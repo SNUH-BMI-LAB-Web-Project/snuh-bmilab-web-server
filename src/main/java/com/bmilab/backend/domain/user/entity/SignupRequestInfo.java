@@ -44,10 +44,24 @@ public class SignupRequestInfo {
     @Column(name = "is_approved", nullable = false)
     private boolean isApproved;
 
-    @Column(name = "approved_at")
-    private LocalDateTime approvedAt;
+    @Column(name = "processed_at")
+    private LocalDateTime processedAt;
 
     @CreatedDate
     @Column(name = "requested_at", nullable = false)
     private LocalDateTime requestedAt;
+
+    public void approve() {
+        isApproved = true;
+        processedAt = LocalDateTime.now();
+    }
+
+    public void reject() {
+        isApproved = false;
+        processedAt = LocalDateTime.now();
+    }
+
+    public boolean isPending() {
+        return (!isApproved) && (processedAt == null);
+    }
 }
