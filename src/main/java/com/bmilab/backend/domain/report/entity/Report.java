@@ -38,4 +38,9 @@ public class Report {
     @CreatedDate
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    public void update(String tag, LocalDateTime dueDate) {
+        this.tag = tag;
+        this.dueDate = dueDate;
+    }
 }

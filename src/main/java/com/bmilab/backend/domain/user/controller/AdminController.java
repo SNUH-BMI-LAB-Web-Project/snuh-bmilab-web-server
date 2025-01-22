@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/admin")
 @RequiredArgsConstructor
 @OnlyAdmin
-public class AdminController {
+public class AdminController implements AdminApi {
     private final AuthService authService;
 
     @GetMapping("/sign-up/request")

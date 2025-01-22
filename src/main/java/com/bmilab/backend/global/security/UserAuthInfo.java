@@ -23,6 +23,10 @@ public class UserAuthInfo implements UserDetails {
         );
     }
 
+    public Long getUserId() {
+        return user.getId();
+    }
+
     @Override
     public String getPassword() {
         return user.getPassword();
