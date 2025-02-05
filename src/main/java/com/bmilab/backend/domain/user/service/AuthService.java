@@ -17,7 +17,6 @@ import com.bmilab.backend.domain.user.repository.UserRepository;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.jwt.TokenProvider;
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -43,8 +42,9 @@ public class AuthService {
         }
 
         String accessToken = tokenProvider.generateToken(user, Duration.ofDays(30));
+        Role role = user.getRole();
 
-        return LoginResponse.of(accessToken);
+        return LoginResponse.of(accessToken, role);
     }
 
     @Transactional
