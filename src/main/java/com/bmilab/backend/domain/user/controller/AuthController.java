@@ -27,4 +27,9 @@ public class AuthController implements AuthApi {
         authService.requestSignup(request);
         return ResponseEntity.ok().build();
     }
+
+//    @PostMapping("/test/admin")
+//    public ResponseEntity<String> testAdmin() {
+//        return ResponseEntity.ok(authService.testAdmin());
+//    }
 }

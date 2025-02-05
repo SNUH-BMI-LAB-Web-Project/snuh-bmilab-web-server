@@ -1,4 +1,4 @@
-package com.bmilab.backend.domain.report.entity;
+package com.bmilab.backend.domain.leave.entity;
 
 import com.bmilab.backend.domain.user.entity.User;
 import jakarta.persistence.Column;
@@ -10,52 +10,40 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "user_reports")
+@Table(name = "user_leaves")
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class UserReport {
+public class UserLeave {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_report_id")
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "report_id")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Report report;
+    @Column(name = "annual_leave_count", nullable = false)
+    private Double annualLeaveCount;
 
-    @Column(nullable = false)
-    private String fileUrl;
+    @Column(name = "used_leave_count", nullable = false)
+    private Double usedLeaveCount;
 
-    @CreatedDate
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    public void useLeave(int leaveCount, boolean isAnnualLeave) {
+        if (isAnnualLeave) {
+            annualLeaveCount -= leaveCount;
+        }
 
-    @LastModifiedDate
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
-    public void updateFileUrl(String fileUrl) {
-        this.fileUrl = fileUrl;
+        usedLeaveCount += leaveCount;
     }
 }

@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: backend
+
+  datasource:
+    url: ${DB_URL}?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8&allowPublicKeyRetrieval=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+        dialect.storage_engine: innodb
+    show-sql: true
+    hibernate:
+      ddl-auto: create
+
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 200MB
+      resolve-lazily: true
+
+cloud:
+  aws:
+    s3:
+      bucket: ${S3_BUCKET}
+    credentials:
+      access-key: ${S3_ACCESS_KEY}
+      secret-key: ${S3_SECRET_KEY}
+    region:
+      static: ap-northeast-2
+    stack:
+      auto: false
+
+jwt:
+  secret_key: ${JWT_SECRET_KEY}
+  issuer: ${JWT_ISSUER}
+
+cors:
+  allowed-origins: ${CORS_ALLOWED_ORIGINS}

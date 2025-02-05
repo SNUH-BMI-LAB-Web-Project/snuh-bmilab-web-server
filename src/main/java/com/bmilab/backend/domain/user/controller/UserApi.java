@@ -1,6 +1,7 @@
 package com.bmilab.backend.domain.user.controller;
 
 import com.bmilab.backend.domain.user.dto.response.UserDetail;
+import com.bmilab.backend.domain.user.dto.response.UserSummary;
 import com.bmilab.backend.domain.user.dto.response.UserFindAllResponse;
 import com.bmilab.backend.global.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;

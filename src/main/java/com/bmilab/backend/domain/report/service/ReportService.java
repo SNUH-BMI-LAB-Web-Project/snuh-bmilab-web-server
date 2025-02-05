@@ -4,7 +4,8 @@ import com.bmilab.backend.domain.report.dto.request.ReportRequest;
 import com.bmilab.backend.domain.report.dto.response.ReportDetail;
 import com.bmilab.backend.domain.report.dto.response.ReportSummary;
 import com.bmilab.backend.domain.report.dto.response.ReportFindAllResponse;
-import com.bmilab.backend.domain.report.dto.response.UserReportDetail;
+import com.bmilab.backend.domain.report.dto.response.UserReportFindAllResponse;
+import com.bmilab.backend.domain.report.dto.response.UserReportSummary;
 import com.bmilab.backend.domain.report.entity.Report;
 import com.bmilab.backend.domain.report.entity.UserReport;
 import com.bmilab.backend.domain.report.exception.ReportErrorCode;
@@ -46,6 +47,12 @@ public class ReportService {
         reportRepository.save(report);
     }
 
+    public UserReportFindAllResponse getAllReportsByUser(Long userId) {
+        List<UserReport> userReports = userReportRepository.findAllByUserId(userId);
+
+        return UserReportFindAllResponse.of(userReports);
+    }
+
     public ReportFindAllResponse getAllReports(int pageNo, String criteria) {
         PageRequest pageRequest = PageRequest.of(pageNo, 10, Sort.by(Direction.DESC, criteria));
         List<ReportSummary> reportSummaries = reportRepository.findAll(pageRequest)
@@ -82,12 +89,13 @@ public class ReportService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
 
-        Optional<UserReport> userReport = userReportRepository.findByReportAndUser(report, user);
+        Optional<UserReport> userReportOptional = userReportRepository.findByReportAndUser(report, user);
 
         String fileUrl = uploadReportFile(file, report, user);
 
-        if (userReport.isPresent()) {
-            userReport.get().updateFile(fileUrl);
+        if (userReportOptional.isPresent()) {
+            UserReport userReport = userReportOptional.get();
+            userReport.updateFileUrl(fileUrl);
             return;
         }
 
@@ -110,9 +118,9 @@ public class ReportService {
         Report report = reportRepository.findById(reportId)
                 .orElseThrow(() -> new ApiException(ReportErrorCode.REPORT_NOT_FOUND));
 
-        List<UserReportDetail> userReports = userReportRepository.findAllByReportId(reportId)
+        List<UserReportSummary> userReports = userReportRepository.findAllByReportId(reportId)
                 .stream()
-                .map(UserReportDetail::from)
+                .map(UserReportSummary::from)
                 .toList();
 
         return ReportDetail.from(report, userReports);

@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface UserReportRepository extends JpaRepository<UserReport, Long> {
     List<UserReport> findAllByReportId(Long reportId);
 
-    List<UserReport> user(User user);
+    List<UserReport> findAllByUserId(Long userId);
 
     Optional<UserReport> findByReportAndUser(Report report, User user);
 }

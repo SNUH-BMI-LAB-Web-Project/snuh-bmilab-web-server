@@ -32,7 +32,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
 
     @Column(nullable = false)
@@ -44,8 +44,8 @@ public class User {
     @Column(nullable = false)
     private String department;
 
-    @Column(name = "leave_count")
-    private Integer leaveCount;
+    @Column(nullable = false)
+    private LocalDateTime joinedAt;
 
     @Enumerated(EnumType.STRING)
     private Role role;

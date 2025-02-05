@@ -11,9 +11,9 @@ public record ReportDetail(
         String tag,
         LocalDateTime dueDate,
         LocalDateTime createdAt,
-        List<UserReportDetail> userReports
+        List<UserReportSummary> userReports
 ) {
-    public static ReportDetail from(Report report, List<UserReportDetail> userReports) {
+    public static ReportDetail from(Report report, List<UserReportSummary> userReports) {
         return ReportDetail
                 .builder()
                 .reportId(report.getId())

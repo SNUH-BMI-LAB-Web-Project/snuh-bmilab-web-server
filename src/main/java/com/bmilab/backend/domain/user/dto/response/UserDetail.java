@@ -1,6 +1,8 @@
 package com.bmilab.backend.domain.user.dto.response;
 
+import com.bmilab.backend.domain.leave.entity.UserLeave;
 import com.bmilab.backend.domain.user.entity.User;
+import com.bmilab.backend.domain.user.enums.Role;
 import java.time.LocalDateTime;
 import lombok.Builder;
 
@@ -10,22 +12,24 @@ public record UserDetail(
         String email,
         String name,
         String department,
-        Integer leaveCount,
-        String role,
+        Role role,
         String comment,
-        LocalDateTime createdAt
+        Double annualLeaveCount,
+        Double usedLeaveCount,
+        LocalDateTime joinedAt
 ) {
-    public static UserDetail from(User user) {
+    public static UserDetail from(User user, UserLeave userLeave) {
         return UserDetail
                 .builder()
                 .userId(user.getId())
                 .email(user.getEmail())
                 .name(user.getName())
                 .department(user.getDepartment())
-                .leaveCount(user.getLeaveCount())
-                .role(user.getRole().name())
+                .role(user.getRole())
                 .comment(user.getComment())
-                .createdAt(user.getCreatedAt())
+                .annualLeaveCount(userLeave.getAnnualLeaveCount())
+                .usedLeaveCount(userLeave.getUsedLeaveCount())
+                .joinedAt(user.getJoinedAt())
                 .build();
     }
 }

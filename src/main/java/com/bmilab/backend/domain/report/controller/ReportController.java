@@ -4,9 +4,11 @@ import com.bmilab.backend.domain.report.dto.request.DeleteReportRequest;
 import com.bmilab.backend.domain.report.dto.request.ReportRequest;
 import com.bmilab.backend.domain.report.dto.response.ReportDetail;
 import com.bmilab.backend.domain.report.dto.response.ReportFindAllResponse;
+import com.bmilab.backend.domain.report.dto.response.UserReportFindAllResponse;
 import com.bmilab.backend.domain.report.service.ReportService;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +48,13 @@ public class ReportController implements ReportApi {
     @GetMapping("/{reportId}")
     public ResponseEntity<ReportDetail> getReportById(@PathVariable Long reportId) {
         return ResponseEntity.ok(reportService.getReportById(reportId));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserReportFindAllResponse> getAllReportsByUser(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo
+    ) {
+        return ResponseEntity.ok(reportService.getAllReportsByUser(userAuthInfo.getUserId()));
     }
 
     @PutMapping("/{reportId}")

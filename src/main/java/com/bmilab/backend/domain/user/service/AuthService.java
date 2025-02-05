@@ -1,5 +1,7 @@
 package com.bmilab.backend.domain.user.service;
 
+import com.bmilab.backend.domain.leave.entity.UserLeave;
+import com.bmilab.backend.domain.leave.repository.UserLeaveRepository;
 import com.bmilab.backend.domain.user.dto.request.ApproveSignupRequest;
 import com.bmilab.backend.domain.user.dto.request.LoginRequest;
 import com.bmilab.backend.domain.user.dto.request.SignupRequest;
@@ -15,6 +17,7 @@ import com.bmilab.backend.domain.user.repository.UserRepository;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.jwt.TokenProvider;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,6 +32,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
     private final SignupRequestInfoRepository signupRequestInfoRepository;
+    private final UserLeaveRepository userLeaveRepository;
 
     public LoginResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.email())
@@ -62,6 +66,10 @@ public class AuthService {
         SignupRequestInfo signupRequestInfo = signupRequestInfoRepository.findById(request.requestId())
                 .orElseThrow(() -> new ApiException(UserErrorCode.SIGNUP_REQUEST_NOT_FOUND));
 
+        if (!signupRequestInfo.isPending()) {
+            throw new ApiException(UserErrorCode.SIGNUP_REQUEST_ALREADY_DONE);
+        }
+
         signupRequestInfo.approve();
 
         User user = User.builder()
@@ -69,17 +77,29 @@ public class AuthService {
                 .email(signupRequestInfo.getEmail())
                 .password(signupRequestInfo.getPassword())
                 .department(signupRequestInfo.getDepartment())
-                .leaveCount(request.leaveCount())
+                .joinedAt(request.joinedAt())
                 .role(Role.USER)
                 .build();
 
         userRepository.save(user);
+
+        UserLeave userLeave = UserLeave.builder()
+                .user(user)
+                .annualLeaveCount(request.annualLeaveCount())
+                .usedLeaveCount(request.usedLeaveCount())
+                .build();
+
+        userLeaveRepository.save(userLeave);
     }
 
     @Transactional
     public void rejectSignup(Long requestId) {
         SignupRequestInfo signupRequestInfo = signupRequestInfoRepository.findById(requestId)
                 .orElseThrow(() -> new ApiException(UserErrorCode.SIGNUP_REQUEST_NOT_FOUND));
+
+        if (!signupRequestInfo.isPending()) {
+            throw new ApiException(UserErrorCode.SIGNUP_REQUEST_ALREADY_DONE);
+        }
 
         signupRequestInfo.reject();
     }

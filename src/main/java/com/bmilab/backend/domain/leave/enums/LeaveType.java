@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public enum LeaveType {
-    SICK("병가");
+    ANNUAL("연가"), SICK("병가");
 
     private String description;
 }

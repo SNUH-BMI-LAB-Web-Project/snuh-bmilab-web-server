@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@Tag(name = "Auth(Admin)", description = "관리자용 인증 처리 API")
-public interface AdminApi {
+@Tag(name = "(Admin) Auth", description = "관리자용 인증 처리 API")
+public interface AdminSignupApi {
     @Operation(summary = "전체 회원가입 요청 조회", description = "전체 회원가입 요청을 조회하는 POST API")
     @ApiResponses(
             value = {

@@ -15,26 +15,26 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/admin/sign-up")
 @RequiredArgsConstructor
 @OnlyAdmin
-public class AdminController implements AdminApi {
+public class AdminSignupController implements AdminSignupApi {
     private final AuthService authService;
 
-    @GetMapping("/sign-up/request")
+    @GetMapping("/request")
     public ResponseEntity<SignupRequestFindAllResponse> getAllSignupRequests(
             @RequestParam boolean isPending
     ) {
         return ResponseEntity.ok(authService.getAllSignupRequests(isPending));
     }
 
-    @PostMapping("/sign-up/approve")
+    @PostMapping("/approve")
     public ResponseEntity<Void> approveSignup(@RequestBody ApproveSignupRequest request) {
         authService.approveSignup(request);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/sign-up/reject/{requestId}")
+    @PostMapping("/reject/{requestId}")
     public ResponseEntity<Void> rejectSignup(@PathVariable Long requestId) {
         authService.rejectSignup(requestId);
         return ResponseEntity.ok().build();

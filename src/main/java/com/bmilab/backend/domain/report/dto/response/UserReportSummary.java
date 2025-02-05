@@ -6,19 +6,20 @@ import java.time.LocalDateTime;
 import lombok.Builder;
 
 @Builder
-public record UserReportDetail(
+public record UserReportSummary(
         Long userReportId,
-        ReportSummary report,
+        Long reportId,
         UserSummary user,
         String fileUrl,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
-    public static UserReportDetail from(UserReport userReport) {
-        return UserReportDetail
+    public static UserReportSummary from(UserReport userReport) {
+        return UserReportSummary
                 .builder()
                 .userReportId(userReport.getId())
-                .report(ReportSummary.from(userReport.getReport()))
+                .reportId(userReport.getReport().getId())
+                .user(UserSummary.from(userReport.getUser()))
                 .fileUrl(userReport.getFileUrl())
                 .createdAt(userReport.getCreatedAt())
                 .updatedAt(userReport.getUpdatedAt())
