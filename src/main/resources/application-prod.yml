@@ -36,6 +36,9 @@ cloud:
     stack:
       auto: false
 
+data-portal:
+  service-key: ${DATA_PORTAL_SERVICE_KEY}
+
 jwt:
   secret_key: ${JWT_SECRET_KEY}
   issuer: ${JWT_ISSUER}
