@@ -6,6 +6,7 @@ import com.bmilab.backend.domain.leave.dto.response.LeaveFindAllResponse;
 import com.bmilab.backend.domain.leave.entity.Leave;
 import com.bmilab.backend.domain.leave.entity.UserLeave;
 import com.bmilab.backend.domain.leave.enums.LeaveStatus;
+import com.bmilab.backend.domain.leave.enums.LeaveType;
 import com.bmilab.backend.domain.leave.exception.LeaveErrorCode;
 import com.bmilab.backend.domain.leave.repository.LeaveRepository;
 import com.bmilab.backend.domain.leave.repository.UserLeaveRepository;
@@ -14,6 +15,7 @@ import com.bmilab.backend.domain.user.exception.UserErrorCode;
 import com.bmilab.backend.domain.user.repository.UserRepository;
 import com.bmilab.backend.global.exception.ApiException;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class LeaveService {
     private final LeaveRepository leaveRepository;
     private final UserRepository userRepository;
@@ -46,8 +49,11 @@ public class LeaveService {
     public void applyLeave(Long userId, ApplyLeaveRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
-        //TODO: 공휴일 제외하고 휴가 일 수 구하기
-        int leaveCount = (int) ChronoUnit.DAYS.between(request.startDate(), request.endDate());
+        double leaveCount = (request.endDate() == null) ? 1 : calculateLeaveCount(request.startDate(), request.endDate());
+
+        if (request.type() == LeaveType.HALF) {
+            leaveCount *= 0.5;
+        }
 
         Leave leave = Leave.builder()
                 .user(user)
@@ -62,6 +68,10 @@ public class LeaveService {
         leaveRepository.save(leave);
     }
 
+    public double calculateLeaveCount(LocalDateTime startDate, LocalDateTime endDate) {
+        return (double) ChronoUnit.DAYS.between(startDate, endDate);
+    }
+
     @Transactional
     public void approveLeave(long leaveId) {
         Leave leave = leaveRepository.findById(leaveId)
@@ -70,7 +80,7 @@ public class LeaveService {
         UserLeave userLeave = userLeaveRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new ApiException(LeaveErrorCode.USER_LEAVE_NOT_FOUND));
 
-        if (leave.isPending()) {
+        if (leave.isNotPending()) {
             throw new ApiException(LeaveErrorCode.LEAVE_ALREADY_DONE);
         }
 
@@ -88,10 +98,18 @@ public class LeaveService {
         Leave leave = leaveRepository.findById(leaveId)
                 .orElseThrow(() -> new ApiException(LeaveErrorCode.LEAVE_NOT_FOUND));
 
-        if (leave.isPending()) {
+        if (leave.isNotPending()) {
             throw new ApiException(LeaveErrorCode.LEAVE_ALREADY_DONE);
         }
 
         leave.reject(request.rejectReason());
+    }
+
+    public int countDatesByUserIdWithMonth(long userId, YearMonth yearMonth) {
+        return leaveRepository.findAllByUserId(userId)
+                .stream()
+                .filter(Leave::isApproved)
+                .mapToInt((leave) -> leave.countDaysInYearMonth(yearMonth))
+                .sum();
     }
 }

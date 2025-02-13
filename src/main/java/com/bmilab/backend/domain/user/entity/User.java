@@ -55,4 +55,8 @@ public class User {
     @CreatedDate
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    public void updateComment(String comment) {
+        this.comment = comment;
+    }
 }

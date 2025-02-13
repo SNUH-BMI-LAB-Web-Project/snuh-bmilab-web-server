@@ -39,11 +39,24 @@ public class UserLeave {
     @Column(name = "used_leave_count", nullable = false)
     private Double usedLeaveCount;
 
-    public void useLeave(int leaveCount, boolean isAnnualLeave) {
+    public void useLeave(Double leaveCount, boolean isAnnualLeave) {
         if (isAnnualLeave) {
             annualLeaveCount -= leaveCount;
         }
 
         usedLeaveCount += leaveCount;
+    }
+
+    public void resetLeaveCounts() {
+        this.annualLeaveCount = 0.0;
+        this.usedLeaveCount = 0.0;
+    }
+
+    public void increaseAnnualLeaveCount(Double leaveIncrement) {
+        this.annualLeaveCount += leaveIncrement;
+    }
+
+    public void updateAnnualLeaveCount(Double annualLeaveCount) {
+        this.annualLeaveCount = annualLeaveCount;
     }
 }

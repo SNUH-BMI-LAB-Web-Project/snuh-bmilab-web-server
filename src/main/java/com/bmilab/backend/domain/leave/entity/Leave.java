@@ -14,7 +14,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -61,7 +63,7 @@ public class Leave {
     private String rejectReason;
 
     @Column(name = "leave_count")
-    private Integer leaveCount;
+    private Double leaveCount;
 
     @CreatedDate
     @Column(name = "applicated_at", nullable = false)
@@ -76,11 +78,32 @@ public class Leave {
         this.rejectReason = rejectReason;
     }
 
-    public boolean isPending() {
+    public boolean isNotPending() {
         return status != LeaveStatus.PENDING;
+    }
+
+    public boolean isApproved() {
+        return status == LeaveStatus.APPROVED;
     }
 
     public boolean isAnnualLeave() {
         return type == LeaveType.ANNUAL;
     }
+
+    public int countDaysInYearMonth(YearMonth yearMonth) {
+        if (endDate == null) {
+            return YearMonth.from(startDate).equals(yearMonth) ? 1 : 0;
+        }
+
+        LocalDate firstDayOfMonth = yearMonth.atDay(1);
+        LocalDate lastDayOfMonth = yearMonth.atEndOfMonth();
+
+        // 실제 비교할 시작일과 종료일 설정
+        LocalDate effectiveStart = startDate.isBefore(firstDayOfMonth.atStartOfDay()) ? firstDayOfMonth : startDate.toLocalDate();
+        LocalDate effectiveEnd = endDate.isAfter(lastDayOfMonth.atStartOfDay()) ? lastDayOfMonth : endDate.toLocalDate();
+
+        // 포함되는 날짜 수 계산
+        return effectiveStart.isAfter(effectiveEnd) ? 0 : (int) (effectiveStart.datesUntil(effectiveEnd.plusDays(1)).count());
+    }
+
 }
