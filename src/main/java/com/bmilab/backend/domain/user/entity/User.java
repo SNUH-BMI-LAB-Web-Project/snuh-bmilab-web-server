@@ -44,9 +44,6 @@ public class User {
     @Column(nullable = false)
     private String department;
 
-    @Column(nullable = false)
-    private LocalDateTime joinedAt;
-
     @Enumerated(EnumType.STRING)
     private Role role;
 

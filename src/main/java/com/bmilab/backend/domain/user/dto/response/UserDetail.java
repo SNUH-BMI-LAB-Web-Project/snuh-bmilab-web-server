@@ -29,7 +29,7 @@ public record UserDetail(
                 .comment(user.getComment())
                 .annualLeaveCount(userLeave.getAnnualLeaveCount())
                 .usedLeaveCount(userLeave.getUsedLeaveCount())
-                .joinedAt(user.getJoinedAt())
+                .joinedAt(user.getCreatedAt())
                 .build();
     }
 }

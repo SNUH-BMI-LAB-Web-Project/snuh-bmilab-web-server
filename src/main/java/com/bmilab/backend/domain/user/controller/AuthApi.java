@@ -1,7 +1,6 @@
 package com.bmilab.backend.domain.user.controller;
 
 import com.bmilab.backend.domain.user.dto.request.LoginRequest;
-import com.bmilab.backend.domain.user.dto.request.SignupRequest;
 import com.bmilab.backend.domain.user.dto.response.LoginResponse;
 import com.bmilab.backend.global.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,15 +34,4 @@ public interface AuthApi {
             }
     )
     ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request);
-
-    @Operation(summary = "회원가입 요청", description = "회원가입 요청하는 POST API")
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "회원가입 요청 성공"
-                    )
-            }
-    )
-    ResponseEntity<Void> requestSignup(@RequestBody SignupRequest request);
 }
