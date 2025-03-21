@@ -34,16 +34,16 @@ public class LeaveSchedulerService {
     @Transactional
     public void updateUserAnnualLeaves() {
         YearMonth lastMonthWithYear = YearMonth.now().minusMonths(1);
-        log.info("lastMonthWithYear: {} {}", lastMonthWithYear.getYear(), lastMonthWithYear.getMonth());
         int endOfMonth = lastMonthWithYear.lengthOfMonth();
-        log.info("endOfMonth: {}", endOfMonth);
         int holidayCount = countHolidays(lastMonthWithYear);
-        log.info("holidayCount: {}", holidayCount);
         int weekendCount = (int) countWeekends(lastMonthWithYear);
-        log.info("weekendCount: {}", weekendCount);
         int weekdayCount = endOfMonth - holidayCount - weekendCount;
-        log.info("weekdayCount: {}", weekdayCount);
 
+        log.info("lastMonthWithYear: {} {}", lastMonthWithYear.getYear(), lastMonthWithYear.getMonth());
+        log.info("endOfMonth: {}", endOfMonth);
+        log.info("holidayCount: {}", holidayCount);
+        log.info("weekendCount: {}", weekendCount);
+        log.info("weekdayCount: {}", weekdayCount);
 
         userLeaveRepository.findAll()
                 .forEach((userLeave) -> {
