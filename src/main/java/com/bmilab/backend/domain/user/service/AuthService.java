@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +34,7 @@ public class AuthService {
     private final SignupRequestInfoRepository signupRequestInfoRepository;
     private final UserLeaveRepository userLeaveRepository;
 
-    public LoginResponse login(LoginRequest request) {
+    public LoginResponse login(@RequestBody LoginRequest request) {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
 
