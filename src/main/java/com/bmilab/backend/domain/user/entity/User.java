@@ -41,6 +41,9 @@ public class User {
     @Column(nullable = false)
     private String name;
 
+    @Column(name = "profile_image_url", columnDefinition = "TEXT")
+    private String profileImageUrl;
+
     @Column(nullable = false)
     private String department;
 

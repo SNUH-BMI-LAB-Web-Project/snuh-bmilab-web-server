@@ -7,10 +7,12 @@ import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.exception.GlobalErrorCode;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class S3Service {
@@ -18,6 +20,9 @@ public class S3Service {
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
+
+    @Value("${cloud.aws.s3.base-url}")
+    private String baseUrl;
 
     public String uploadFile(MultipartFile file, String newFileName) {
         String originalName = file.getOriginalFilename();
@@ -37,5 +42,19 @@ public class S3Service {
         }
 
         return amazonS3.getUrl(bucket, changedName).toString();
+    }
+
+    public void deleteFile(String fileUrl) {
+        String imageKey = fileUrl.replace(baseUrl, "");
+
+        if (!amazonS3.doesObjectExist(bucket, imageKey)) {
+            throw new ApiException(GlobalErrorCode.FILE_NOT_FOUND);
+        }
+
+        try {
+            amazonS3.deleteObject(bucket, imageKey);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
     }
 }

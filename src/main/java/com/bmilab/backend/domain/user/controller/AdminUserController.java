@@ -2,7 +2,7 @@ package com.bmilab.backend.domain.user.controller;
 
 import com.bmilab.backend.domain.user.dto.request.RegisterUserRequest;
 import com.bmilab.backend.domain.user.service.AuthService;
-import com.bmilab.backend.global.security.annotation.OnlyAdmin;
+import com.bmilab.backend.global.annotation.OnlyAdmin;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

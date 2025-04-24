@@ -2,7 +2,7 @@ package com.bmilab.backend.domain.leave.controller;
 
 import com.bmilab.backend.domain.leave.dto.request.RejectLeaveRequest;
 import com.bmilab.backend.domain.leave.service.LeaveService;
-import com.bmilab.backend.global.security.annotation.OnlyAdmin;
+import com.bmilab.backend.global.annotation.OnlyAdmin;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;

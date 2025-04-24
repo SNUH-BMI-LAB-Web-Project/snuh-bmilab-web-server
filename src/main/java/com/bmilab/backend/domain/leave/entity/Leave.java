@@ -105,5 +105,4 @@ public class Leave {
         // 포함되는 날짜 수 계산
         return effectiveStart.isAfter(effectiveEnd) ? 0 : (int) (effectiveStart.datesUntil(effectiveEnd.plusDays(1)).count());
     }
-
 }
