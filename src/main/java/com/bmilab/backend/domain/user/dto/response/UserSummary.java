@@ -8,7 +8,8 @@ public record UserSummary(
         Long userId,
         String email,
         String name,
-        String department
+        String department,
+        String profileImageUrl
 ) {
     public static UserSummary from(User user) {
         return UserSummary
@@ -17,6 +18,7 @@ public record UserSummary(
                 .email(user.getEmail())
                 .name(user.getName())
                 .department(user.getDepartment())
+                .profileImageUrl(user.getProfileImageUrl())
                 .build();
     }
 }

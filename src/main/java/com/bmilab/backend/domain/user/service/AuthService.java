@@ -36,9 +36,8 @@ public class AuthService {
         }
 
         String accessToken = tokenProvider.generateToken(user, Duration.ofDays(30));
-        Role role = user.getRole();
 
-        return LoginResponse.of(accessToken, role);
+        return LoginResponse.of(accessToken, user);
     }
 
     @Transactional
