@@ -16,7 +16,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "user_info")
@@ -24,7 +23,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
 public class UserInfo {
 
     @Id
@@ -35,7 +33,6 @@ public class UserInfo {
     @JoinColumn(name = "user_id", unique = true, nullable = false)
     private User user;
 
-    @Column(nullable = false)
     private String category;
 
     @Column(name = "seat_num")
