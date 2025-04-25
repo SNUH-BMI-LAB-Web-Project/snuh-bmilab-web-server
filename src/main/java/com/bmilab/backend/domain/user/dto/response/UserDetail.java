@@ -26,7 +26,7 @@ public record UserDetail(
         String comment,
         LocalDate joinedAt
 ) {
-    public static UserDetail from(UserDetailQueryResult queryResult) {
+    public static UserDetail from(UserDetailQueryResult queryResult, boolean includeComment) {
         User user = queryResult.user();
         UserLeave userLeave = queryResult.userLeave();
         UserInfo userInfo = queryResult.userInfo();
@@ -38,7 +38,7 @@ public record UserDetail(
                 .name(user.getName())
                 .department(user.getDepartment())
                 .role(user.getRole())
-                .comment(userInfo.getComment())
+                .comment((includeComment) ? userInfo.getComment() : null)
                 .annualLeaveCount(userLeave.getAnnualLeaveCount())
                 .usedLeaveCount(userLeave.getUsedLeaveCount())
                 .categories(
