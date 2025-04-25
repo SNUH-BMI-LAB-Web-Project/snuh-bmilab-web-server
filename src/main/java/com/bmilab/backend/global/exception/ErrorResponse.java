@@ -1,5 +1,6 @@
 package com.bmilab.backend.global.exception;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,9 +12,16 @@ import lombok.Setter;
 @Builder
 @AllArgsConstructor
 public class ErrorResponse {
+    @Schema(description = "에러 코드", example = "INTERNAL_SERVER_ERROR")
     private String code;
+
+    @Schema(description = "에러 메시지", example = "에러 메시지 예시입니다.")
     private String message;
+
+    @Schema(description = "HTTP 상태 코드", example = "500")
     private Integer status;
+
+    @Schema(description = "에러 발생 시각 (UTC)", example = "2025-04-25T14:37:00Z")
     private Instant timestamp;
 
     public static ErrorResponse from(ErrorCode errorCode, Instant timestamp) {
