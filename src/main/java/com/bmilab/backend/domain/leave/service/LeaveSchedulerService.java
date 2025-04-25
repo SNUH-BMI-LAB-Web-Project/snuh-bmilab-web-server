@@ -33,6 +33,11 @@ public class LeaveSchedulerService {
     @Scheduled(cron = "0 0 0 1 * *", zone = "Asia/Seoul")
     @Transactional
     public void updateUserAnnualLeaves() {
+        if (YearMonth.from(LocalDate.now()).getYear() == 2025) {
+            log.info("임시 중단");
+            return;
+        }
+
         YearMonth lastMonthWithYear = YearMonth.now().minusMonths(1);
         int endOfMonth = lastMonthWithYear.lengthOfMonth();
         int holidayCount = countHolidays(lastMonthWithYear);
