@@ -23,17 +23,34 @@ public record MeetingFindAllResponse(
 
     @Builder
     public record MeetingSummary(
+            @Schema(description = "미팅 ID", example = "101")
             Long meetingId,
+
+            @Schema(description = "프로젝트 ID", example = "55")
             Long projectId,
+
+            @Schema(description = "미팅 기록 작성자 정보")
             UserSummary recorder,
+
+            @Schema(description = "미팅 제목", example = "UX 개선 회의")
             String title,
+
+            @Schema(description = "미팅 날짜", example = "2025-05-10")
             LocalDate date,
-            @Schema(type = "string", pattern = "HH:mm", example = "14:30")
+
+            @Schema(description = "미팅 시작 시간 (24시간제)", example = "14:00")
             LocalTime startTime,
-            @Schema(type = "string", pattern = "HH:mm", example = "14:30")
+
+            @Schema(description = "미팅 종료 시간 (24시간제)", example = "15:30")
             LocalTime endTime,
+
+            @Schema(description = "미팅 유형", example = "RESEARCH_PRESENTATION")
             MeetingType meetingType,
+
+            @Schema(description = "미팅 요약", example = "디자인 시스템 전면 개편 논의 및 일정 정리")
             String summary,
+
+            @Schema(description = "댓글 수", example = "5")
             int commentCount
     ) {
         public static MeetingSummary from(Meeting meeting) {

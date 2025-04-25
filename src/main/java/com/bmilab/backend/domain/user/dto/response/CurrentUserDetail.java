@@ -2,9 +2,7 @@ package com.bmilab.backend.domain.user.dto.response;
 
 import com.bmilab.backend.domain.leave.dto.response.LeaveDetail;
 import com.bmilab.backend.domain.leave.entity.Leave;
-import com.bmilab.backend.domain.leave.entity.UserLeave;
 import com.bmilab.backend.domain.user.dto.query.UserDetailQueryResult;
-import com.bmilab.backend.domain.user.entity.User;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.Builder;
@@ -17,7 +15,7 @@ public record CurrentUserDetail(
     public static CurrentUserDetail from(UserDetailQueryResult queryResult, List<Leave> leaves) {
         return CurrentUserDetail
                 .builder()
-                .user(UserDetail.from(queryResult))
+                .user(UserDetail.from(queryResult, false))
                 .leaves(
                         leaves.stream()
                                 .map(LeaveDetail::from)

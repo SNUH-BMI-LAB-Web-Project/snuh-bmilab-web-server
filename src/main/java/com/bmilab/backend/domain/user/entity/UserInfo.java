@@ -1,5 +1,6 @@
 package com.bmilab.backend.domain.user.entity;
 
+import com.bmilab.backend.domain.project.enums.ProjectCategory;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -11,6 +12,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -48,5 +50,11 @@ public class UserInfo {
 
     public void updateComment(String comment) {
         this.comment = comment;
+    }
+
+    public void update(List<ProjectCategory> categories, String seatNumber, String phoneNumber) {
+        this.category = String.join(",", categories.stream().map(ProjectCategory::name).toList());
+        this.seatNumber = seatNumber;
+        this.phoneNumber = phoneNumber;
     }
 }

@@ -3,6 +3,7 @@ package com.bmilab.backend.domain.project.dto.response;
 import com.bmilab.backend.domain.project.dto.query.GetAllProjectsQueryResult;
 import com.bmilab.backend.domain.project.enums.ProjectCategory;
 import com.bmilab.backend.domain.user.dto.response.UserSummary;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.Builder;
@@ -14,13 +15,29 @@ public record ProjectFindAllResponse(
 ) {
     @Builder
     public record ProjectSummary(
+
+            @Schema(description = "프로젝트 ID", example = "42")
             Long projectId,
+
+            @Schema(description = "프로젝트 제목", example = "AI 콘텐츠 자동 생성 시스템")
             String title,
+
+            @Schema(description = "연구 분야", example = "NLP")
             ProjectCategory category,
+
+            @Schema(description = "프로젝트 시작일", example = "2025-05-01")
             LocalDate startDate,
+
+            @Schema(description = "프로젝트 종료일", example = "2025-06-30")
             LocalDate endDate,
+
+            @Schema(description = "프로젝트 리더 목록")
             List<UserSummary> leaders,
+
+            @Schema(description = "프로젝트 참여자 수", example = "8")
             int participantCount,
+
+            @Schema(description = "첨부 파일 존재 여부", example = "true")
             boolean hasFile
     ) {
         public static ProjectSummary from(GetAllProjectsQueryResult queryResult) {

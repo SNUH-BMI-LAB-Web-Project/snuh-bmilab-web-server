@@ -53,4 +53,18 @@ public class User {
     @CreatedDate
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
+    }
+
+    public void updateProfileImageUrl(String newProfileImageUrl) {
+        this.profileImageUrl = newProfileImageUrl;
+    }
+
+    public void update(String name, String email, String department) {
+        this.name = name;
+        this.email = email;
+        this.department = department;
+    }
 }
