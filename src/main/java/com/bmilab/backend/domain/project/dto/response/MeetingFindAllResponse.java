@@ -3,6 +3,7 @@ package com.bmilab.backend.domain.project.dto.response;
 import com.bmilab.backend.domain.project.entity.Meeting;
 import com.bmilab.backend.domain.project.enums.MeetingType;
 import com.bmilab.backend.domain.user.dto.response.UserSummary;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -27,7 +28,9 @@ public record MeetingFindAllResponse(
             UserSummary recorder,
             String title,
             LocalDate date,
+            @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
             LocalTime startTime,
+            @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
             LocalTime endTime,
             MeetingType meetingType,
             String summary,
