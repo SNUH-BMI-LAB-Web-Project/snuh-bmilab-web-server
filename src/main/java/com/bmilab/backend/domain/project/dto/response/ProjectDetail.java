@@ -15,40 +15,40 @@ import lombok.Builder;
 
 @Builder
 public record ProjectDetail(
-        @Schema(description = "프로젝트 ID", example = "42")
+        @Schema(description = "연구 ID", example = "42")
         Long projectId,
 
-        @Schema(description = "프로젝트 생성자 정보")
+        @Schema(description = "연구 생성자 정보")
         UserSummary author,
 
-        @Schema(description = "프로젝트 제목", example = "글로우업 플랫폼 확장 프로젝트")
+        @Schema(description = "연구 제목", example = "글로우업 플랫폼 확장 연구")
         String title,
 
-        @Schema(description = "프로젝트 설명", example = "AI 텍스트 작성 도구를 기반으로 한 협업 플랫폼 기능 확장")
+        @Schema(description = "연구 설명", example = "AI 텍스트 작성 도구를 기반으로 한 협업 플랫폼 기능 확장")
         String content,
 
-        @Schema(description = "프로젝트 시작일", example = "2025-05-01")
+        @Schema(description = "연구 시작일", example = "2025-05-01")
         LocalDate startDate,
 
-        @Schema(description = "프로젝트 종료일", example = "2025-08-31")
+        @Schema(description = "연구 종료일", example = "2025-08-31")
         LocalDate endDate,
 
-        @Schema(description = "프로젝트 리더 목록")
+        @Schema(description = "연구 책임자 목록")
         List<UserSummary> leaders,
 
-        @Schema(description = "프로젝트 참여자 목록")
+        @Schema(description = "연구 참여자 목록")
         List<UserSummary> participants,
 
         @Schema(description = "연구 분야", example = "NLP")
         ProjectCategory category,
 
-        @Schema(description = "프로젝트 상태", example = "IN_PROGRESS")
+        @Schema(description = "연구 상태", example = "IN_PROGRESS")
         ProjectStatus status,
 
         @Schema(description = "첨부된 파일 URL 목록", example = "[\"https://s3.aws.com/project1/file1.png\", \"https://s3.aws.com/project1/file2.pdf\"]")
         List<String> fileUrls,
 
-        @Schema(description = "프로젝트 생성 시각", example = "2025-04-22T10:15:00")
+        @Schema(description = "연구 생성 시각", example = "2025-04-22T10:15:00")
         LocalDateTime createdAt
 ) {
     public static ProjectDetail from(Project project, List<ProjectParticipant> participants) {

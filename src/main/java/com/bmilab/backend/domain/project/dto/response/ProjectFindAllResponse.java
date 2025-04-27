@@ -16,25 +16,25 @@ public record ProjectFindAllResponse(
     @Builder
     public record ProjectSummary(
 
-            @Schema(description = "프로젝트 ID", example = "42")
+            @Schema(description = "연구 ID", example = "42")
             Long projectId,
 
-            @Schema(description = "프로젝트 제목", example = "AI 콘텐츠 자동 생성 시스템")
+            @Schema(description = "연구 제목", example = "AI 콘텐츠 자동 생성 시스템")
             String title,
 
             @Schema(description = "연구 분야", example = "NLP")
             ProjectCategory category,
 
-            @Schema(description = "프로젝트 시작일", example = "2025-05-01")
+            @Schema(description = "연구 시작일", example = "2025-05-01")
             LocalDate startDate,
 
-            @Schema(description = "프로젝트 종료일", example = "2025-06-30")
+            @Schema(description = "연구 종료일", example = "2025-06-30")
             LocalDate endDate,
 
-            @Schema(description = "프로젝트 리더 목록")
+            @Schema(description = "연구 책임자 목록")
             List<UserSummary> leaders,
 
-            @Schema(description = "프로젝트 참여자 수", example = "8")
+            @Schema(description = "연구 참여자 수", example = "8")
             int participantCount,
 
             @Schema(description = "첨부 파일 존재 여부", example = "true")

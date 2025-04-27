@@ -26,7 +26,7 @@ public record MeetingFindAllResponse(
             @Schema(description = "미팅 ID", example = "101")
             Long meetingId,
 
-            @Schema(description = "프로젝트 ID", example = "55")
+            @Schema(description = "연구 ID", example = "55")
             Long projectId,
 
             @Schema(description = "미팅 기록 작성자 정보")
@@ -44,7 +44,7 @@ public record MeetingFindAllResponse(
             @Schema(description = "미팅 종료 시간 (24시간제)", example = "15:30")
             LocalTime endTime,
 
-            @Schema(description = "미팅 유형", example = "RESEARCH_PRESENTATION")
+            @Schema(description = "미팅 유형", example = "연구 발표")
             MeetingType meetingType,
 
             @Schema(description = "미팅 요약", example = "디자인 시스템 전면 개편 논의 및 일정 정리")
