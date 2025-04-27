@@ -2,14 +2,14 @@ package com.bmilab.backend.domain.user.service;
 
 import com.bmilab.backend.domain.leave.entity.Leave;
 import com.bmilab.backend.domain.leave.repository.LeaveRepository;
-import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.user.dto.query.UserDetailQueryResult;
+import com.bmilab.backend.domain.user.dto.query.UserInfoQueryResult;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserPasswordRequest;
 import com.bmilab.backend.domain.user.dto.request.AdminUpdateUserRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserRequest;
 import com.bmilab.backend.domain.user.dto.response.CurrentUserDetail;
+import com.bmilab.backend.domain.user.dto.response.SearchUserResponse;
 import com.bmilab.backend.domain.user.dto.response.UserDetail;
-import com.bmilab.backend.domain.user.dto.response.UserSummary;
 import com.bmilab.backend.domain.user.dto.response.UserFindAllResponse;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.exception.UserErrorCode;
@@ -19,6 +19,7 @@ import com.bmilab.backend.global.external.s3.S3Service;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
@@ -39,12 +40,9 @@ public class UserService {
     public UserFindAllResponse getAllUsers(int pageNo, String criteria) {
         PageRequest pageRequest = PageRequest.of(pageNo, 10, Sort.by(Direction.DESC, criteria));
 
-        List<UserSummary> userSummaries = userRepository.findAll(pageRequest)
-                .stream()
-                .map(UserSummary::from)
-                .toList();
+        Page<UserInfoQueryResult> results = userRepository.findAllUserInfosPagination(pageRequest);
 
-        return new UserFindAllResponse(userSummaries);
+        return UserFindAllResponse.of(results.getContent());
     }
 
     public UserDetail getUserById(long userId) {
@@ -117,5 +115,11 @@ public class UserService {
     @Transactional
     public void deleteUserById(Long userId) {
         userRepository.deleteById(userId);
+    }
+
+    public SearchUserResponse searchUsers(String keyword) {
+        List<User> users = userRepository.searchUsersByKeyword(keyword);
+
+        return SearchUserResponse.of(users);
     }
 }

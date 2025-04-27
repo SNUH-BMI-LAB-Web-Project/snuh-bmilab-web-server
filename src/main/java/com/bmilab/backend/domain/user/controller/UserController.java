@@ -3,6 +3,7 @@ package com.bmilab.backend.domain.user.controller;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserPasswordRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserRequest;
 import com.bmilab.backend.domain.user.dto.response.CurrentUserDetail;
+import com.bmilab.backend.domain.user.dto.response.SearchUserResponse;
 import com.bmilab.backend.domain.user.dto.response.UserFindAllResponse;
 import com.bmilab.backend.domain.user.service.UserService;
 import com.bmilab.backend.global.security.UserAuthInfo;
@@ -32,6 +33,13 @@ public class UserController implements UserApi {
             @RequestParam(required = false, defaultValue = "createdAt", value = "criteria") String criteria) {
 
         return ResponseEntity.ok(userService.getAllUsers(pageNo, criteria));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<SearchUserResponse> searchUsers(
+            @RequestParam(required = false) String keyword
+    ) {
+        return ResponseEntity.ok(userService.searchUsers(keyword));
     }
 
     @GetMapping("/me")

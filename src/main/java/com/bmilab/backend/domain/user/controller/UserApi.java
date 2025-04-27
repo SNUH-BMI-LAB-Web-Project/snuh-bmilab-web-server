@@ -3,6 +3,7 @@ package com.bmilab.backend.domain.user.controller;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserPasswordRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserRequest;
 import com.bmilab.backend.domain.user.dto.response.CurrentUserDetail;
+import com.bmilab.backend.domain.user.dto.response.SearchUserResponse;
 import com.bmilab.backend.domain.user.dto.response.UserFindAllResponse;
 import com.bmilab.backend.global.annotation.FormDataRequestBody;
 import com.bmilab.backend.global.exception.ErrorResponse;
@@ -89,5 +90,18 @@ public interface UserApi {
     ResponseEntity<Void> updatePassword(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestBody UpdateUserPasswordRequest request
+    );
+
+    @Operation(summary = "사용자 검색", description = "사용자 검색을 위한 조회용 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "사용자 조회 성공"
+                    )
+            }
+    )
+    ResponseEntity<SearchUserResponse> searchUsers(
+            @RequestParam(required = false) String keyword
     );
 }
