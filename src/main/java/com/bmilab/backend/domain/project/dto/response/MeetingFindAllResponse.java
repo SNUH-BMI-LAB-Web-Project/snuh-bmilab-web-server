@@ -44,7 +44,7 @@ public record MeetingFindAllResponse(
             @Schema(description = "미팅 종료 시간 (24시간제)", example = "15:30")
             LocalTime endTime,
 
-            @Schema(description = "미팅 유형", example = "RESEARCH_PRESENTATION")
+            @Schema(description = "미팅 유형", example = "연구 발표")
             MeetingType meetingType,
 
             @Schema(description = "미팅 요약", example = "디자인 시스템 전면 개편 논의 및 일정 정리")

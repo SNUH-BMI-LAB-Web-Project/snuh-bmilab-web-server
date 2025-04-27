@@ -37,7 +37,7 @@ public record UserFindAllResponse(
             @Schema(description = "프로필 이미지 URL", example = "https://cdn.example.com/profiles/user1.png")
             String profileImageUrl,
 
-            @Schema(description = "연구 분야 목록", example = "[\"NLP\", \"BIOINFORMATICS\"]")
+            @Schema(description = "연구 분야 목록", example = "[\"NLP\", \"Bioinformatics\"]")
             List<ProjectCategory> categories,
 
             @Schema(description = "좌석 번호", example = "12-30")
