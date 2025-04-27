@@ -1,6 +1,7 @@
 package com.bmilab.backend.domain.project.dto.query;
 
 import com.bmilab.backend.domain.project.enums.ProjectCategory;
+import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.user.entity.User;
 import java.time.LocalDate;
 import java.util.List;
@@ -25,6 +26,8 @@ public class GetAllProjectsQueryResult {
     private List<User> leaders;
 
     private Long participantCount;
+
+    private ProjectStatus status;
 
     private Boolean hasFile;
 }

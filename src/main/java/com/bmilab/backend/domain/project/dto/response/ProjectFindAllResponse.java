@@ -2,6 +2,7 @@ package com.bmilab.backend.domain.project.dto.response;
 
 import com.bmilab.backend.domain.project.dto.query.GetAllProjectsQueryResult;
 import com.bmilab.backend.domain.project.enums.ProjectCategory;
+import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.user.dto.response.UserSummary;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
@@ -37,6 +38,9 @@ public record ProjectFindAllResponse(
             @Schema(description = "연구 참여자 수", example = "8")
             int participantCount,
 
+            @Schema(description = "연구 상태", example = "IN_PROGRESS")
+            ProjectStatus status,
+
             @Schema(description = "첨부 파일 존재 여부", example = "true")
             boolean hasFile
     ) {
@@ -53,6 +57,7 @@ public record ProjectFindAllResponse(
                             .toList()
                     )
                     .participantCount(queryResult.getParticipantCount().intValue())
+                    .status(queryResult.getStatus())
                     .hasFile(queryResult.getHasFile())
                     .build();
         }

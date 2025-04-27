@@ -84,6 +84,7 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                                         .where(participant.project.eq(project)),
                                 "participantCount"
                         ),
+                        project.status,
                         project.fileUrls.size().gt(0)
                 ))
                 .from(project)
