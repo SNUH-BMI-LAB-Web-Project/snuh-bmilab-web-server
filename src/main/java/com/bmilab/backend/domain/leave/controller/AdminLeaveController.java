@@ -18,13 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class AdminLeaveController implements AdminLeaveApi {
     private final LeaveService leaveService;
 
-    @PostMapping("/approve/{leaveId}")
+    @PostMapping("/{leaveId}/approve")
     public ResponseEntity<Void> approveLeave(@PathVariable long leaveId) {
         leaveService.approveLeave(leaveId);
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/reject/{leaveId}")
+    @PostMapping("/{leaveId}/reject")
     public ResponseEntity<Void> rejectLeave(
             @PathVariable long leaveId,
             @RequestBody RejectLeaveRequest request
