@@ -26,7 +26,7 @@ public record MeetingFindAllResponse(
             @Schema(description = "미팅 ID", example = "101")
             Long meetingId,
 
-            @Schema(description = "프로젝트 ID", example = "55")
+            @Schema(description = "연구 ID", example = "55")
             Long projectId,
 
             @Schema(description = "미팅 기록 작성자 정보")
