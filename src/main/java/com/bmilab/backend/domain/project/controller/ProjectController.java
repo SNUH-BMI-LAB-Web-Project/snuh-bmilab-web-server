@@ -1,10 +1,13 @@
 package com.bmilab.backend.domain.project.controller;
 
+import com.bmilab.backend.domain.project.dto.condition.ProjectFilterCondition;
 import com.bmilab.backend.domain.project.dto.request.ProjectCompleteRequest;
 import com.bmilab.backend.domain.project.dto.request.ProjectRequest;
 import com.bmilab.backend.domain.project.dto.response.ProjectDetail;
 import com.bmilab.backend.domain.project.dto.request.ProjectFileRequest;
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse;
+import com.bmilab.backend.domain.project.enums.ProjectCategory;
+import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.project.service.ProjectService;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import java.util.List;
@@ -90,10 +93,15 @@ public class ProjectController implements ProjectApi {
     public ResponseEntity<ProjectFindAllResponse> getAllProjects(
             @RequestParam(required = false) String search,
             @RequestParam(required = false, defaultValue = "0") int pageNo,
-            @RequestParam(required = false, defaultValue = "10") int size
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false) Long leaderId,
+            @RequestParam(required = false) ProjectCategory category,
+            @RequestParam(required = false) ProjectStatus status
     ) {
 
-        return ResponseEntity.ok(projectService.getAllProjects(pageNo, size, search));
+        return ResponseEntity.ok(
+                projectService.getAllProjects(pageNo, size, search, ProjectFilterCondition.of(leaderId, category, status))
+        );
     }
 
     @GetMapping("/{projectId}")

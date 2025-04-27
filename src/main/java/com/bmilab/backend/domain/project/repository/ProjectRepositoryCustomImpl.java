@@ -1,5 +1,6 @@
 package com.bmilab.backend.domain.project.repository;
 
+import com.bmilab.backend.domain.project.dto.condition.ProjectFilterCondition;
 import com.bmilab.backend.domain.project.dto.query.GetAllProjectsQueryResult;
 import com.bmilab.backend.domain.project.entity.QProject;
 import com.bmilab.backend.domain.project.entity.QProjectParticipant;
@@ -28,7 +29,9 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<GetAllProjectsQueryResult> findAllBySearch(String keyword, Pageable pageable) {
+    public Page<GetAllProjectsQueryResult> findAllBySearch(String keyword, Pageable pageable,
+                                                           ProjectFilterCondition condition) {
+
         QProject project = QProject.project;
         QProjectParticipant participant = QProjectParticipant.projectParticipant;
         QUser user = QUser.user;
@@ -47,6 +50,20 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                         user.name.containsIgnoreCase(keyword)
                 ).exists()
                 : null;
+
+        BooleanExpression leaderFilter = condition.leaderId() != null
+                ? JPAExpressions.selectOne()
+                .from(participant)
+                .join(participant.user, user)
+                .where(
+                        participant.user.id.eq(condition.leaderId())
+                ).exists()
+                : null;
+
+        BooleanExpression statusFilter = condition.status() != null ? project.status.eq(condition.status()) : null;
+
+        BooleanExpression categoryFilter =
+                condition.category() != null ? project.category.eq(condition.category()) : null;
 
         List<GetAllProjectsQueryResult> results = queryFactory
                 .select(Projections.constructor(
@@ -67,7 +84,10 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                 ))
                 .from(project)
                 .where(
-                        Expressions.anyOf(titleContains, leaderNameContains)
+                        Expressions.anyOf(titleContains, leaderNameContains),
+                        statusFilter,
+                        categoryFilter,
+                        leaderFilter
                 )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())

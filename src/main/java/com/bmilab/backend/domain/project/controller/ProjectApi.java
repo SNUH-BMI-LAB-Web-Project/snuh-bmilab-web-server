@@ -5,6 +5,8 @@ import com.bmilab.backend.domain.project.dto.request.ProjectFileRequest;
 import com.bmilab.backend.domain.project.dto.request.ProjectRequest;
 import com.bmilab.backend.domain.project.dto.response.ProjectDetail;
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse;
+import com.bmilab.backend.domain.project.enums.ProjectCategory;
+import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.global.annotation.FormDataRequestBody;
 import com.bmilab.backend.global.exception.ErrorResponse;
 import com.bmilab.backend.global.security.UserAuthInfo;
@@ -153,7 +155,10 @@ public interface ProjectApi {
     ResponseEntity<ProjectFindAllResponse> getAllProjects(
             @RequestParam(required = false) String search,
             @RequestParam(required = false, defaultValue = "0") int pageNo,
-            @RequestParam(required = false, defaultValue = "10") int size
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false) Long leaderId,
+            @RequestParam(required = false) ProjectCategory category,
+            @RequestParam(required = false) ProjectStatus status
     );
 
     @Operation(summary = "연구 상세 조회", description = "ID로 연구를 상세 조회하는 GET API")

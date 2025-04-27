@@ -1,5 +1,6 @@
 package com.bmilab.backend.domain.project.service;
 
+import com.bmilab.backend.domain.project.dto.condition.ProjectFilterCondition;
 import com.bmilab.backend.domain.project.dto.query.GetAllProjectsQueryResult;
 import com.bmilab.backend.domain.project.dto.request.ProjectCompleteRequest;
 import com.bmilab.backend.domain.project.dto.request.ProjectFileRequest;
@@ -10,6 +11,7 @@ import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse.Pro
 import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.project.entity.ProjectParticipant;
 import com.bmilab.backend.domain.project.entity.ProjectParticipantId;
+import com.bmilab.backend.domain.project.enums.ProjectCategory;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.project.exception.ProjectErrorCode;
 import com.bmilab.backend.domain.project.repository.ProjectParticipantRepository;
@@ -122,9 +124,10 @@ public class ProjectService {
         project.updateFileUrls(fileUrls);
     }
 
-    public ProjectFindAllResponse getAllProjects(int pageNo, int size, String search) {
+    public ProjectFindAllResponse getAllProjects(int pageNo, int size, String search, ProjectFilterCondition condition) {
+
         PageRequest pageRequest = PageRequest.of(pageNo, size, Sort.by(Direction.DESC, "createdAt"));
-        Page<GetAllProjectsQueryResult> queryResults = projectRepository.findAllBySearch(search, pageRequest);
+        Page<GetAllProjectsQueryResult> queryResults = projectRepository.findAllBySearch(search, pageRequest, condition);
 
         return ProjectFindAllResponse
                 .builder()
