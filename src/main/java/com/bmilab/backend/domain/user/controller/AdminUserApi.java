@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@Tag(name = "(Admin) Auth", description = "관리자용 인증 처리 API")
+@Tag(name = "(Admin) User", description = "관리자용 사용자 API")
 public interface AdminUserApi {
     @Operation(summary = "신규 사용자 등록", description = "신규 사용자를 등록하는 POST API")
     @ApiResponses(
