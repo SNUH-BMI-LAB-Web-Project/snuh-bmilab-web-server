@@ -17,6 +17,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springdoc.core.converters.models.PageableAsQueryParam;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -152,13 +158,13 @@ public interface ProjectApi {
                     )
             }
     )
+    @PageableAsQueryParam
     ResponseEntity<ProjectFindAllResponse> getAllProjects(
             @RequestParam(required = false) String search,
-            @RequestParam(required = false, defaultValue = "0") int pageNo,
-            @RequestParam(required = false, defaultValue = "10") int size,
             @RequestParam(required = false) Long leaderId,
             @RequestParam(required = false) ProjectCategory category,
-            @RequestParam(required = false) ProjectStatus status
+            @RequestParam(required = false) ProjectStatus status,
+            @PageableDefault(sort = "createdAt", direction = Direction.DESC) @ParameterObject Pageable pageable
     );
 
     @Operation(summary = "연구 상세 조회", description = "ID로 연구를 상세 조회하는 GET API")

@@ -12,6 +12,10 @@ import com.bmilab.backend.domain.project.service.ProjectService;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -92,15 +96,14 @@ public class ProjectController implements ProjectApi {
     @GetMapping
     public ResponseEntity<ProjectFindAllResponse> getAllProjects(
             @RequestParam(required = false) String search,
-            @RequestParam(required = false, defaultValue = "0") int pageNo,
-            @RequestParam(required = false, defaultValue = "10") int size,
             @RequestParam(required = false) Long leaderId,
             @RequestParam(required = false) ProjectCategory category,
-            @RequestParam(required = false) ProjectStatus status
+            @RequestParam(required = false) ProjectStatus status,
+            @PageableDefault(sort = "createdAt", direction = Direction.DESC) @ParameterObject Pageable pageable
     ) {
 
         return ResponseEntity.ok(
-                projectService.getAllProjects(pageNo, size, search, ProjectFilterCondition.of(leaderId, category, status))
+                projectService.getAllProjects(pageable, search, ProjectFilterCondition.of(leaderId, category, status))
         );
     }
 

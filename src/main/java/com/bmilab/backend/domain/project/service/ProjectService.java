@@ -28,6 +28,7 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
@@ -124,10 +125,8 @@ public class ProjectService {
         project.updateFileUrls(fileUrls);
     }
 
-    public ProjectFindAllResponse getAllProjects(int pageNo, int size, String search, ProjectFilterCondition condition) {
-
-        PageRequest pageRequest = PageRequest.of(pageNo, size, Sort.by(Direction.DESC, "createdAt"));
-        Page<GetAllProjectsQueryResult> queryResults = projectRepository.findAllBySearch(search, pageRequest, condition);
+    public ProjectFindAllResponse getAllProjects(Pageable pageable, String search, ProjectFilterCondition condition) {
+        Page<GetAllProjectsQueryResult> queryResults = projectRepository.findAllBySearch(search, pageable, condition);
 
         return ProjectFindAllResponse
                 .builder()

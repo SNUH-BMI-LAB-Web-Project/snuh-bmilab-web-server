@@ -28,7 +28,7 @@ public interface RSSApi {
             }
     )
     ResponseEntity<RSSResponse> getAllRssAssignments(
-            @RequestParam(required = false, defaultValue = "0") int pageNo,
+            @RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
             @RequestParam(required = false, defaultValue = "10") int size
     );
 }
