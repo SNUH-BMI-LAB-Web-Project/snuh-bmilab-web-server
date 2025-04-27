@@ -29,6 +29,9 @@ public record UserDetail(
         @Schema(description = "사용자 역할", example = "USER")
         Role role,
 
+        @Schema(description = "프로필 이미지 URL", example = "https://cdn.example.com/profiles/user1.png")
+        String profileImageUrl,
+
         @Schema(description = "총 연차 수", example = "15.0")
         Double annualLeaveCount,
 
@@ -62,6 +65,7 @@ public record UserDetail(
                 .name(user.getName())
                 .department(user.getDepartment())
                 .role(user.getRole())
+                .profileImageUrl(user.getProfileImageUrl())
                 .comment((includeComment) ? userInfo.getComment() : null)
                 .annualLeaveCount(userLeave.getAnnualLeaveCount())
                 .usedLeaveCount(userLeave.getUsedLeaveCount())

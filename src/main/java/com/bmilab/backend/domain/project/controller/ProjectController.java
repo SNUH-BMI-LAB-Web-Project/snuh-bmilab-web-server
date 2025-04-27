@@ -99,7 +99,7 @@ public class ProjectController implements ProjectApi {
             @RequestParam(required = false) Long leaderId,
             @RequestParam(required = false) ProjectCategory category,
             @RequestParam(required = false) ProjectStatus status,
-            @PageableDefault(sort = "createdAt", direction = Direction.DESC) @ParameterObject Pageable pageable
+            @PageableDefault(size = 10, sort = "createdAt", direction = Direction.DESC) @ParameterObject Pageable pageable
     ) {
 
         return ResponseEntity.ok(
