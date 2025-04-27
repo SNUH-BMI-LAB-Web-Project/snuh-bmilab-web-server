@@ -42,7 +42,7 @@ public class UserService {
 
         Page<UserInfoQueryResult> results = userRepository.findAllUserInfosPagination(pageRequest);
 
-        return UserFindAllResponse.of(results.getContent());
+        return UserFindAllResponse.of(results);
     }
 
     public UserDetail getUserById(long userId) {

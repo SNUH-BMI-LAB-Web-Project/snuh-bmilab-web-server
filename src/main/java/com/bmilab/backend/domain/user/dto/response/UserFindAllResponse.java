@@ -8,15 +8,19 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.Arrays;
 import java.util.List;
 import lombok.Builder;
+import org.springframework.data.domain.Page;
 
 public record UserFindAllResponse(
-        List<UserItem> users
+        List<UserItem> users,
+        int totalPage
 ) {
-    public static UserFindAllResponse of(List<UserInfoQueryResult> queryResults) {
+    public static UserFindAllResponse of(Page<UserInfoQueryResult> queryResults) {
         return new UserFindAllResponse(
-                queryResults.stream()
+                queryResults.getContent()
+                        .stream()
                         .map(UserItem::from)
-                        .toList()
+                        .toList(),
+                queryResults.getTotalPages()
         );
     }
 
