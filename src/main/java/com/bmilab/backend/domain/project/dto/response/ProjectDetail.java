@@ -45,6 +45,12 @@ public record ProjectDetail(
         @Schema(description = "연구 상태", example = "IN_PROGRESS")
         ProjectStatus status,
 
+        @Schema(description = "연구 IRB 번호", example = "IRB-DEF-...")
+        String irbId,
+
+        @Schema(description = "연구 DRB 번호", example = "DRB-DFEF-...")
+        String drbId,
+
         @Schema(description = "첨부된 파일 URL 목록", example = "[\"https://s3.aws.com/project1/file1.png\", \"https://s3.aws.com/project1/file2.pdf\"]")
         List<String> fileUrls,
 
@@ -77,6 +83,8 @@ public record ProjectDetail(
                 )
                 .category(project.getCategory())
                 .status(project.getStatus())
+                .irbId(project.getIrbId())
+                .drbId(project.getDrbId())
                 .fileUrls(project.getFileUrls())
                 .createdAt(project.getCreatedAt())
                 .build();

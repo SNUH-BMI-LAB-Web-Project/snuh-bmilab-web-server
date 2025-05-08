@@ -65,6 +65,12 @@ public class Project {
     @Column(nullable = false)
     private ProjectStatus status;
 
+    @Column(name = "irb_id")
+    private String irbId;
+
+    @Column(name = "drb_id")
+    private String drbId;
+
     @Builder.Default
     @ElementCollection
     @CollectionTable(name = "file_urls", joinColumns = @JoinColumn(name = "project_id"))
