@@ -5,11 +5,11 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Getter
-public enum MeetingType {
-    REGULAR("정기 미팅"),
-    AD_HOC("임시 미팅"),
-    RESEARCH_PRESENTATION("연구 발표"),
-    EXTERNAL_COLLABORATION("외부 협력");
+public enum TimelineType {
+    EXTERNAL_MEETING("외부 미팅"),
+    INTERNAL_MEETING("내부 미팅"),
+    SUBMISSION_DEADLINE("제출 마감"),
+    MATERIAL_SHARE("자료 공유");
 
     private final String description;
 }

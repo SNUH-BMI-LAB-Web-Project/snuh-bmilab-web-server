@@ -1,11 +1,11 @@
 package com.bmilab.backend.domain.project.service;
 
-import com.bmilab.backend.domain.project.dto.request.MeetingRequest;
-import com.bmilab.backend.domain.project.dto.response.MeetingFindAllResponse;
-import com.bmilab.backend.domain.project.entity.Meeting;
+import com.bmilab.backend.domain.project.dto.request.TimelineRequest;
+import com.bmilab.backend.domain.project.dto.response.TimelineFindAllResponse;
+import com.bmilab.backend.domain.project.entity.Timeline;
 import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.project.exception.ProjectErrorCode;
-import com.bmilab.backend.domain.project.repository.MeetingRepository;
+import com.bmilab.backend.domain.project.repository.TimelineRepository;
 import com.bmilab.backend.domain.project.repository.ProjectRepository;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.exception.UserErrorCode;
@@ -19,13 +19,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class MeetingService {
-    private final MeetingRepository meetingRepository;
+public class TimelineService {
+    private final TimelineRepository timelineRepository;
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
 
     @Transactional
-    public void createMeeting(Long userId, Long projectId, MeetingRequest request) {
+    public void createTimeline(Long userId, Long projectId, TimelineRequest request) {
         User recorder = userRepository.findById(userId)
                 .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
 
@@ -36,7 +36,7 @@ public class MeetingService {
             throw new ApiException(ProjectErrorCode.PROJECT_ACCESS_DENIED);
         }
 
-        Meeting meeting = Meeting.builder()
+        Timeline timeline = Timeline.builder()
                 .project(project)
                 .recorder(recorder)
                 .title(request.title())
@@ -45,15 +45,14 @@ public class MeetingService {
                 .endTime(request.endTime())
                 .type(request.type())
                 .summary(request.summary())
-                .content(request.content())
                 .build();
 
-        meetingRepository.save(meeting);
+        timelineRepository.save(timeline);
     }
 
-    public MeetingFindAllResponse getAllMeetingsByProjectId(Long projectId) {
-        List<Meeting> meetings = meetingRepository.findAllByProjectId(projectId);
+    public TimelineFindAllResponse getAllTimelinesByProjectId(Long projectId) {
+        List<Timeline> timelines = timelineRepository.findAllByProjectId(projectId);
 
-        return MeetingFindAllResponse.of(meetings);
+        return TimelineFindAllResponse.of(timelines);
     }
 }

@@ -1,8 +1,8 @@
 package com.bmilab.backend.domain.project.controller;
 
-import com.bmilab.backend.domain.project.dto.request.MeetingRequest;
-import com.bmilab.backend.domain.project.dto.response.MeetingFindAllResponse;
-import com.bmilab.backend.domain.project.service.MeetingService;
+import com.bmilab.backend.domain.project.dto.request.TimelineRequest;
+import com.bmilab.backend.domain.project.dto.response.TimelineFindAllResponse;
+import com.bmilab.backend.domain.project.service.TimelineService;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,25 +18,25 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/projects")
 @RequiredArgsConstructor
-public class MeetingController implements MeetingApi {
-    private final MeetingService meetingService;
+public class TimelineController implements TimelineApi {
+    private final TimelineService timelineService;
 
-    @PostMapping("/{projectId}/meetings")
-    public ResponseEntity<Void> createMeeting(
+    @PostMapping("/{projectId}/timelines")
+    public ResponseEntity<Void> createTimeline(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @PathVariable Long projectId,
-            @RequestBody MeetingRequest request
+            @RequestBody TimelineRequest request
     ) {
 
-        meetingService.createMeeting(userAuthInfo.getUserId(), projectId, request);
+        timelineService.createTimeline(userAuthInfo.getUserId(), projectId, request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @GetMapping("/{projectId}/meetings")
-    public ResponseEntity<MeetingFindAllResponse> getAllMeetingsByProjectId(
+    @GetMapping("/{projectId}/timelines")
+    public ResponseEntity<TimelineFindAllResponse> getAllTimelinesByProjectId(
             @PathVariable Long projectId
     ) {
-        return ResponseEntity.ok(meetingService.getAllMeetingsByProjectId(projectId));
+        return ResponseEntity.ok(timelineService.getAllTimelinesByProjectId(projectId));
     }
 }
 
