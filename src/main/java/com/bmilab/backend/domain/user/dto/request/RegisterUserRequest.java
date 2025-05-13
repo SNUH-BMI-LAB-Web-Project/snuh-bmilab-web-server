@@ -33,6 +33,9 @@ public record RegisterUserRequest(
         @Schema(description = "전화번호", example = "010-1234-5678")
         String phoneNumber,
 
+        @Schema(description = "학력", example = "국민대학교 소프트웨어학부 재학 중")
+        String education,
+
         @Schema(description = "입사일", example = "2025-04-01")
         LocalDate joinedAt
 ) {

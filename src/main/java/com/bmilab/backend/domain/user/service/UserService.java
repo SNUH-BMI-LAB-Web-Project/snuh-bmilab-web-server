@@ -97,7 +97,7 @@ public class UserService {
         }
 
         result.user().update(request.name(), request.email(), request.department());
-        result.userInfo().update(request.categories(), request.seatNumber(), request.phoneNumber());
+        result.userInfo().update(request.categories(), request.seatNumber(), request.phoneNumber(), request.education());
     }
 
     private String uploadProfileImage(Long userId, MultipartFile file) {

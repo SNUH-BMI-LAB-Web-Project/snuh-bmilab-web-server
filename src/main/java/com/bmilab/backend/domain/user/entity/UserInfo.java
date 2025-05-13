@@ -46,13 +46,15 @@ public class UserInfo {
     @Column(name = "joined_at")
     private LocalDate joinedAt;
 
+    private String education;
+
     private String comment;
 
     public void updateComment(String comment) {
         this.comment = comment;
     }
 
-    public void update(List<ProjectCategory> categories, String seatNumber, String phoneNumber) {
+    public void update(List<ProjectCategory> categories, String seatNumber, String phoneNumber, String education) {
         this.category = String.join(",", categories.stream().map(ProjectCategory::name).toList());
         this.seatNumber = seatNumber;
         this.phoneNumber = phoneNumber;

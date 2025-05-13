@@ -45,7 +45,10 @@ public record UserFindAllResponse(
             List<ProjectCategory> categories,
 
             @Schema(description = "좌석 번호", example = "12-30")
-            String seatNumber
+            String seatNumber,
+
+            @Schema(description = "학력", example = "국민대학교 소프트웨어학부 재학 중")
+            String education
     ) {
         public static UserItem from(UserInfoQueryResult queryResult) {
             User user = queryResult.user();
@@ -63,6 +66,7 @@ public record UserFindAllResponse(
                                     .toList()
                     )
                     .seatNumber(userInfo.getSeatNumber())
+                    .education(userInfo.getEducation())
                     .build();
         }
     }

@@ -21,6 +21,9 @@ public record UpdateUserRequest(
         String phoneNumber,
 
         @Schema(description = "좌석 번호", example = "14-07")
-        String seatNumber
+        String seatNumber,
+
+        @Schema(description = "학력", example = "국민대학교 소프트웨어학부 재학 중")
+        String education
 ) {
 }

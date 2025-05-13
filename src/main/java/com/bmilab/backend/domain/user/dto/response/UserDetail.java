@@ -47,6 +47,9 @@ public record UserDetail(
         @Schema(description = "전화번호", example = "010-1234-5678")
         String phoneNumber,
 
+        @Schema(description = "학력", example = "국민대학교 소프트웨어학부 재학 중")
+        String education,
+
         @Schema(description = "비고 또는 한 줄 소개", example = "딥러닝과 커피를 사랑하는 개발자")
         String comment,
 
@@ -76,6 +79,7 @@ public record UserDetail(
                 )
                 .seatNumber(userInfo.getSeatNumber())
                 .phoneNumber(userInfo.getPhoneNumber())
+                .education(userInfo.getEducation())
                 .comment(userInfo.getComment())
                 .joinedAt(userInfo.getJoinedAt())
                 .build();
