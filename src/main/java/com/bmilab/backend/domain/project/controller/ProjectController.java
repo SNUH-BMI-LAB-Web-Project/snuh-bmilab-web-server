@@ -10,7 +10,6 @@ import com.bmilab.backend.domain.project.enums.ProjectCategory;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.project.service.ProjectService;
 import com.bmilab.backend.global.security.UserAuthInfo;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -30,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/projects")
@@ -41,23 +39,11 @@ public class ProjectController implements ProjectApi {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> createNewProject(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
-            @RequestPart(required = false) List<MultipartFile> files,
             @RequestPart ProjectRequest request
     ) {
 
-        projectService.createNewProject(userAuthInfo.getUserId(), files, request);
+        projectService.createNewProject(userAuthInfo.getUserId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
-
-    @PatchMapping(value = "/{projectId}/files", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> addProjectFile(
-            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
-            @PathVariable Long projectId,
-            @RequestPart MultipartFile file
-    ) {
-
-        projectService.addProjectFile(userAuthInfo.getUserId(), projectId, file);
-        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{projectId}/files")

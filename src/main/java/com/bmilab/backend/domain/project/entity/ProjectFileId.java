@@ -3,6 +3,7 @@ package com.bmilab.backend.domain.project.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.io.Serializable;
+import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -17,5 +18,5 @@ public class ProjectFileId implements Serializable {
     private Long projectId;
 
     @Column(name = "file_id")
-    private Long fileId;
+    private UUID fileId;
 }

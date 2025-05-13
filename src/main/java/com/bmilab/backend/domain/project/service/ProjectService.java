@@ -1,5 +1,7 @@
 package com.bmilab.backend.domain.project.service;
 
+import com.bmilab.backend.domain.file.entity.FileInformation;
+import com.bmilab.backend.domain.file.repository.FileInformationRepository;
 import com.bmilab.backend.domain.project.dto.condition.ProjectFilterCondition;
 import com.bmilab.backend.domain.project.dto.query.GetAllProjectsQueryResult;
 import com.bmilab.backend.domain.project.dto.request.ProjectCompleteRequest;
@@ -9,11 +11,14 @@ import com.bmilab.backend.domain.project.dto.response.ProjectDetail;
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse.ProjectSummary;
 import com.bmilab.backend.domain.project.entity.Project;
+import com.bmilab.backend.domain.project.entity.ProjectFile;
+import com.bmilab.backend.domain.project.entity.ProjectFileId;
 import com.bmilab.backend.domain.project.entity.ProjectParticipant;
 import com.bmilab.backend.domain.project.entity.ProjectParticipantId;
-import com.bmilab.backend.domain.project.enums.ProjectCategory;
+import com.bmilab.backend.domain.project.enums.ProjectFileType;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.project.exception.ProjectErrorCode;
+import com.bmilab.backend.domain.project.repository.ProjectFileRepository;
 import com.bmilab.backend.domain.project.repository.ProjectParticipantRepository;
 import com.bmilab.backend.domain.project.repository.ProjectRepository;
 import com.bmilab.backend.domain.user.entity.User;
@@ -25,15 +30,12 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -43,9 +45,11 @@ public class ProjectService {
     private final UserRepository userRepository;
     private final S3Service s3Service;
     private final ProjectParticipantRepository projectParticipantRepository;
+    private final FileInformationRepository fileInformationRepository;
+    private final ProjectFileRepository projectFileRepository;
 
     @Transactional
-    public void createNewProject(Long userId, List<MultipartFile> files, ProjectRequest request) {
+    public void createNewProject(Long userId, ProjectRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
 
@@ -61,20 +65,20 @@ public class ProjectService {
                 .startDate(request.startDate())
                 .endDate(request.endDate())
                 .status(status)
+                .irbId(request.irbId())
+                .drbId(request.drbId())
                 .category(request.category())
                 .build();
 
         projectRepository.save(project);
 
-        if (files != null && !files.isEmpty()) {
+        //연구 첨부파일 초기화
 
-            List<String> fileUrls = files.stream()
-                    .filter(file -> file != null && !file.isEmpty())
-                    .map(notNullFile -> uploadProjectFile(notNullFile, project))
-                    .toList();
+        createProjectFiles(request.fileIds(), project, ProjectFileType.GENERAL);
+        createProjectFiles(request.irbFileIds(), project, ProjectFileType.IRB);
+        createProjectFiles(request.drbFileIds(), project, ProjectFileType.DRB);
 
-            project.updateFileUrls(fileUrls);
-        }
+        //연구 참가자 및 책임자 초기화
 
         List<User> leaders = userRepository.findAllById(request.leaderIds());
 
@@ -106,23 +110,23 @@ public class ProjectService {
         });
     }
 
-    @Transactional
-    public void addProjectFile(Long userId, Long projectId, MultipartFile file) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+    public void createProjectFiles(List<UUID> fileIds, Project project, ProjectFileType fileType) {
+        List<FileInformation> files = fileInformationRepository.findAllById(fileIds);
 
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
+        List<ProjectFile> projectFiles = files
+                .stream()
+                .map(file -> {
+                    ProjectFileId projectFileId = new ProjectFileId(project.getId(), file.getId());
 
-        if (!project.canBeEditedBy(user)) {
-            throw new ApiException(ProjectErrorCode.PROJECT_ACCESS_DENIED);
-        }
+                    return ProjectFile.builder()
+                            .id(projectFileId)
+                            .project(project)
+                            .fileInformation(file)
+                            .type(fileType)
+                            .build();
+                }).toList();
 
-        List<String> fileUrls = project.getFileUrls();
-
-        fileUrls.add(uploadProjectFile(file, project));
-
-        project.updateFileUrls(fileUrls);
+        projectFileRepository.saveAll(projectFiles);
     }
 
     public ProjectFindAllResponse getAllProjects(Pageable pageable, String search, ProjectFilterCondition condition) {
@@ -232,14 +236,6 @@ public class ProjectService {
         project.complete(request.endDate());
     }
 
-    private String uploadProjectFile(MultipartFile file, Project project) {
-        String originalName = file.getOriginalFilename();
-        String fileName = originalName.substring(0, originalName.lastIndexOf("."));
-        String newFileDir = "projects/" + project.getId() + "/" + fileName;
-
-        return s3Service.uploadFile(file, newFileDir);
-    }
-
     private ProjectStatus calculateProjectStatus(LocalDate startDate, LocalDate endDate) {
         LocalDate today = LocalDate.now();
 
@@ -248,18 +244,21 @@ public class ProjectService {
         }
 
         if (startDate != null) {
-            if (today.isBefore(startDate))
+            if (today.isBefore(startDate)) {
                 return ProjectStatus.PENDING;
+            }
 
-            if (today.isEqual(startDate) || today.isAfter(startDate))
+            if (today.isEqual(startDate) || today.isAfter(startDate)) {
                 return ProjectStatus.IN_PROGRESS;
+            }
         }
 
         return ProjectStatus.WAITING;
     }
 
 
-    private void updateParticipants(Project project, List<Long> updatedIds, List<Long> participantIds, boolean updateLeader) {
+    private void updateParticipants(Project project, List<Long> updatedIds, List<Long> participantIds,
+                                    boolean updateLeader) {
         Set<Long> intersection = new HashSet<>(participantIds);
 
         intersection.retainAll(updatedIds);

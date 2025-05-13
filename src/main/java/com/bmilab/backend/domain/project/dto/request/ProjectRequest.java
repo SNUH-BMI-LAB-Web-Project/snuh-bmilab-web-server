@@ -4,6 +4,7 @@ import com.bmilab.backend.domain.project.enums.ProjectCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 public record ProjectRequest(
         @Schema(description = "연구 제목", example = "글로우업 AI 에디터 개발")
@@ -23,6 +24,21 @@ public record ProjectRequest(
 
         @Schema(description = "연구 종료일 (있으면)", example = "2025-06-30")
         LocalDate endDate,
+
+        @Schema(description = "IRB 번호 (있으면)", example = "IRB-DSEB-...")
+        String irbId,
+
+        @Schema(description = "DRB 번호 (있으면)", example = "DRB-DSEB-...")
+        String drbId,
+
+        @Schema(description = "IRB 파일 ID 리스트", example = "[dfaef-afaefaef-aefaefae-..., efaeaf-aefafea-aefaef..]")
+        List<UUID> irbFileIds,
+
+        @Schema(description = "DRB 파일 ID 리스트", example = "[dfaef-afaefaef-aefaefae-..., dfaef-afaefaef-aefaefae-..., dfaef-afaefaef-aefaefae-...]")
+        List<UUID> drbFileIds,
+
+        @Schema(description  = "일반 첨부파일 ID 리스트", example = "[dfaef-afaefaef-aefaefae-..., dfaef-afaefaef-aefaefae-..., dfaef-afaefaef-aefaefae-...]")
+        List<UUID> fileIds,
 
         @Schema(description = "대기 상태 여부", example = "false")
         boolean isWaiting,

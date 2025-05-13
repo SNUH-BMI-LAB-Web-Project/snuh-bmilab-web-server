@@ -7,7 +7,6 @@ import com.bmilab.backend.domain.project.dto.response.ProjectDetail;
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse;
 import com.bmilab.backend.domain.project.enums.ProjectCategory;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
-import com.bmilab.backend.global.annotation.FormDataRequestBody;
 import com.bmilab.backend.global.exception.ErrorResponse;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,7 +15,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +26,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "Project", description = "연구 API")
 public interface ProjectApi {
@@ -41,36 +38,9 @@ public interface ProjectApi {
                     ),
             }
     )
-    @FormDataRequestBody
     ResponseEntity<Void> createNewProject(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
-            @RequestPart List<MultipartFile> files,
             @RequestPart ProjectRequest request
-    );
-
-    @Operation(summary = "연구에 첨부파일 추가", description = "연구 데이터에 첨부파일을 추가하는 PATCH API")
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "첨부파일 추가 성공"
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "연구 정보를 찾을 수 없습니다.",
-                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-                    ),
-                    @ApiResponse(
-                            responseCode = "403",
-                            description = "연구에 접근할 수 있는 권한이 없습니다.",
-                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-                    )
-            }
-    )
-    ResponseEntity<Void> addProjectFile(
-            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
-            @PathVariable Long projectId,
-            @RequestPart MultipartFile file
     );
 
     @Operation(summary = "연구 첨부파일 삭제", description = "연구 데이터에서 첨부파일을 삭제하는 DELETE API")
