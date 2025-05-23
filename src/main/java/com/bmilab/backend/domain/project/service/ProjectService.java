@@ -9,7 +9,7 @@ import com.bmilab.backend.domain.project.dto.request.ProjectCompleteRequest;
 import com.bmilab.backend.domain.project.dto.request.ProjectRequest;
 import com.bmilab.backend.domain.project.dto.response.ProjectDetail;
 import com.bmilab.backend.domain.project.dto.response.ProjectFileFindAllResponse;
-import com.bmilab.backend.domain.project.dto.response.ProjectFileFindAllResponse.ProjectFileSummary;
+import com.bmilab.backend.domain.project.dto.response.ProjectFileSummary;
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse.ProjectSummary;
 import com.bmilab.backend.domain.project.entity.Project;
@@ -151,15 +151,19 @@ public class ProjectService {
     public ProjectDetail getProjectById(Long projectId) {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
+
         List<ProjectParticipant> participants = projectParticipantRepository.findAllByProjectId(projectId);
 
-        return ProjectDetail.from(project, participants);
+        List<ProjectFile> projectFiles = projectFileRepository.findAllByProjectId(projectId);
+
+        return ProjectDetail.from(project, participants, projectFiles);
     }
 
     @Transactional
     public void updateProject(Long editorId, Long projectId, ProjectRequest request) {
         User editor = userRepository.findById(editorId)
                 .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
 
@@ -196,6 +200,7 @@ public class ProjectService {
     public void deleteProjectById(Long userId, Long projectId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
 
@@ -299,6 +304,7 @@ public class ProjectService {
 
     public ProjectFileFindAllResponse getAllProjectFiles(Long projectId) {
         List<ProjectFile> projectFiles = projectFileRepository.findAllByProjectId(projectId);
+
         List<ProjectFileSummary> fileSummaries = projectFiles
                 .stream()
                 .map(ProjectFileSummary::from)

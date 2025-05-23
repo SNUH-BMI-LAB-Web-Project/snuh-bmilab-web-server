@@ -1,8 +1,10 @@
 package com.bmilab.backend.domain.project.dto.response;
 
 import com.bmilab.backend.domain.project.entity.Project;
+import com.bmilab.backend.domain.project.entity.ProjectFile;
 import com.bmilab.backend.domain.project.entity.ProjectParticipant;
 import com.bmilab.backend.domain.project.enums.ProjectCategory;
+import com.bmilab.backend.domain.project.enums.ProjectFileType;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.user.dto.response.UserSummary;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -51,13 +53,25 @@ public record ProjectDetail(
         @Schema(description = "연구 DRB 번호", example = "DRB-DFEF-...")
         String drbId,
 
-        @Schema(description = "첨부된 파일 URL 목록", example = "[\"https://s3.aws.com/project1/file1.png\", \"https://s3.aws.com/project1/file2.pdf\"]")
-        List<String> fileUrls,
+        @Schema(description = "PI", example = "김광수")
+        String pi,
+
+        @Schema(description = "실무 교수", example = "김광수")
+        String practicalProfessor,
+
+        @Schema(description = "첨부된 파일 정보 목록")
+        List<ProjectFileSummary> files,
+
+        @Schema(description = "첨부된 IRB 파일 정보 목록")
+        List<ProjectFileSummary> irbFiles,
+
+        @Schema(description = "첨부된 DRB 파일 정보 목록")
+        List<ProjectFileSummary> drbFiles,
 
         @Schema(description = "연구 생성 시각", example = "2025-04-22T10:15:00")
         LocalDateTime createdAt
 ) {
-    public static ProjectDetail from(Project project, List<ProjectParticipant> participants) {
+    public static ProjectDetail from(Project project, List<ProjectParticipant> participants, List<ProjectFile> projectFiles) {
         Map<Boolean, List<ProjectParticipant>> leaderPartitioned = participants.stream()
                 .collect(Collectors.partitioningBy(ProjectParticipant::isLeader));
 
@@ -85,7 +99,23 @@ public record ProjectDetail(
                 .status(project.getStatus())
                 .irbId(project.getIrbId())
                 .drbId(project.getDrbId())
-                .fileUrls(project.getFileUrls())
+                .pi(project.getPi())
+                .practicalProfessor(project.getPracticalProfessor())
+                .files(projectFiles.stream()
+                        .filter(file -> file.getType() == ProjectFileType.GENERAL)
+                        .map(ProjectFileSummary::from)
+                        .collect(Collectors.toList())
+                )
+                .irbFiles(projectFiles.stream()
+                        .filter(file -> file.getType() == ProjectFileType.IRB)
+                        .map(ProjectFileSummary::from)
+                        .collect(Collectors.toList())
+                )
+                .drbFiles(projectFiles.stream()
+                        .filter(file -> file.getType() == ProjectFileType.DRB)
+                        .map(ProjectFileSummary::from)
+                        .collect(Collectors.toList())
+                )
                 .createdAt(project.getCreatedAt())
                 .build();
     }
