@@ -4,6 +4,8 @@ import com.bmilab.backend.domain.project.enums.TimelineType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.UUID;
 
 public record TimelineRequest(
         @Schema(description = "타임라인 제목", example = "AI 도입 전략 타임라인")
@@ -21,10 +23,10 @@ public record TimelineRequest(
         @Schema(description = "타임라인 유형 (예: 정기 타임라인, 연구 발표)", example = "정기 타임라인")
         TimelineType type,
 
-        @Schema(description = "타임라인 요약", example = "AI 도입의 전략적 방향성과 단계 논의")
+        @Schema(description = "타임라인 내용", example = "시장 조사 결과를 바탕으로 AI 기술 도입 로드맵 설정")
         String summary,
 
-        @Schema(description = "타임라인 내용", example = "시장 조사 결과를 바탕으로 AI 기술 도입 로드맵 설정")
-        String content
+        @Schema(description = "첨부파일 ID 목록", example = "연구 타임라인의 첨부파일 목록")
+        List<UUID> fileIds
 ) {
 }

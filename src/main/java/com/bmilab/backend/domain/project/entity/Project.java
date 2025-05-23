@@ -65,6 +65,12 @@ public class Project {
     @Column(nullable = false)
     private ProjectStatus status;
 
+    @Column
+    private String pi;
+
+    @Column(name = "practical_professor")
+    private String practicalProfessor;
+
     @Column(name = "irb_id")
     private String irbId;
 
