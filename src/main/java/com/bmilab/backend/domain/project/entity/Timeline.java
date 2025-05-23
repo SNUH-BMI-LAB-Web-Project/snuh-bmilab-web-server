@@ -66,6 +66,9 @@ public class Timeline {
 
     private String summary;
 
+    @Column(name = "meeting_place")
+    private String meetingPlace;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

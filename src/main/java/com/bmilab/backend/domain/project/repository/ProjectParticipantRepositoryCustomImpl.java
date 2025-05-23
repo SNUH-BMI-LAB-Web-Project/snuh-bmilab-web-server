@@ -1,6 +1,7 @@
 package com.bmilab.backend.domain.project.repository;
 
 import com.bmilab.backend.domain.project.entity.QProjectParticipant;
+import com.bmilab.backend.domain.project.enums.ProjectParticipantType;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,7 @@ public class ProjectParticipantRepositoryCustomImpl implements ProjectParticipan
                 .from(projectParticipant)
                 .where(
                         projectParticipant.project.id.eq(projectId)
-                                .and(projectParticipant.isLeader.eq(leader))
+                                .and((leader) ? projectParticipant.type.eq(ProjectParticipantType.LEADER) : null)
                 )
                 .fetch();
     }

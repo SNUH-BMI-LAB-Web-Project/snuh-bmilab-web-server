@@ -1,13 +1,15 @@
 package com.bmilab.backend.domain.project.service;
 
 import com.bmilab.backend.domain.file.entity.FileInformation;
+import com.bmilab.backend.domain.file.exception.FileErrorCode;
 import com.bmilab.backend.domain.file.repository.FileInformationRepository;
 import com.bmilab.backend.domain.project.dto.condition.ProjectFilterCondition;
 import com.bmilab.backend.domain.project.dto.query.GetAllProjectsQueryResult;
 import com.bmilab.backend.domain.project.dto.request.ProjectCompleteRequest;
-import com.bmilab.backend.domain.project.dto.request.ProjectFileRequest;
 import com.bmilab.backend.domain.project.dto.request.ProjectRequest;
 import com.bmilab.backend.domain.project.dto.response.ProjectDetail;
+import com.bmilab.backend.domain.project.dto.response.ProjectFileFindAllResponse;
+import com.bmilab.backend.domain.project.dto.response.ProjectFileFindAllResponse.ProjectFileSummary;
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse.ProjectSummary;
 import com.bmilab.backend.domain.project.entity.Project;
@@ -16,6 +18,7 @@ import com.bmilab.backend.domain.project.entity.ProjectFileId;
 import com.bmilab.backend.domain.project.entity.ProjectParticipant;
 import com.bmilab.backend.domain.project.entity.ProjectParticipantId;
 import com.bmilab.backend.domain.project.enums.ProjectFileType;
+import com.bmilab.backend.domain.project.enums.ProjectParticipantType;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.project.exception.ProjectErrorCode;
 import com.bmilab.backend.domain.project.repository.ProjectFileRepository;
@@ -89,7 +92,7 @@ public class ProjectService {
                     .id(projectParticipantId)
                     .project(project)
                     .user(leader)
-                    .isLeader(true)
+                    .type(ProjectParticipantType.LEADER)
                     .build();
 
             projectParticipantRepository.save(projectLeader);
@@ -104,6 +107,7 @@ public class ProjectService {
                     .id(projectParticipantId)
                     .project(project)
                     .user(participant)
+                    .type(ProjectParticipantType.PARTICIPANT)
                     .build();
 
             projectParticipantRepository.save(projectParticipant);
@@ -203,9 +207,10 @@ public class ProjectService {
     }
 
     @Transactional
-    public void deleteProjectFile(Long userId, Long projectId, ProjectFileRequest request) {
+    public void deleteProjectFile(Long userId, Long projectId, UUID fileId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
 
@@ -213,13 +218,14 @@ public class ProjectService {
             throw new ApiException(ProjectErrorCode.PROJECT_ACCESS_DENIED);
         }
 
-        String fileUrl = request.fileUrl();
-        List<String> fileUrls = project.getFileUrls();
+        FileInformation file = fileInformationRepository.findById(fileId)
+                .orElseThrow(() -> new ApiException(FileErrorCode.FILE_NOT_FOUND));
 
-        s3Service.deleteFile(fileUrl);
+        ProjectFile projectFile = projectFileRepository.findByProjectAndFileInformation(project, file)
+                .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_FILE_NOT_FOUND));
 
-        fileUrls.remove(fileUrl);
-        project.updateFileUrls(fileUrls);
+        s3Service.deleteFile(file.getUploadUrl());
+        projectFileRepository.delete(projectFile);
     }
 
     @Transactional
@@ -256,7 +262,6 @@ public class ProjectService {
         return ProjectStatus.WAITING;
     }
 
-
     private void updateParticipants(Project project, List<Long> updatedIds, List<Long> participantIds,
                                     boolean updateLeader) {
         Set<Long> intersection = new HashSet<>(participantIds);
@@ -281,7 +286,7 @@ public class ProjectService {
                     .id(projectParticipantId)
                     .project(project)
                     .user(user)
-                    .isLeader(updateLeader)
+                    .type((updateLeader) ? ProjectParticipantType.LEADER : ProjectParticipantType.PARTICIPANT)
                     .build();
 
             projectParticipantRepository.save(newParticipant);
@@ -290,5 +295,15 @@ public class ProjectService {
         deletedIds.forEach(userId ->
                 projectParticipantRepository.deleteByProjectIdAndUserId(project.getId(), userId)
         );
+    }
+
+    public ProjectFileFindAllResponse getAllProjectFiles(Long projectId) {
+        List<ProjectFile> projectFiles = projectFileRepository.findAllByProjectId(projectId);
+        List<ProjectFileSummary> fileSummaries = projectFiles
+                .stream()
+                .map(ProjectFileSummary::from)
+                .toList();
+
+        return new ProjectFileFindAllResponse(fileSummaries);
     }
 }

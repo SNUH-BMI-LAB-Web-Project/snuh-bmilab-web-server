@@ -4,12 +4,13 @@ import com.bmilab.backend.domain.project.dto.condition.ProjectFilterCondition;
 import com.bmilab.backend.domain.project.dto.request.ProjectCompleteRequest;
 import com.bmilab.backend.domain.project.dto.request.ProjectRequest;
 import com.bmilab.backend.domain.project.dto.response.ProjectDetail;
-import com.bmilab.backend.domain.project.dto.request.ProjectFileRequest;
+import com.bmilab.backend.domain.project.dto.response.ProjectFileFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse;
 import com.bmilab.backend.domain.project.enums.ProjectCategory;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.project.service.ProjectService;
 import com.bmilab.backend.global.security.UserAuthInfo;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -46,15 +47,21 @@ public class ProjectController implements ProjectApi {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @DeleteMapping("/{projectId}/files")
+    @DeleteMapping("/{projectId}/files/{fileId}")
     public ResponseEntity<Void> deleteProjectFile(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @PathVariable Long projectId,
-            @RequestBody ProjectFileRequest request
+            @PathVariable UUID fileId
     ) {
 
-        projectService.deleteProjectFile(userAuthInfo.getUserId(), projectId, request);
+        projectService.deleteProjectFile(userAuthInfo.getUserId(), projectId, fileId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{projectId}/files")
+    public ResponseEntity<ProjectFileFindAllResponse> getAllProjectFiles(@PathVariable Long projectId) {
+
+        return ResponseEntity.ok(projectService.getAllProjectFiles(projectId));
     }
 
     @PatchMapping("/{projectId}")

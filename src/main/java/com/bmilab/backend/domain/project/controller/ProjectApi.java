@@ -1,9 +1,9 @@
 package com.bmilab.backend.domain.project.controller;
 
 import com.bmilab.backend.domain.project.dto.request.ProjectCompleteRequest;
-import com.bmilab.backend.domain.project.dto.request.ProjectFileRequest;
 import com.bmilab.backend.domain.project.dto.request.ProjectRequest;
 import com.bmilab.backend.domain.project.dto.response.ProjectDetail;
+import com.bmilab.backend.domain.project.dto.response.ProjectFileFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse;
 import com.bmilab.backend.domain.project.enums.ProjectCategory;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.UUID;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Pageable;
@@ -65,8 +66,24 @@ public interface ProjectApi {
     ResponseEntity<Void> deleteProjectFile(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @PathVariable Long projectId,
-            @RequestBody ProjectFileRequest request
+            @PathVariable UUID fileId
     );
+
+    @Operation(summary = "연구 자료실 첨부파일 조회", description = "연구 자료실을 위한 첨부파일 목록을 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "첨부파일 삭제 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "연구 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<ProjectFileFindAllResponse> getAllProjectFiles(@PathVariable Long projectId);
 
     @Operation(summary = "연구 수정", description = "연구 정보를 수정하는 PUT API")
     @ApiResponses(

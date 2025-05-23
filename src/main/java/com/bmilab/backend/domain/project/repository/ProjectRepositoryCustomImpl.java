@@ -5,6 +5,7 @@ import com.bmilab.backend.domain.project.dto.query.GetAllProjectsQueryResult;
 import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.project.entity.QProject;
 import com.bmilab.backend.domain.project.entity.QProjectParticipant;
+import com.bmilab.backend.domain.project.enums.ProjectParticipantType;
 import com.bmilab.backend.domain.user.entity.QUser;
 import com.bmilab.backend.domain.user.entity.User;
 import com.querydsl.core.Tuple;
@@ -50,7 +51,7 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                 .join(participant.user, user)
                 .where(
                         participant.project.eq(project),
-                        participant.isLeader.isTrue(),
+                        participant.type.eq(ProjectParticipantType.LEADER),
                         user.name.containsIgnoreCase(keyword)
                 ).exists()
                 : null;
@@ -119,7 +120,7 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
         List<Tuple> leaderResults = queryFactory.select(participant.project.id, user)
                 .from(participant)
                 .join(participant.user, user)
-                .where(participant.project.id.in(projectIds), participant.isLeader.isTrue())
+                .where(participant.project.id.in(projectIds), participant.type.eq(ProjectParticipantType.LEADER))
                 .fetch();
 
         Map<Long, List<User>> leadersMap = leaderResults.stream()

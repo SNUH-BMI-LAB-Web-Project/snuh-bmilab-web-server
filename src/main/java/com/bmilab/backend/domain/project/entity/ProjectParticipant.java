@@ -6,6 +6,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
@@ -41,10 +43,7 @@ public class ProjectParticipant {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
 
-    @Builder.Default
-    @Column(name = "is_leader", nullable = false, columnDefinition = "TINYINT(1)")
-    private boolean isLeader = false;
-
+    @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private ProjectParticipantType type;
 
@@ -54,4 +53,8 @@ public class ProjectParticipant {
 
     @Column(name = "left_at")
     private LocalDateTime leftAt;
+
+    public boolean isLeader() {
+        return type == ProjectParticipantType.LEADER;
+    }
 }
