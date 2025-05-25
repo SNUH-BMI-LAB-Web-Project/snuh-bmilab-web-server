@@ -37,13 +37,13 @@ public record ProjectRequest(
         @Schema(description = "DRB 번호 (있으면)", example = "DRB-DSEB-...")
         String drbId,
 
-        @Schema(description = "(새로 추가된 파일의 ID만) IRB 파일 ID 리스트", example = "[dfaef-afaefaef-aefaefae-..., efaeaf-aefafea-aefaef..]")
+        @Schema(description = "(새로 추가된 파일의 ID만) IRB 파일 ID 리스트", example = "[\"dfaef-afaefaef-aefaefae-...\", \"efaeaf-aefafea-aefaef..\"]")
         List<UUID> irbFileIds,
 
-        @Schema(description = "(새로 추가된 파일의 ID만) DRB 파일 ID 리스트", example = "[dfaef-afaefaef-aefaefae-..., dfaef-afaefaef-aefaefae-..., dfaef-afaefaef-aefaefae-...]")
+        @Schema(description = "(새로 추가된 파일의 ID만) DRB 파일 ID 리스트", example = "[\"dfaef-afaefaef-aefaefae-...\", \"dfaef-afaefaef-aefaefae-...\", \"dfaef-afaefaef-aefaefae-...\"]")
         List<UUID> drbFileIds,
 
-        @Schema(description  = "(새로 추가된 파일의 ID만) 일반 첨부파일 ID 리스트", example = "[dfaef-afaefaef-aefaefae-..., dfaef-afaefaef-aefaefae-..., dfaef-afaefaef-aefaefae-...]")
+        @Schema(description  = "(새로 추가된 파일의 ID만) 일반 첨부파일 ID 리스트", example = "[\"dfaef-afaefaef-aefaefae-...\", \"dfaef-afaefaef-aefaefae-..., dfaef-afaefaef-aefaefae-...\"]")
         List<UUID> fileIds,
 
         @Schema(description = "대기 상태 여부", example = "false")

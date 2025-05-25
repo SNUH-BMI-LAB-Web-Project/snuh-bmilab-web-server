@@ -26,7 +26,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
 
 @Tag(name = "Project", description = "연구 API")
 public interface ProjectApi {
@@ -41,7 +40,7 @@ public interface ProjectApi {
     )
     ResponseEntity<Void> createNewProject(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
-            @RequestPart ProjectRequest request
+            @RequestBody ProjectRequest request
     );
 
     @Operation(summary = "연구 첨부파일 삭제", description = "연구 데이터에서 첨부파일을 삭제하는 DELETE API")

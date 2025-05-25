@@ -37,10 +37,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProjectController implements ProjectApi {
     private final ProjectService projectService;
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping
     public ResponseEntity<Void> createNewProject(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
-            @RequestPart ProjectRequest request
+            @RequestBody ProjectRequest request
     ) {
 
         projectService.createNewProject(userAuthInfo.getUserId(), request);
