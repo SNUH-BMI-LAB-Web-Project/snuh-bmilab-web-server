@@ -18,7 +18,10 @@ public class RSSController implements RSSApi {
     @GetMapping
     public ResponseEntity<RSSResponse> getAllRssAssignments(
             @RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
-            @RequestParam(required = false, defaultValue = "10") int size
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) Long minBudget,
+            @RequestParam(required = false) Long maxBudget
     ) {
         return ResponseEntity.ok(rssService.getAllRssAssignments(pageNo, size));
     }

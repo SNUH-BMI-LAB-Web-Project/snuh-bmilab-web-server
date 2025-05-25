@@ -53,6 +53,35 @@ public class RSSService {
         }
     }
 
+    public NTISAssignmentResponse getAllRecentNTISAssignments() {
+        RestClient restClient = RestClient.create(NTIS_RSS_URL);
+
+        String bodyText = restClient.get()
+                .uri((uriBuilder) -> uriBuilder
+                        .queryParam("prt", 200)
+                        .queryParam("Fi", 0)
+                        .build()
+                )
+                .retrieve().body(String.class);
+
+        JSONObject bodyObject = XML.toJSONObject(Objects.requireNonNull(bodyText));
+
+        JSONArray items = bodyObject.getJSONObject("rss")
+                .getJSONObject("channel")
+                .getJSONArray("item");
+
+        JSONObject jsonObject = new JSONObject();
+
+        jsonObject.put("items", items);
+
+        try {
+            return objectMapper.readValue(jsonObject.toString(), NTISAssignmentResponse.class);
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage());
+            return null;
+        }
+    }
+
     public RSSResponse getAllRssAssignments(int pageNo, int size) {
         int startIndex = pageNo * size + 1;
         int endIndex = startIndex - 1 + size;
