@@ -13,6 +13,9 @@ public record FileSummary(
         @Schema(description = "파일 이름 (확장자 포함)", example = "design_doc.pdf")
         String fileName,
 
+        @Schema(description = "파일 사이즈 (bytes 단위)", example = "1023254")
+        Long size,
+
         @Schema(
                 description = "S3에 업로드된 파일의 URL",
                 example = "https://my-bucket.s3.ap-northeast-2.amazonaws.com/uploads/design_doc.pdf"
@@ -23,6 +26,7 @@ public record FileSummary(
         return FileSummary.builder()
                 .fileId(fileInformation.getId())
                 .fileName(fileInformation.getName())
+                .size(fileInformation.getSize())
                 .uploadUrl(fileInformation.getUploadUrl())
                 .build();
     }

@@ -27,6 +27,9 @@ public record TimelineRequest(
         TimelineType type,
 
         @Schema(description = "타임라인 내용", example = "시장 조사 결과를 바탕으로 AI 기술 도입 로드맵 설정")
-        String summary
+        String summary,
+
+        @Schema(description = "타임라인 첨부파일 ID 목록")
+        List<UUID> fileIds
 ) {
 }

@@ -37,6 +37,7 @@ public class FileService {
                 .name(request.fileName())
                 .extension(request.extension())
                 .domainType(request.domainType())
+                .size(request.size())
                 .uploadUrl(s3Service.getUploadedFileUrl(fileKey))
                 .build();
 

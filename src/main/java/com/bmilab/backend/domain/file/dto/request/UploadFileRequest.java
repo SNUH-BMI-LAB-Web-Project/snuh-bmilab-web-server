@@ -5,6 +5,7 @@ import com.bmilab.backend.domain.file.enums.FileDomainType;
 public record UploadFileRequest(
         String fileName,
         String extension,
+        long size,
         FileDomainType domainType
 ) {
 }

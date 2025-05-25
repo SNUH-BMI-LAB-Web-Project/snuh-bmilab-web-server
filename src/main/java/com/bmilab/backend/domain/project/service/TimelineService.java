@@ -1,6 +1,8 @@
 package com.bmilab.backend.domain.project.service;
 
+import com.bmilab.backend.domain.file.entity.FileInformation;
 import com.bmilab.backend.domain.file.enums.FileDomainType;
+import com.bmilab.backend.domain.file.repository.FileInformationRepository;
 import com.bmilab.backend.domain.file.service.FileService;
 import com.bmilab.backend.domain.project.dto.query.GetAllTimelinesQueryResult;
 import com.bmilab.backend.domain.project.dto.request.TimelineRequest;
@@ -29,6 +31,7 @@ public class TimelineService {
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
     private final FileService fileService;
+    private final FileInformationRepository fileInformationRepository;
 
     @Transactional
     public void createTimeline(Long userId, Long projectId, TimelineRequest request) {
@@ -54,6 +57,10 @@ public class TimelineService {
                 .build();
 
         timelineRepository.save(timeline);
+
+        List<FileInformation> files = fileInformationRepository.findAllById(request.fileIds());
+
+        files.forEach(file -> file.updateDomain(FileDomainType.TIMELINE, timeline.getId()));
     }
 
     public TimelineFindAllResponse getAllTimelinesByProjectId(Long projectId) {
@@ -102,6 +109,10 @@ public class TimelineService {
                 request.type(),
                 request.summary()
         );
+
+        List<FileInformation> files = fileInformationRepository.findAllById(request.fileIds());
+
+        files.forEach(file -> file.updateDomain(FileDomainType.TIMELINE, timeline.getId()));
     }
 
     @Transactional

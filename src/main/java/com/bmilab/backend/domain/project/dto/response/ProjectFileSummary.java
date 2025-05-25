@@ -21,6 +21,9 @@ public record ProjectFileSummary(
         )
         String uploadUrl,
 
+        @Schema(description = "파일 사이즈 (bytes 단위)", example = "1023254")
+        Long size,
+
         @Schema(description = "프로젝트 파일 유형")
         ProjectFileType fileType
 ) {

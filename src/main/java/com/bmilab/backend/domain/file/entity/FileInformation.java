@@ -36,6 +36,9 @@ public class FileInformation {
     @Column(nullable = false)
     private String extension;
 
+    @Column(nullable = false)
+    private Long size;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "domain_type", nullable = false)
     private FileDomainType domainType;
