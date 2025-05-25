@@ -15,7 +15,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
-@Table(name = "project_files")
+@Table(name = "timeline_files")
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
