@@ -10,6 +10,8 @@ import com.bmilab.backend.domain.file.repository.FileInformationRepository;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.external.s3.S3Service;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +33,7 @@ public class FileService {
 
     @Transactional
     public FileSummary uploadFile(UploadFileRequest request) {
-        String fileKey = request.domainType().name().toLowerCase() + "/" + request.fileName();
+        String fileKey = request.domainType().name().toLowerCase() + "/" + URLEncoder.encode(request.fileName(), StandardCharsets.UTF_8);
 
         FileInformation fileInformation = FileInformation.builder()
                 .name(request.fileName())

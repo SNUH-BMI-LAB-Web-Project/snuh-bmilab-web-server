@@ -46,7 +46,7 @@ public class FileInformation {
     @Column(name = "entity_id")
     private Long entityId;
 
-    @Column(name = "upload_url", nullable = false)
+    @Column(name = "upload_url", nullable = false, columnDefinition = "TEXT")
     private String uploadUrl;
 
     public void updateDomain(FileDomainType domainType, Long entityId) {

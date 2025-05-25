@@ -78,6 +78,6 @@ public class S3Service {
     }
 
     public String getUploadedFileUrl(String key) {
-        return baseUrl + URLEncoder.encode(key, StandardCharsets.UTF_8);
+        return baseUrl + key;
     }
 }
