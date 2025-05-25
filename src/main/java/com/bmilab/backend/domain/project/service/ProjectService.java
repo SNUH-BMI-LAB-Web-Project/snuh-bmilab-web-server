@@ -124,9 +124,11 @@ public class ProjectService {
     }
 
     public void createProjectFiles(List<UUID> fileIds, Project project, ProjectFileType fileType) {
-        List<FileInformation> files = fileInformationRepository.findAllById(fileIds);
+        if (fileIds.isEmpty()) {
+            return;
+        }
 
-        files.forEach(file -> file.updateDomain(FileDomainType.PROJECT, project.getId()));
+        List<FileInformation> files = fileInformationRepository.findAllById(fileIds);
 
         List<ProjectFile> projectFiles = files
                 .stream()
@@ -139,6 +141,8 @@ public class ProjectService {
                 }).toList();
 
         projectFileRepository.saveAll(projectFiles);
+
+        files.forEach(file -> file.updateDomain(FileDomainType.PROJECT, project.getId()));
     }
 
     public ProjectFindAllResponse getAllProjects(Pageable pageable, String search, ProjectFilterCondition condition) {
