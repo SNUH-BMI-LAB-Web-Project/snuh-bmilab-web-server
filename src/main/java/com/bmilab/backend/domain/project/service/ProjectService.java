@@ -4,6 +4,7 @@ import com.bmilab.backend.domain.file.entity.FileInformation;
 import com.bmilab.backend.domain.file.enums.FileDomainType;
 import com.bmilab.backend.domain.file.exception.FileErrorCode;
 import com.bmilab.backend.domain.file.repository.FileInformationRepository;
+import com.bmilab.backend.domain.file.service.FileService;
 import com.bmilab.backend.domain.project.dto.condition.ProjectFilterCondition;
 import com.bmilab.backend.domain.project.dto.query.GetAllProjectsQueryResult;
 import com.bmilab.backend.domain.project.dto.request.ProjectCompleteRequest;
@@ -50,6 +51,7 @@ public class ProjectService {
     private final ProjectParticipantRepository projectParticipantRepository;
     private final FileInformationRepository fileInformationRepository;
     private final ProjectFileRepository projectFileRepository;
+    private final FileService fileService;
 
     @Transactional
     public void createNewProject(Long userId, ProjectRequest request) {
@@ -213,6 +215,7 @@ public class ProjectService {
             throw new ApiException(ProjectErrorCode.PROJECT_ACCESS_DENIED);
         }
 
+        fileService.deleteAllFileByDomainTypeAndEntityId(FileDomainType.PROJECT, project.getId());
         projectRepository.deleteById(projectId);
     }
 

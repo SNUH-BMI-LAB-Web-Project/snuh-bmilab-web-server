@@ -49,6 +49,9 @@ public record TimelineFindAllResponse(
             @Schema(description = "타임라인 종료 시간 (24시간제)", example = "15:30")
             LocalTime endTime,
 
+            @Schema(description = "미팅 장소", example = "7층 회의실 1")
+            String meetingPlace,
+
             @Schema(description = "타임라인 유형")
             TimelineType timelineType,
 
@@ -68,6 +71,7 @@ public record TimelineFindAllResponse(
                     .date(timeline.getDate())
                     .startTime(timeline.getStartTime())
                     .endTime(timeline.getEndTime())
+                    .meetingPlace(timeline.getMeetingPlace())
                     .timelineType(timeline.getType())
                     .summary(timeline.getSummary())
                     .files(

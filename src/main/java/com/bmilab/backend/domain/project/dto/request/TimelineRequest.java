@@ -20,6 +20,9 @@ public record TimelineRequest(
         @Schema(type = "string", pattern = "HH:mm", example = "14:30")
         LocalTime endTime,
 
+        @Schema(description = "미팅 장소", example = "7층 회의실 1")
+        String meetingPlace,
+
         @Schema(description = "타임라인 유형 (예: 정기 타임라인, 연구 발표)", example = "정기 타임라인")
         TimelineType type,
 

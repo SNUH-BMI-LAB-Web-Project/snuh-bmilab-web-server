@@ -82,6 +82,7 @@ public class Timeline {
             LocalDate date,
             LocalTime startTime,
             LocalTime endTime,
+            String meetingPlace,
             TimelineType type,
             String summary
     ) {
@@ -89,6 +90,7 @@ public class Timeline {
         this.date = date;
         this.startTime = startTime;
         this.endTime = endTime;
+        this.meetingPlace = meetingPlace;
         this.type = type;
         this.summary = summary;
     }

@@ -98,6 +98,7 @@ public class TimelineService {
                 request.date(),
                 request.startTime(),
                 request.endTime(),
+                request.meetingPlace(),
                 request.type(),
                 request.summary()
         );
