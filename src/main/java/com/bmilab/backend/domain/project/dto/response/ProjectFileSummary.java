@@ -32,7 +32,7 @@ public record ProjectFileSummary(
 
         return ProjectFileSummary.builder()
                 .fileId(fileInformation.getId())
-                .fileName(fileInformation.getName() + "." + fileInformation.getExtension())
+                .fileName(fileInformation.getName())
                 .uploadUrl(fileInformation.getUploadUrl())
                 .fileType(projectFile.getType())
                 .build();
@@ -41,7 +41,7 @@ public record ProjectFileSummary(
     public static ProjectFileSummary from(FileInformation fileInformation, ProjectFileType fileType) {
         return ProjectFileSummary.builder()
                 .fileId(fileInformation.getId())
-                .fileName(fileInformation.getName() + "." + fileInformation.getExtension())
+                .fileName(fileInformation.getName())
                 .uploadUrl(fileInformation.getUploadUrl())
                 .fileType(fileType)
                 .build();
