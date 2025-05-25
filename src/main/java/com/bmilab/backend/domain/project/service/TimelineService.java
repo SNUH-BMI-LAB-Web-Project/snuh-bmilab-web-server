@@ -51,6 +51,7 @@ public class TimelineService {
                 .title(request.title())
                 .date(request.date())
                 .startTime(request.startTime())
+                .meetingPlace(request.meetingPlace())
                 .endTime(request.endTime())
                 .type(request.type())
                 .summary(request.summary())
