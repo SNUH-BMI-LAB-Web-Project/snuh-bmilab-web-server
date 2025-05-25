@@ -1,6 +1,9 @@
 package com.bmilab.backend.domain.project.dto.response;
 
+import com.bmilab.backend.domain.file.dto.response.FileSummary;
+import com.bmilab.backend.domain.project.dto.query.GetAllTimelinesQueryResult;
 import com.bmilab.backend.domain.project.entity.Timeline;
+import com.bmilab.backend.domain.project.entity.TimelineFile;
 import com.bmilab.backend.domain.project.enums.TimelineType;
 import com.bmilab.backend.domain.user.dto.response.UserSummary;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -12,11 +15,13 @@ import lombok.Builder;
 public record TimelineFindAllResponse(
         List<TimelineSummary> timelines
 ) {
-    public static TimelineFindAllResponse of(List<Timeline> timelines) {
+    public static TimelineFindAllResponse of(List<GetAllTimelinesQueryResult> queryResults) {
         return new TimelineFindAllResponse(
-                timelines
+                queryResults
                     .stream()
-                    .map(TimelineSummary::from)
+                    .map(result ->
+                            TimelineSummary.from(result.timeline(), result.timelineFiles())
+                    )
                     .toList()
         );
     }
@@ -44,13 +49,16 @@ public record TimelineFindAllResponse(
             @Schema(description = "타임라인 종료 시간 (24시간제)", example = "15:30")
             LocalTime endTime,
 
-            @Schema(description = "타임라인 유형", example = "연구 발표")
+            @Schema(description = "타임라인 유형")
             TimelineType timelineType,
 
             @Schema(description = "타임라인 요약", example = "디자인 시스템 전면 개편 논의 및 일정 정리")
-            String summary
+            String summary,
+
+            @Schema(description = "타임라인 첨부파일 목록")
+            List<FileSummary> files
     ) {
-        public static TimelineSummary from(Timeline timeline) {
+        public static TimelineSummary from(Timeline timeline, List<TimelineFile> timelineFiles) {
             return TimelineSummary
                     .builder()
                     .timelineId(timeline.getId())
@@ -62,6 +70,10 @@ public record TimelineFindAllResponse(
                     .endTime(timeline.getEndTime())
                     .timelineType(timeline.getType())
                     .summary(timeline.getSummary())
+                    .files(timelineFiles.stream()
+                            .map(timelineFile -> FileSummary.from(timelineFile.getFileInformation()))
+                            .toList()
+                    )
                     .build();
         }
     }

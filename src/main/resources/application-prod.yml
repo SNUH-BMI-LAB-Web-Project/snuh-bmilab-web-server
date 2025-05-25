@@ -16,7 +16,7 @@ spring:
         dialect.storage_engine: innodb
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
 
   servlet:
     multipart:

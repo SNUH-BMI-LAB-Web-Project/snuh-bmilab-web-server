@@ -3,6 +3,7 @@ package com.bmilab.backend.domain.project.service;
 import com.bmilab.backend.domain.file.entity.FileInformation;
 import com.bmilab.backend.domain.file.exception.FileErrorCode;
 import com.bmilab.backend.domain.file.repository.FileInformationRepository;
+import com.bmilab.backend.domain.project.dto.query.GetAllTimelinesQueryResult;
 import com.bmilab.backend.domain.project.dto.request.TimelineRequest;
 import com.bmilab.backend.domain.project.dto.response.TimelineFindAllResponse;
 import com.bmilab.backend.domain.project.entity.Timeline;
@@ -62,9 +63,9 @@ public class TimelineService {
     }
 
     public TimelineFindAllResponse getAllTimelinesByProjectId(Long projectId) {
-        List<Timeline> timelines = timelineRepository.findAllByProjectId(projectId);
+        List<GetAllTimelinesQueryResult> results = timelineRepository.findAllResultsByProjectId(projectId);
 
-        return TimelineFindAllResponse.of(timelines);
+        return TimelineFindAllResponse.of(results);
     }
 
     @Transactional
