@@ -76,4 +76,20 @@ public class Timeline {
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    public void update(
+            String title,
+            LocalDate date,
+            LocalTime startTime,
+            LocalTime endTime,
+            TimelineType type,
+            String summary
+    ) {
+        this.title = title;
+        this.date = date;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.type = type;
+        this.summary = summary;
+    }
 }

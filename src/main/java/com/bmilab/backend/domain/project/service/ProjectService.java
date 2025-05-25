@@ -1,6 +1,7 @@
 package com.bmilab.backend.domain.project.service;
 
 import com.bmilab.backend.domain.file.entity.FileInformation;
+import com.bmilab.backend.domain.file.enums.FileDomainType;
 import com.bmilab.backend.domain.file.exception.FileErrorCode;
 import com.bmilab.backend.domain.file.repository.FileInformationRepository;
 import com.bmilab.backend.domain.project.dto.condition.ProjectFilterCondition;
@@ -14,7 +15,6 @@ import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse.ProjectSummary;
 import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.project.entity.ProjectFile;
-import com.bmilab.backend.domain.project.entity.ProjectFileId;
 import com.bmilab.backend.domain.project.entity.ProjectParticipant;
 import com.bmilab.backend.domain.project.entity.ProjectParticipantId;
 import com.bmilab.backend.domain.project.enums.ProjectFileType;
@@ -68,6 +68,8 @@ public class ProjectService {
                 .startDate(request.startDate())
                 .endDate(request.endDate())
                 .status(status)
+                .pi(request.pi())
+                .practicalProfessor(request.practicalProfessor())
                 .irbId(request.irbId())
                 .drbId(request.drbId())
                 .category(request.category())
@@ -117,14 +119,13 @@ public class ProjectService {
     public void createProjectFiles(List<UUID> fileIds, Project project, ProjectFileType fileType) {
         List<FileInformation> files = fileInformationRepository.findAllById(fileIds);
 
+        files.forEach(file -> file.updateDomain(FileDomainType.PROJECT, project.getId()));
+
         List<ProjectFile> projectFiles = files
                 .stream()
                 .map(file -> {
-                    ProjectFileId projectFileId = new ProjectFileId(project.getId(), file.getId());
-
                     return ProjectFile.builder()
-                            .id(projectFileId)
-                            .project(project)
+                            .fileId(file.getId())
                             .fileInformation(file)
                             .type(fileType)
                             .build();
@@ -194,6 +195,10 @@ public class ProjectService {
 
         updateParticipants(project, updatedParticipantIds, participantIds, false);
         updateParticipants(project, updatedLeaderIds, leaderIds, true);
+
+        createProjectFiles(request.fileIds(), project, ProjectFileType.GENERAL);
+        createProjectFiles(request.irbFileIds(), project, ProjectFileType.IRB);
+        createProjectFiles(request.drbFileIds(), project, ProjectFileType.DRB);
     }
 
     @Transactional
@@ -226,7 +231,7 @@ public class ProjectService {
         FileInformation file = fileInformationRepository.findById(fileId)
                 .orElseThrow(() -> new ApiException(FileErrorCode.FILE_NOT_FOUND));
 
-        ProjectFile projectFile = projectFileRepository.findByProjectAndFileInformation(project, file)
+        ProjectFile projectFile = projectFileRepository.findByFileInformation(file)
                 .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_FILE_NOT_FOUND));
 
         s3Service.deleteFile(file.getUploadUrl());

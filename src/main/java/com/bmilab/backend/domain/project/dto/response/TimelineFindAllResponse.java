@@ -1,9 +1,9 @@
 package com.bmilab.backend.domain.project.dto.response;
 
 import com.bmilab.backend.domain.file.dto.response.FileSummary;
+import com.bmilab.backend.domain.file.entity.FileInformation;
 import com.bmilab.backend.domain.project.dto.query.GetAllTimelinesQueryResult;
 import com.bmilab.backend.domain.project.entity.Timeline;
-import com.bmilab.backend.domain.project.entity.TimelineFile;
 import com.bmilab.backend.domain.project.enums.TimelineType;
 import com.bmilab.backend.domain.user.dto.response.UserSummary;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -18,11 +18,11 @@ public record TimelineFindAllResponse(
     public static TimelineFindAllResponse of(List<GetAllTimelinesQueryResult> queryResults) {
         return new TimelineFindAllResponse(
                 queryResults
-                    .stream()
-                    .map(result ->
-                            TimelineSummary.from(result.timeline(), result.timelineFiles())
-                    )
-                    .toList()
+                        .stream()
+                        .map(result ->
+                                TimelineSummary.from(result.timeline(), result.files())
+                        )
+                        .toList()
         );
     }
 
@@ -58,7 +58,7 @@ public record TimelineFindAllResponse(
             @Schema(description = "타임라인 첨부파일 목록")
             List<FileSummary> files
     ) {
-        public static TimelineSummary from(Timeline timeline, List<TimelineFile> timelineFiles) {
+        public static TimelineSummary from(Timeline timeline, List<FileInformation> files) {
             return TimelineSummary
                     .builder()
                     .timelineId(timeline.getId())
@@ -70,9 +70,10 @@ public record TimelineFindAllResponse(
                     .endTime(timeline.getEndTime())
                     .timelineType(timeline.getType())
                     .summary(timeline.getSummary())
-                    .files(timelineFiles.stream()
-                            .map(timelineFile -> FileSummary.from(timelineFile.getFileInformation()))
-                            .toList()
+                    .files(
+                            files.stream()
+                                    .map(FileSummary::from)
+                                    .toList()
                     )
                     .build();
         }

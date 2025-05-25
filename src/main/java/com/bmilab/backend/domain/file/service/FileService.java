@@ -4,9 +4,14 @@ import com.bmilab.backend.domain.file.dto.request.UploadFileRequest;
 import com.bmilab.backend.domain.file.dto.response.FilePresignedUrlResponse;
 import com.bmilab.backend.domain.file.dto.response.FileSummary;
 import com.bmilab.backend.domain.file.entity.FileInformation;
+import com.bmilab.backend.domain.file.enums.FileDomainType;
+import com.bmilab.backend.domain.file.exception.FileErrorCode;
 import com.bmilab.backend.domain.file.repository.FileInformationRepository;
+import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.external.s3.S3Service;
 import java.net.URL;
+import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,5 +43,28 @@ public class FileService {
         fileInformationRepository.save(fileInformation);
 
         return FileSummary.from(fileInformation);
+    }
+
+    @Transactional
+    public void deleteFile(FileDomainType domainType, UUID fileId) {
+        FileInformation fileInformation = fileInformationRepository.findById(fileId)
+                .orElseThrow(() -> new ApiException(FileErrorCode.FILE_NOT_FOUND));
+
+        if (!domainType.equals(fileInformation.getDomainType())) {
+            throw new ApiException(FileErrorCode.FILE_DOMAIN_MISMATCH);
+        }
+
+        s3Service.deleteFile(fileInformation.getUploadUrl());
+        fileInformationRepository.deleteById(fileId);
+    }
+
+    public void deleteAllFileByDomainTypeAndEntityId(FileDomainType domainType, Long entityId) {
+        List<FileInformation> files = fileInformationRepository.findAllByDomainTypeAndEntityId(domainType, entityId);
+
+        if (files.isEmpty()) {
+            return;
+        }
+
+        fileInformationRepository.deleteAll(files);
     }
 }
