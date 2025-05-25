@@ -34,6 +34,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @EntityListeners(AuditingEntityListener.class)
 public class ProjectFile {
     @Id
+    @Column(name = "project_file_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
