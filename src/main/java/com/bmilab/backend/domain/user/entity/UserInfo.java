@@ -58,5 +58,6 @@ public class UserInfo {
         this.category = String.join(",", categories.stream().map(ProjectCategory::name).toList());
         this.seatNumber = seatNumber;
         this.phoneNumber = phoneNumber;
+        this.education = education;
     }
 }

@@ -96,8 +96,20 @@ public class UserService {
             result.user().updateProfileImageUrl(profileImageUrl);
         }
 
-        result.user().update(request.name(), request.email(), request.department());
-        result.userInfo().update(request.categories(), request.seatNumber(), request.phoneNumber(), request.education());
+        result.user().update(
+                request.name(),
+                request.email(),
+                request.organization(),
+                request.department(),
+                request.affiliation()
+        );
+
+        result.userInfo().update(
+                request.categories(),
+                request.seatNumber(),
+                request.phoneNumber(),
+                request.education()
+        );
     }
 
     private String uploadProfileImage(Long userId, MultipartFile file) {

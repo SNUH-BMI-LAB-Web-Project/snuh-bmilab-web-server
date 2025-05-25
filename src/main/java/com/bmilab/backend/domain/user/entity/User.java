@@ -67,9 +67,11 @@ public class User {
         this.profileImageUrl = newProfileImageUrl;
     }
 
-    public void update(String name, String email, String department) {
+    public void update(String name, String email, String organization, String department, String affiliation) {
         this.name = name;
         this.email = email;
         this.department = department;
+        this.organization = organization;
+        this.affiliation = affiliation;
     }
 }
