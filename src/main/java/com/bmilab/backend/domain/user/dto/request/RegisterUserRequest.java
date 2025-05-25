@@ -15,8 +15,14 @@ public record RegisterUserRequest(
         @Schema(description = "비밀번호", example = "SecurePass123!")
         String password,
 
-        @Schema(description = "소속 부서", example = "개발팀")
+        @Schema(description = "기관", example = "융합의학연구실")
+        String organization,
+
+        @Schema(description = "부서", example = "개발팀")
         String department,
+
+        @Schema(description = "소속 (있으면)", example = "소속")
+        String affiliation,
 
         @Schema(description = "총 연차 개수", example = "15.0")
         Double annualLeaveCount,

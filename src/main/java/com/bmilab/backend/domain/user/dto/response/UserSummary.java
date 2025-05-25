@@ -15,8 +15,14 @@ public record UserSummary(
         @Schema(description = "이름", example = "홍길동")
         String name,
 
-        @Schema(description = "소속 부서", example = "AI 연구팀")
+        @Schema(description = "기관", example = "융합의학연구실")
+        String organization,
+
+        @Schema(description = "부서", example = "개발팀")
         String department,
+
+        @Schema(description = "소속 (있으면)", example = "소속")
+        String affiliation,
 
         @Schema(description = "프로필 이미지 URL", example = "https://cdn.example.com/profiles/user1.png")
         String profileImageUrl
@@ -27,7 +33,9 @@ public record UserSummary(
                 .userId(user.getId())
                 .email(user.getEmail())
                 .name(user.getName())
+                .organization(user.getOrganization())
                 .department(user.getDepartment())
+                .affiliation(user.getAffiliation())
                 .profileImageUrl(user.getProfileImageUrl())
                 .build();
     }

@@ -50,7 +50,9 @@ public class AuthService {
                 .name(request.name())
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
+                .organization(request.organization())
                 .department(request.department())
+                .affiliation(request.affiliation())
                 .role(Role.USER)
                 .build();
 
@@ -77,6 +79,7 @@ public class AuthService {
                                         .toList()
                         )
                 )
+                .education(request.education())
                 .build();
 
         userInfoRepository.save(userInfo);
