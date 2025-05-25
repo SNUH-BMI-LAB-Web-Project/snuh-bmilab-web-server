@@ -9,6 +9,8 @@ import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.exception.GlobalErrorCode;
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Date;
 import lombok.RequiredArgsConstructor;
@@ -76,6 +78,6 @@ public class S3Service {
     }
 
     public String getUploadedFileUrl(String key) {
-        return baseUrl + key;
+        return baseUrl + URLEncoder.encode(key, StandardCharsets.UTF_8);
     }
 }

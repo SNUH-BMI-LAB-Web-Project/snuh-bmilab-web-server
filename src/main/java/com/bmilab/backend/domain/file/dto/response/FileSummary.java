@@ -22,7 +22,7 @@ public record FileSummary(
     public static FileSummary from(FileInformation fileInformation) {
         return FileSummary.builder()
                 .fileId(fileInformation.getId())
-                .fileName(fileInformation.getName() + "." + fileInformation.getExtension())
+                .fileName(fileInformation.getName())
                 .uploadUrl(fileInformation.getUploadUrl())
                 .build();
     }
