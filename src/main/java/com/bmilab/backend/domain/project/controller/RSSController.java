@@ -23,6 +23,6 @@ public class RSSController implements RSSApi {
             @RequestParam(required = false) Long minBudget,
             @RequestParam(required = false) Long maxBudget
     ) {
-        return ResponseEntity.ok(rssService.getAllRssAssignments(pageNo, size));
+        return ResponseEntity.ok(rssService.getAllRssAssignments(pageNo, size, search, minBudget, maxBudget));
     }
 }
