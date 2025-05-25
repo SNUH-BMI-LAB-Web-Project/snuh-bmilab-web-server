@@ -97,7 +97,7 @@ public class RSSService {
         Stream<AssignmentItem> itemsStream = ntisResults.items().stream();
 
         if (search != null) {
-            itemsStream = itemsStream.filter(item -> item.author().contains(search) || item.title().contains(search));
+            itemsStream = itemsStream.filter(item -> item.author().contains(search) || item.title().contains(search) || item.category().contains(search));
         }
 
         if (minBudget != null) {
