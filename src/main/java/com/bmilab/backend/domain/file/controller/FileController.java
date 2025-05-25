@@ -5,6 +5,7 @@ import com.bmilab.backend.domain.file.dto.response.FilePresignedUrlResponse;
 import com.bmilab.backend.domain.file.dto.response.FileSummary;
 import com.bmilab.backend.domain.file.enums.FileDomainType;
 import com.bmilab.backend.domain.file.service.FileService;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,7 @@ public class FileController implements FileApi
             @RequestParam String contentType
     ) {
         String fileKey = domainType.name().toLowerCase() + "/" + URLEncoder.encode(fileName, StandardCharsets.UTF_8);
-        return ResponseEntity.ok(fileService.generatePresignedUrl(fileKey, contentType));
+        return ResponseEntity.ok(fileService.generatePresignedUrl(fileKey, URLDecoder.decode(contentType, StandardCharsets.UTF_8)));
     }
 
     @PostMapping
