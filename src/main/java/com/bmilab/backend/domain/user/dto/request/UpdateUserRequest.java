@@ -11,8 +11,14 @@ public record UpdateUserRequest(
         @Schema(description = "이메일 주소", example = "hong.gildong@example.com")
         String email,
 
-        @Schema(description = "소속 부서", example = "기획팀")
+        @Schema(description = "기관", example = "융합의학연구실")
+        String organization,
+
+        @Schema(description = "부서", example = "개발팀")
         String department,
+
+        @Schema(description = "소속 (있으면)", example = "소속")
+        String affiliation,
 
         @Schema(description = "연구 분야 목록", example = "[\"NLP\", \"BIOINFORMATICS\"]")
         List<ProjectCategory> categories,
