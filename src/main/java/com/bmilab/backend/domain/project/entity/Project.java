@@ -91,10 +91,6 @@ public class Project {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    public void updateFileUrls(List<String> fileUrls) {
-        this.fileUrls = fileUrls;
-    }
-
     public boolean canBeEditedBy(User user) {
         return author.getId().equals(user.getId()) || user.getRole() == Role.ADMIN;
     }

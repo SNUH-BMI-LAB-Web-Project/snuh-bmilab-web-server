@@ -25,6 +25,12 @@ public record ProjectRequest(
         @Schema(description = "연구 종료일 (있으면)", example = "2025-06-30")
         LocalDate endDate,
 
+        @Schema(description = "PI", example = "김광수")
+        String pi,
+
+        @Schema(description = "실무 교수", example = "김광수")
+        String practicalProfessor,
+
         @Schema(description = "IRB 번호 (있으면)", example = "IRB-DSEB-...")
         String irbId,
 
