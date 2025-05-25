@@ -7,6 +7,7 @@ import com.bmilab.backend.domain.file.repository.FileInformationRepository;
 import com.bmilab.backend.domain.file.service.FileService;
 import com.bmilab.backend.domain.project.dto.condition.ProjectFilterCondition;
 import com.bmilab.backend.domain.project.dto.query.GetAllProjectsQueryResult;
+import com.bmilab.backend.domain.project.dto.query.GetAllTimelinesQueryResult;
 import com.bmilab.backend.domain.project.dto.request.ProjectCompleteRequest;
 import com.bmilab.backend.domain.project.dto.request.ProjectRequest;
 import com.bmilab.backend.domain.project.dto.response.ProjectDetail;
@@ -25,16 +26,19 @@ import com.bmilab.backend.domain.project.exception.ProjectErrorCode;
 import com.bmilab.backend.domain.project.repository.ProjectFileRepository;
 import com.bmilab.backend.domain.project.repository.ProjectParticipantRepository;
 import com.bmilab.backend.domain.project.repository.ProjectRepository;
+import com.bmilab.backend.domain.project.repository.TimelineRepository;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.exception.UserErrorCode;
 import com.bmilab.backend.domain.user.repository.UserRepository;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.external.s3.S3Service;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -52,6 +56,7 @@ public class ProjectService {
     private final FileInformationRepository fileInformationRepository;
     private final ProjectFileRepository projectFileRepository;
     private final FileService fileService;
+    private final TimelineRepository timelineRepository;
 
     @Transactional
     public void createNewProject(Long userId, ProjectRequest request) {
@@ -313,10 +318,20 @@ public class ProjectService {
     public ProjectFileFindAllResponse getAllProjectFiles(Long projectId) {
         List<ProjectFile> projectFiles = projectFileRepository.findAllByProjectId(projectId);
 
+        List<GetAllTimelinesQueryResult> timelineResults = timelineRepository.findAllResultsByProjectId(
+                projectId);
+
+        List<ProjectFileSummary> timelineFileSummaries = timelineResults.stream()
+                .flatMap(result -> result.files().stream())
+                .map(file -> ProjectFileSummary.from(file, ProjectFileType.MEETING))
+                .toList();
+
         List<ProjectFileSummary> fileSummaries = projectFiles
                 .stream()
                 .map(ProjectFileSummary::from)
-                .toList();
+                .collect(Collectors.toList());
+
+        fileSummaries.addAll(timelineFileSummaries);
 
         return new ProjectFileFindAllResponse(fileSummaries);
     }

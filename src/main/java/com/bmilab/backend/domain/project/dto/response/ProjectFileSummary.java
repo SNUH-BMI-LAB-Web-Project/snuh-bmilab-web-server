@@ -34,4 +34,13 @@ public record ProjectFileSummary(
                 .fileType(projectFile.getType())
                 .build();
     }
+
+    public static ProjectFileSummary from(FileInformation fileInformation, ProjectFileType fileType) {
+        return ProjectFileSummary.builder()
+                .fileId(fileInformation.getId())
+                .fileName(fileInformation.getName() + "." + fileInformation.getExtension())
+                .uploadUrl(fileInformation.getUploadUrl())
+                .fileType(fileType)
+                .build();
+    }
 }
