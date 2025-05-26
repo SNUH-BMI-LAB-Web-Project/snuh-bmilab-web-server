@@ -78,6 +78,8 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                         project.category,
                         project.startDate,
                         project.endDate,
+                        project.pi,
+                        project.practicalProfessor,
                         listNullExpression,
                         ExpressionUtils.as(
                                 JPAExpressions.select(participant.count())

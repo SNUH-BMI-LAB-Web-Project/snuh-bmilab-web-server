@@ -32,6 +32,12 @@ public record ProjectFindAllResponse(
             @Schema(description = "연구 종료일", example = "2025-06-30")
             LocalDate endDate,
 
+            @Schema(description = "PI", example = "김광수")
+            String pi,
+
+            @Schema(description = "실무 교수", example = "김광수")
+            String practicalProfessor,
+
             @Schema(description = "연구 책임자 목록")
             List<UserSummary> leaders,
 
@@ -51,6 +57,8 @@ public record ProjectFindAllResponse(
                     .category(queryResult.getCategory())
                     .startDate(queryResult.getStartDate())
                     .endDate(queryResult.getEndDate())
+                    .pi(queryResult.getPi())
+                    .practicalProfessor(queryResult.getPracticalProfessor())
                     .leaders(queryResult.getLeaders()
                             .stream()
                             .map(UserSummary::from)

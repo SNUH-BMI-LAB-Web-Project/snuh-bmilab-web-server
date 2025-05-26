@@ -22,6 +22,10 @@ public class GetAllProjectsQueryResult {
 
     private LocalDate endDate;
 
+    private String pi;
+
+    private String practicalProfessor;
+
     @Setter
     private List<User> leaders;
 
