@@ -45,10 +45,7 @@ public record ProjectFindAllResponse(
             int participantCount,
 
             @Schema(description = "연구 상태", example = "IN_PROGRESS")
-            ProjectStatus status,
-
-            @Schema(description = "첨부 파일 존재 여부", example = "true")
-            boolean hasFile
+            ProjectStatus status
     ) {
         public static ProjectSummary from(GetAllProjectsQueryResult queryResult) {
             return ProjectSummary.builder()
@@ -66,7 +63,6 @@ public record ProjectFindAllResponse(
                     )
                     .participantCount(queryResult.getParticipantCount().intValue())
                     .status(queryResult.getStatus())
-                    .hasFile(queryResult.getHasFile())
                     .build();
         }
     }

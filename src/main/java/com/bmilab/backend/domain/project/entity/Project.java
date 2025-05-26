@@ -77,12 +77,6 @@ public class Project {
     @Column(name = "drb_id")
     private String drbId;
 
-    @Builder.Default
-    @ElementCollection
-    @CollectionTable(name = "file_urls", joinColumns = @JoinColumn(name = "project_id"))
-    @Column(name = "file_url", columnDefinition = "TEXT")
-    private List<String> fileUrls = new ArrayList<>();
-
     @CreatedDate
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
