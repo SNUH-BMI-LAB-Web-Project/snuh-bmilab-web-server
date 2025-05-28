@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/reports")
 @RequiredArgsConstructor
-public class ReportController {
+public class ReportController implements ReportApi {
     private final ReportService reportService;
 
     @PostMapping
