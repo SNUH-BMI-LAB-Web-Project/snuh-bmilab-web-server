@@ -3,9 +3,6 @@ package com.bmilab.backend.domain.report.repository;
 import com.bmilab.backend.domain.file.entity.FileInformation;
 import com.bmilab.backend.domain.file.entity.QFileInformation;
 import com.bmilab.backend.domain.file.enums.FileDomainType;
-import com.bmilab.backend.domain.project.dto.query.GetAllTimelinesQueryResult;
-import com.bmilab.backend.domain.project.entity.QProject;
-import com.bmilab.backend.domain.project.entity.Timeline;
 import com.bmilab.backend.domain.report.dto.query.GetAllReportsQueryResult;
 import com.bmilab.backend.domain.report.entity.QReport;
 import com.bmilab.backend.domain.report.entity.Report;
@@ -22,18 +19,20 @@ import lombok.RequiredArgsConstructor;
 public class ReportRepositoryCustomImpl implements ReportRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
-    public List<GetAllReportsQueryResult> findAllWithFilesByFilteringAndUserId(Long userId, Long projectId, LocalDate startDate, LocalDate endDate) {
+    public List<GetAllReportsQueryResult> findAllWithFiles(Long userId, Long projectId, LocalDate startDate, LocalDate endDate) {
         QFileInformation file = QFileInformation.fileInformation;
         QReport report = QReport.report;
 
         BooleanExpression projectFilter = projectId != null ? report.project.id.eq(projectId) : null;
+
+        BooleanExpression userFilter = userId != null ? report.user.id.eq(userId) : null;
 
         BooleanExpression dateBetween = dateBetween(startDate, endDate, report);
 
         List<Report> reports = queryFactory
                 .selectFrom(report)
                 .where(ExpressionUtils.allOf(
-                        report.user.id.eq(userId),
+                        userFilter,
                         projectFilter,
                         dateBetween
                 ))

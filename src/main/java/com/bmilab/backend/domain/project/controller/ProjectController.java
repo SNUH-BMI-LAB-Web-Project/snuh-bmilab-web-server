@@ -9,7 +9,9 @@ import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse;
 import com.bmilab.backend.domain.project.enums.ProjectCategory;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.project.service.ProjectService;
+import com.bmilab.backend.domain.report.dto.response.ReportFindAllResponse;
 import com.bmilab.backend.global.security.UserAuthInfo;
+import java.time.LocalDate;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -59,9 +61,12 @@ public class ProjectController implements ProjectApi {
     }
 
     @GetMapping("/{projectId}/files")
-    public ResponseEntity<ProjectFileFindAllResponse> getAllProjectFiles(@PathVariable Long projectId) {
+    public ResponseEntity<ProjectFileFindAllResponse> getAllProjectFiles(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long projectId
+    ) {
 
-        return ResponseEntity.ok(projectService.getAllProjectFiles(projectId));
+        return ResponseEntity.ok(projectService.getAllProjectFiles(userAuthInfo.getUserId(), projectId));
     }
 
     @PatchMapping("/{projectId}")
@@ -84,6 +89,18 @@ public class ProjectController implements ProjectApi {
 
         projectService.completeProject(userAuthInfo.getUserId(), projectId, request);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{projectId}/reports")
+    public ResponseEntity<ReportFindAllResponse> getReportsByProject(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long projectId,
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate
+    ) {
+
+        return ResponseEntity.ok(projectService.getReportsByProject(userAuthInfo.getUserId(), projectId, userId, startDate, endDate));
     }
 
     @GetMapping

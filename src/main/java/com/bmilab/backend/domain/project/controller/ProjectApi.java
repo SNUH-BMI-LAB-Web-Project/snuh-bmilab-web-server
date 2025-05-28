@@ -7,6 +7,7 @@ import com.bmilab.backend.domain.project.dto.response.ProjectFileFindAllResponse
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse;
 import com.bmilab.backend.domain.project.enums.ProjectCategory;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
+import com.bmilab.backend.domain.report.dto.response.ReportFindAllResponse;
 import com.bmilab.backend.global.exception.ErrorResponse;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +16,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.LocalDate;
 import java.util.UUID;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
@@ -82,7 +84,10 @@ public interface ProjectApi {
                     )
             }
     )
-    ResponseEntity<ProjectFileFindAllResponse> getAllProjectFiles(@PathVariable Long projectId);
+    ResponseEntity<ProjectFileFindAllResponse> getAllProjectFiles(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long projectId
+    );
 
     @Operation(summary = "연구 수정", description = "연구 정보를 수정하는 PUT API")
     @ApiResponses(
@@ -134,12 +139,29 @@ public interface ProjectApi {
             @RequestBody ProjectCompleteRequest request
     );
 
+    @Operation(summary = "연구와 연관된 일일보고 목록 조회", description = "연구와 연관된 일일보고 목록을 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "일일보고 목록 조회 성공"
+                    )
+            }
+    )
+    ResponseEntity<ReportFindAllResponse> getReportsByProject(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long projectId,
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate
+    );
+
     @Operation(summary = "모든 연구 조회", description = "모든 연구를 조회하는 GET API")
     @ApiResponses(
             value = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "모든 프로젝트 조회 성공"
+                            description = "모든 연구 조회 성공"
                     )
             }
     )

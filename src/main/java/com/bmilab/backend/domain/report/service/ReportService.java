@@ -79,7 +79,7 @@ public class ReportService {
 
     public ReportFindAllResponse getReportsByCurrentUser(Long userId, Long projectId, LocalDate startDate,
                                                          LocalDate endDate) {
-        List<GetAllReportsQueryResult> results = reportRepository.findAllWithFilesByFilteringAndUserId(
+        List<GetAllReportsQueryResult> results = reportRepository.findAllWithFiles(
                 userId, projectId, startDate, endDate);
 
         return ReportFindAllResponse.of(results);
