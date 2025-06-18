@@ -13,6 +13,7 @@ import com.bmilab.backend.domain.leave.repository.UserLeaveRepository;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.exception.UserErrorCode;
 import com.bmilab.backend.domain.user.repository.UserRepository;
+import com.bmilab.backend.domain.user.service.UserService;
 import com.bmilab.backend.global.exception.ApiException;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
@@ -27,8 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class LeaveService {
     private final LeaveRepository leaveRepository;
-    private final UserRepository userRepository;
     private final UserLeaveRepository userLeaveRepository;
+    private final UserService userService;
 
     public LeaveFindAllResponse getLeaves(LocalDateTime startDate, LocalDateTime endDate) {
         List<Leave> leaves =
@@ -47,8 +48,7 @@ public class LeaveService {
 
     @Transactional
     public void applyLeave(Long userId, ApplyLeaveRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+        User user = userService.findUserById(userId);
         double leaveCount = (request.endDate() == null) ? 1 : calculateLeaveCount(request.startDate(), request.endDate());
 
         if (request.type() == LeaveType.HALF) {

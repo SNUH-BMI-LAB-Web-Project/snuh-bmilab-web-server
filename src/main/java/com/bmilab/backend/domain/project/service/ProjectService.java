@@ -31,10 +31,8 @@ import com.bmilab.backend.domain.project.repository.TimelineRepository;
 import com.bmilab.backend.domain.report.dto.query.GetAllReportsQueryResult;
 import com.bmilab.backend.domain.report.dto.response.ReportFindAllResponse;
 import com.bmilab.backend.domain.report.repository.ReportRepository;
-import com.bmilab.backend.domain.report.repository.ReportRepositoryCustomImpl;
 import com.bmilab.backend.domain.user.entity.User;
-import com.bmilab.backend.domain.user.exception.UserErrorCode;
-import com.bmilab.backend.domain.user.repository.UserRepository;
+import com.bmilab.backend.domain.user.service.UserService;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.external.s3.S3Service;
 import java.time.LocalDate;
@@ -57,7 +55,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ProjectService {
     private final ProjectRepository projectRepository;
-    private final UserRepository userRepository;
     private final S3Service s3Service;
     private final ProjectParticipantRepository projectParticipantRepository;
     private final FileInformationRepository fileInformationRepository;
@@ -65,16 +62,20 @@ public class ProjectService {
     private final FileService fileService;
     private final TimelineRepository timelineRepository;
     private final ReportRepository reportRepository;
+    private final UserService userService;
+
+    public Project findProjectById(Long projectId) {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
+    }
 
     @Transactional
     public void createNewProject(Long userId, ProjectRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+        User user = userService.findUserById(userId);
 
         LocalDate startDate = request.startDate();
         LocalDate endDate = request.endDate();
-        ProjectStatus status = (request.isWaiting()) ?
-                ProjectStatus.WAITING : calculateProjectStatus(startDate, endDate);
+        ProjectStatus status = (request.isWaiting()) ? ProjectStatus.WAITING : calculateProjectStatus(startDate, endDate);
 
         Project project = Project.builder()
                 .title(request.title())
@@ -100,7 +101,7 @@ public class ProjectService {
 
         //연구 참가자 및 책임자 초기화
 
-        List<User> leaders = userRepository.findAllById(request.leaderIds());
+        List<User> leaders = userService.findAllUsersById(request.leaderIds());
 
         leaders.forEach(leader -> {
             ProjectParticipantId projectParticipantId = new ProjectParticipantId(project.getId(), leader.getId());
@@ -115,7 +116,7 @@ public class ProjectService {
             projectParticipantRepository.save(projectLeader);
         });
 
-        List<User> participants = userRepository.findAllById(request.participantIds());
+        List<User> participants = userService.findAllUsersById(request.participantIds());
 
         participants.forEach(participant -> {
             ProjectParticipantId projectParticipantId = new ProjectParticipantId(project.getId(), participant.getId());
@@ -145,7 +146,8 @@ public class ProjectService {
                             .fileInformation(file)
                             .type(fileType)
                             .build();
-                }).toList();
+                })
+                .toList();
 
         projectFileRepository.saveAll(projectFiles);
 
@@ -167,9 +169,8 @@ public class ProjectService {
                 .build();
     }
 
-    public ProjectDetail getProjectById(Long projectId) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
+    public ProjectDetail getProjectDetailById(Long projectId) {
+        Project project = findProjectById(projectId);
 
         List<ProjectParticipant> participants = projectParticipantRepository.findAllByProjectId(projectId);
 
@@ -180,21 +181,15 @@ public class ProjectService {
 
     @Transactional
     public void updateProject(Long editorId, Long projectId, ProjectRequest request) {
-        User editor = userRepository.findById(editorId)
-                .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
-
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
-
+        User editor = userService.findUserById(editorId);
+        Project project = findProjectById(projectId);
         LocalDate startDate = request.startDate();
         LocalDate endDate = request.endDate();
 
         ProjectStatus status =
                 (request.isWaiting()) ? ProjectStatus.WAITING : calculateProjectStatus(startDate, endDate);
 
-        if (getAccessPermission(project, editor).isNotGranted(ProjectAccessPermission.EDIT)) {
-            throw new ApiException(ProjectErrorCode.PROJECT_ACCESS_DENIED);
-        }
+        validateProjectAccessPermission(project, editor, ProjectAccessPermission.EDIT, false);
 
         project.update(
                 request.title(),
@@ -221,15 +216,10 @@ public class ProjectService {
 
     @Transactional
     public void deleteProjectById(Long userId, Long projectId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+        User user = userService.findUserById(userId);
+        Project project = findProjectById(projectId);
 
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
-
-        if (getAccessPermission(project, user).isNotGranted(ProjectAccessPermission.DELETE)) {
-            throw new ApiException(ProjectErrorCode.PROJECT_ACCESS_DENIED);
-        }
+        validateProjectAccessPermission(project, user, ProjectAccessPermission.DELETE, false);
 
         fileService.deleteAllFileByDomainTypeAndEntityId(FileDomainType.PROJECT, project.getId());
         projectRepository.deleteById(projectId);
@@ -237,15 +227,10 @@ public class ProjectService {
 
     @Transactional
     public void deleteProjectFile(Long userId, Long projectId, UUID fileId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+        User user = userService.findUserById(userId);
+        Project project = findProjectById(projectId);
 
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
-
-        if (getAccessPermission(project, user).isNotGranted(ProjectAccessPermission.EDIT)) {
-            throw new ApiException(ProjectErrorCode.PROJECT_ACCESS_DENIED);
-        }
+        validateProjectAccessPermission(project, user, ProjectAccessPermission.EDIT, false);
 
         FileInformation file = fileInformationRepository.findById(fileId)
                 .orElseThrow(() -> new ApiException(FileErrorCode.FILE_NOT_FOUND));
@@ -259,14 +244,10 @@ public class ProjectService {
 
     @Transactional
     public void completeProject(Long userId, Long projectId, ProjectCompleteRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
+        User user = userService.findUserById(userId);
+        Project project = findProjectById(projectId);
 
-        if (getAccessPermission(project, user).isNotGranted(ProjectAccessPermission.EDIT)) {
-            throw new ApiException(ProjectErrorCode.PROJECT_ACCESS_DENIED);
-        }
+        validateProjectAccessPermission(project, user, ProjectAccessPermission.EDIT, false);
 
         project.complete(request.endDate());
     }
@@ -305,7 +286,7 @@ public class ProjectService {
 
         deletedIds.removeAll(intersection);
 
-        List<User> newUsers = userRepository.findAllByIds(newIds);
+        List<User> newUsers = userService.findAllUsersById(newIds);
 
         List<ProjectParticipant> newParticipants = newUsers.stream()
                 .map(user -> {
@@ -330,15 +311,10 @@ public class ProjectService {
     }
 
     public ProjectFileFindAllResponse getAllProjectFiles(Long userId, Long projectId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+        User user = userService.findUserById(userId);
+        Project project = findProjectById(projectId);
 
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
-
-        if (project.isPrivate() && getAccessPermission(project, user).isNotGranted(ProjectAccessPermission.EDIT)) {
-            throw new ApiException(ProjectErrorCode.PROJECT_ACCESS_DENIED);
-        }
+        validateProjectAccessPermission(project, user, ProjectAccessPermission.EDIT, true);
 
         List<ProjectFile> projectFiles = projectFileRepository.findAllByProjectId(projectId);
 
@@ -361,15 +337,10 @@ public class ProjectService {
     }
 
     public ReportFindAllResponse getReportsByProject(Long userId, Long projectId, Long filterUserId, LocalDate startDate, LocalDate endDate) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+        User user = userService.findUserById(userId);
+        Project project = findProjectById(projectId);
 
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
-
-        if (project.isPrivate() && getAccessPermission(project, user).isNotGranted(ProjectAccessPermission.EDIT)) {
-            throw new ApiException(ProjectErrorCode.PROJECT_ACCESS_DENIED);
-        }
+        validateProjectAccessPermission(project, user, ProjectAccessPermission.EDIT, true);
 
         List<GetAllReportsQueryResult> results = reportRepository.findAllWithFiles(filterUserId, projectId,
                 startDate, endDate);
@@ -377,7 +348,7 @@ public class ProjectService {
         return ReportFindAllResponse.of(results);
     }
 
-    public ProjectAccessPermission getAccessPermission(Project project, User user) {
+    private ProjectAccessPermission getAccessPermission(Project project, User user) {
         Optional<ProjectParticipant> participant = projectParticipantRepository.findByProjectAndUser(project, user);
 
         if (participant.isEmpty()) {
@@ -395,5 +366,13 @@ public class ProjectService {
         }
 
         return ProjectAccessPermission.NONE;
+    }
+
+    private void validateProjectAccessPermission(Project project, User user, ProjectAccessPermission permission, boolean needPrivate) {
+        boolean shouldValidate = !needPrivate || project.isPrivate();
+
+        if (shouldValidate && getAccessPermission(project, user).isNotGranted(permission)) {
+            throw new ApiException(ProjectErrorCode.PROJECT_ACCESS_DENIED);
+        }
     }
 }

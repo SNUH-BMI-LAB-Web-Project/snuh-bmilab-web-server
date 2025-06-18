@@ -14,8 +14,7 @@ import com.bmilab.backend.domain.project.exception.TimelineErrorCode;
 import com.bmilab.backend.domain.project.repository.TimelineRepository;
 import com.bmilab.backend.domain.project.repository.ProjectRepository;
 import com.bmilab.backend.domain.user.entity.User;
-import com.bmilab.backend.domain.user.exception.UserErrorCode;
-import com.bmilab.backend.domain.user.repository.UserRepository;
+import com.bmilab.backend.domain.user.service.UserService;
 import com.bmilab.backend.global.exception.ApiException;
 import java.util.List;
 import java.util.UUID;
@@ -28,15 +27,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class TimelineService {
     private final TimelineRepository timelineRepository;
-    private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
     private final FileService fileService;
     private final FileInformationRepository fileInformationRepository;
+    private final UserService userService;
+
+    public Timeline findTimelineById(Long timelineId) {
+        return timelineRepository.findById(timelineId)
+                .orElseThrow(() -> new ApiException(TimelineErrorCode.TIMELINE_NOT_FOUND));
+    }
 
     @Transactional
     public void createTimeline(Long userId, Long projectId, TimelineRequest request) {
-        User recorder = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+        User recorder = userService.findUserById(userId);
 
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
@@ -73,8 +76,7 @@ public class TimelineService {
 
     @Transactional
     public void deleteTimelineFile(Long userId, Long projectId, Long timelineId, UUID fileId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+        User user = userService.findUserById(userId);
 
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
@@ -88,8 +90,7 @@ public class TimelineService {
 
     @Transactional
     public void updateTimeline(Long userId, Long projectId, Long timelineId, TimelineRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+        User user = userService.findUserById(userId);
 
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
@@ -98,8 +99,7 @@ public class TimelineService {
             throw new ApiException(ProjectErrorCode.PROJECT_ACCESS_DENIED);
         }
 
-        Timeline timeline = timelineRepository.findById(timelineId)
-                .orElseThrow(() -> new ApiException(TimelineErrorCode.TIMELINE_NOT_FOUND));
+        Timeline timeline = findTimelineById(timelineId);
 
         timeline.update(
                 request.title(),
@@ -118,8 +118,7 @@ public class TimelineService {
 
     @Transactional
     public void deleteTimeline(Long userId, Long projectId, Long timelineId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+        User user = userService.findUserById(userId);
 
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
@@ -128,8 +127,7 @@ public class TimelineService {
             throw new ApiException(ProjectErrorCode.PROJECT_ACCESS_DENIED);
         }
 
-        Timeline timeline = timelineRepository.findById(timelineId)
-                .orElseThrow(() -> new ApiException(TimelineErrorCode.TIMELINE_NOT_FOUND));
+        Timeline timeline = findTimelineById(timelineId);
 
         fileService.deleteAllFileByDomainTypeAndEntityId(FileDomainType.TIMELINE, timeline.getId());
 

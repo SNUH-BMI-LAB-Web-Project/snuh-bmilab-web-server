@@ -36,7 +36,7 @@ public class AdminUserController implements AdminUserApi {
     @GetMapping("/{userId}")
     public ResponseEntity<UserDetail> getUserById(@PathVariable Long userId) {
 
-        return ResponseEntity.ok(userService.getUserById(userId));
+        return ResponseEntity.ok(userService.getUserDetailById(userId));
     }
 
     @PatchMapping("/{userId}")

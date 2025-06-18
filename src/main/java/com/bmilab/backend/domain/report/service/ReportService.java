@@ -13,8 +13,7 @@ import com.bmilab.backend.domain.report.entity.Report;
 import com.bmilab.backend.domain.report.exception.ReportErrorCode;
 import com.bmilab.backend.domain.report.repository.ReportRepository;
 import com.bmilab.backend.domain.user.entity.User;
-import com.bmilab.backend.domain.user.exception.UserErrorCode;
-import com.bmilab.backend.domain.user.repository.UserRepository;
+import com.bmilab.backend.domain.user.service.UserService;
 import com.bmilab.backend.global.exception.ApiException;
 import java.time.LocalDate;
 import java.util.List;
@@ -27,15 +26,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class ReportService {
     private final ReportRepository reportRepository;
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final ProjectRepository projectRepository;
     private final FileInformationRepository fileInformationRepository;
     private final FileService fileService;
 
+    public Report findReportById(Long reportId) {
+        return reportRepository.findById(reportId)
+                .orElseThrow(() -> new ApiException(ReportErrorCode.REPORT_NOT_FOUND));
+    }
+
     @Transactional
     public void createReport(Long userId, ReportRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+        User user = userService.findUserById(userId);
 
         Project project = projectRepository.findById(request.projectId())
                 .orElse(null);
@@ -57,18 +60,14 @@ public class ReportService {
 
     @Transactional
     public void updateReport(Long userId, Long reportId, ReportRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+        User user = userService.findUserById(userId);
 
         Project project = projectRepository.findById(request.projectId())
                 .orElse(null);
 
-        Report report = reportRepository.findById(reportId)
-                .orElseThrow(() -> new ApiException(ReportErrorCode.REPORT_NOT_FOUND));
+        Report report = findReportById(reportId);
 
-        if (!report.isAuthor(user)) {
-            throw new ApiException(ReportErrorCode.REPORT_ACCESS_DENIED);
-        }
+        validateUserIsReportAuthor(user, report);
 
         report.update(project, request.date(), request.content());
 
@@ -87,17 +86,19 @@ public class ReportService {
 
     @Transactional
     public void deleteReport(Long userId, Long reportId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+        User user = userService.findUserById(userId);
 
-        Report report = reportRepository.findById(reportId)
-                .orElseThrow(() -> new ApiException(ReportErrorCode.REPORT_NOT_FOUND));
+        Report report = findReportById(reportId);
 
-        if (!report.isAuthor(user)) {
-            throw new ApiException(ReportErrorCode.REPORT_ACCESS_DENIED);
-        }
+        validateUserIsReportAuthor(user, report);
 
         fileService.deleteAllFileByDomainTypeAndEntityId(FileDomainType.REPORT, report.getId());
         reportRepository.delete(report);
+    }
+
+    private void validateUserIsReportAuthor(User user, Report report) {
+        if (!report.isAuthor(user)) {
+            throw new ApiException(ReportErrorCode.REPORT_ACCESS_DENIED);
+        }
     }
 }
