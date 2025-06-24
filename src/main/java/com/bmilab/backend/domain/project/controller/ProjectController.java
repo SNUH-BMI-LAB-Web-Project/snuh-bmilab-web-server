@@ -107,11 +107,13 @@ public class ProjectController implements ProjectApi {
             @RequestParam(required = false) Long leaderId,
             @RequestParam(required = false) ProjectCategory category,
             @RequestParam(required = false) ProjectStatus status,
+            @RequestParam(required = false) String pi,
+            @RequestParam(required = false) String practicalProfessor,
             @PageableDefault(size = 10, sort = "createdAt", direction = Direction.DESC) @ParameterObject Pageable pageable
     ) {
 
         return ResponseEntity.ok(
-                projectService.getAllProjects(pageable, search, ProjectFilterCondition.of(leaderId, category, status))
+                projectService.getAllProjects(pageable, search, ProjectFilterCondition.of(leaderId, category, status, pi, practicalProfessor))
         );
     }
 
