@@ -10,8 +10,8 @@ public record ReportProjectSummary(
 ) {
     public static ReportProjectSummary from(Project project) {
         return ReportProjectSummary.builder()
-                .projectId(project.getId())
-                .title(project.getTitle())
+                .projectId((project != null) ? project.getId() : null)
+                .title((project != null) ? project.getTitle() : null)
                 .build();
     }
 }
