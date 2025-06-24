@@ -2,21 +2,25 @@ package com.bmilab.backend.domain.user.service;
 
 import com.bmilab.backend.domain.user.dto.query.UserDetailQueryResult;
 import com.bmilab.backend.domain.user.dto.query.UserInfoQueryResult;
+import com.bmilab.backend.domain.user.dto.request.UserEducationRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserPasswordRequest;
 import com.bmilab.backend.domain.user.dto.request.AdminUpdateUserRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserRequest;
-import com.bmilab.backend.domain.user.dto.response.CurrentUserDetail;
 import com.bmilab.backend.domain.user.dto.response.SearchUserResponse;
 import com.bmilab.backend.domain.user.dto.response.UserDetail;
 import com.bmilab.backend.domain.user.dto.response.UserFindAllResponse;
 import com.bmilab.backend.domain.user.entity.User;
+import com.bmilab.backend.domain.user.entity.UserEducation;
+import com.bmilab.backend.domain.user.event.UserEducationUpdateEvent;
 import com.bmilab.backend.domain.user.exception.UserErrorCode;
+import com.bmilab.backend.domain.user.repository.UserEducationRepository;
 import com.bmilab.backend.domain.user.repository.UserRepository;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.external.s3.S3Service;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -33,6 +37,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final S3Service s3Service;
+    private final UserEducationRepository userEducationRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public User findUserById(Long userId) {
         return userRepository.findById(userId)
@@ -54,15 +60,17 @@ public class UserService {
     public UserDetail getUserDetailById(long userId) {
         UserDetailQueryResult result = userRepository.findUserDetailsById(userId)
                 .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+        List<UserEducation> educations = userEducationRepository.findAllByUser(result.user());
 
-        return UserDetail.from(result, true);
+        return UserDetail.from(result, educations, true);
     }
 
-    public CurrentUserDetail getCurrentUser(Long userId) {
+    public UserDetail getCurrentUser(Long userId) {
         UserDetailQueryResult result = userRepository.findUserDetailsById(userId)
                 .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+        List<UserEducation> educations = userEducationRepository.findAllByUser(result.user());
 
-        return CurrentUserDetail.from(result, result.leaves());
+        return UserDetail.from(result, educations, false);
     }
 
     @Transactional
@@ -111,8 +119,7 @@ public class UserService {
         result.userInfo().update(
                 request.categories(),
                 request.seatNumber(),
-                request.phoneNumber(),
-                request.education()
+                request.phoneNumber()
         );
     }
 
@@ -137,5 +144,25 @@ public class UserService {
         List<User> users = userRepository.searchUsersByKeyword(keyword);
 
         return SearchUserResponse.of(users);
+    }
+
+    @Transactional
+    public void addEducations(Long userId, UserEducationRequest request) {
+        User user = findUserById(userId);
+        UserEducation userEducation = UserEducation.builder()
+                .user(user)
+                .title(request.title())
+                .startYearMonth(request.startYearMonth())
+                .endYearMonth(request.endYearMonth())
+                .build();
+
+        userEducationRepository.save(userEducation);
+        eventPublisher.publishEvent(new UserEducationUpdateEvent(userId));
+    }
+
+    @Transactional
+    public void deleteEducations(Long userId, Long userEducationId) {
+        userEducationRepository.deleteById(userEducationId);
+        eventPublisher.publishEvent(new UserEducationUpdateEvent(userId));
     }
 }

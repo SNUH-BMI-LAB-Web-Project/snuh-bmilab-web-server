@@ -2,8 +2,9 @@ package com.bmilab.backend.domain.user.controller;
 
 import com.bmilab.backend.domain.user.dto.request.UpdateUserPasswordRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserRequest;
-import com.bmilab.backend.domain.user.dto.response.CurrentUserDetail;
+import com.bmilab.backend.domain.user.dto.request.UserEducationRequest;
 import com.bmilab.backend.domain.user.dto.response.SearchUserResponse;
+import com.bmilab.backend.domain.user.dto.response.UserDetail;
 import com.bmilab.backend.domain.user.dto.response.UserFindAllResponse;
 import com.bmilab.backend.global.annotation.FormDataRequestBody;
 import com.bmilab.backend.global.exception.ErrorResponse;
@@ -16,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -50,7 +52,7 @@ public interface UserApi {
                     )
             }
     )
-    ResponseEntity<CurrentUserDetail> getCurrentUser(@AuthenticationPrincipal UserAuthInfo userAuthInfo);
+    ResponseEntity<UserDetail> getCurrentUser(@AuthenticationPrincipal UserAuthInfo userAuthInfo);
 
     @Operation(summary = "현재 사용자 정보 수정", description = "현재 로그인한 사용자 정보를 수정하는 PUT API")
     @ApiResponses(
@@ -103,5 +105,43 @@ public interface UserApi {
     )
     ResponseEntity<SearchUserResponse> searchUsers(
             @RequestParam(required = false) String keyword
+    );
+
+    @Operation(summary = "사용자 학력 추가", description = "사용자의 학력을 추가하기 위한 PATCH API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "사용자 학력 추가 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "사용자 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> addEducations(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @RequestBody UserEducationRequest request
+    );
+
+    @Operation(summary = "사용자 학력 삭제", description = "사용자의 학력을 삭제하는 DELETE API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "사용자 학력 삭제 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "사용자 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> deleteEducations(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long educationId
     );
 }

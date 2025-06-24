@@ -1,16 +1,13 @@
 package com.bmilab.backend.domain.user.repository;
 
-import com.bmilab.backend.domain.leave.entity.QLeave;
 import com.bmilab.backend.domain.leave.entity.QUserLeave;
 import com.bmilab.backend.domain.user.dto.query.UserDetailQueryResult;
 import com.bmilab.backend.domain.user.dto.query.UserInfoQueryResult;
 import com.bmilab.backend.domain.user.entity.QUser;
 import com.bmilab.backend.domain.user.entity.QUserInfo;
-import com.querydsl.core.group.GroupBy;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,27 +23,21 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         QUser user = QUser.user;
         QUserInfo userInfo = QUserInfo.userInfo;
         QUserLeave userLeave = QUserLeave.userLeave;
-        QLeave leave = QLeave.leave;
 
-        Map<Long, UserDetailQueryResult> result = queryFactory
+        UserDetailQueryResult result = queryFactory
+                .select(Projections.constructor(
+                        UserDetailQueryResult.class,
+                        user,
+                        userLeave,
+                        userInfo
+                ))
                 .from(user)
                 .innerJoin(userInfo).on(userInfo.user.eq(user))
                 .innerJoin(userLeave).on(userLeave.user.eq(user))
-                .leftJoin(leave).on(leave.user.eq(user))
                 .where(user.id.eq(userId))
-                .transform(
-                        GroupBy.groupBy(user.id).as(
-                                Projections.constructor(
-                                        UserDetailQueryResult.class,
-                                        user,
-                                        userInfo,
-                                        userLeave,
-                                        GroupBy.list(leave)
-                                )
-                        )
-                );
+                .fetchOne();
 
-        return Optional.ofNullable(result.get(userId));
+        return Optional.ofNullable(result);
     }
 
     @Override

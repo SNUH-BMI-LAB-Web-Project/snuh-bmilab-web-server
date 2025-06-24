@@ -4,6 +4,7 @@ import com.bmilab.backend.domain.leave.entity.UserLeave;
 import com.bmilab.backend.domain.project.enums.ProjectCategory;
 import com.bmilab.backend.domain.user.dto.query.UserDetailQueryResult;
 import com.bmilab.backend.domain.user.entity.User;
+import com.bmilab.backend.domain.user.entity.UserEducation;
 import com.bmilab.backend.domain.user.entity.UserInfo;
 import com.bmilab.backend.domain.user.enums.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -54,7 +55,7 @@ public record UserDetail(
         String phoneNumber,
 
         @Schema(description = "학력", example = "국민대학교 소프트웨어학부 재학 중")
-        String education,
+        List<UserEducationSummary> educations,
 
         @Schema(description = "비고 또는 한 줄 소개", example = "딥러닝과 커피를 사랑하는 개발자")
         String comment,
@@ -62,7 +63,7 @@ public record UserDetail(
         @Schema(description = "입사일", example = "2023-03-01")
         LocalDate joinedAt
 ) {
-    public static UserDetail from(UserDetailQueryResult queryResult, boolean includeComment) {
+    public static UserDetail from(UserDetailQueryResult queryResult, List<UserEducation> educations, boolean includeComment) {
         User user = queryResult.user();
         UserLeave userLeave = queryResult.userLeave();
         UserInfo userInfo = queryResult.userInfo();
@@ -87,7 +88,7 @@ public record UserDetail(
                 )
                 .seatNumber(userInfo.getSeatNumber())
                 .phoneNumber(userInfo.getPhoneNumber())
-                .education(userInfo.getEducation())
+                .educations(educations.stream().map(UserEducationSummary::from).toList())
                 .comment(userInfo.getComment())
                 .joinedAt(userInfo.getJoinedAt())
                 .build();

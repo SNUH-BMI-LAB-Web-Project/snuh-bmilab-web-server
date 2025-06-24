@@ -54,10 +54,13 @@ public class UserInfo {
         this.comment = comment;
     }
 
-    public void update(List<ProjectCategory> categories, String seatNumber, String phoneNumber, String education) {
+    public void update(List<ProjectCategory> categories, String seatNumber, String phoneNumber) {
         this.category = String.join(",", categories.stream().map(ProjectCategory::name).toList());
         this.seatNumber = seatNumber;
         this.phoneNumber = phoneNumber;
+    }
+
+    public void updateEducation(String education) {
         this.education = education;
     }
 }
