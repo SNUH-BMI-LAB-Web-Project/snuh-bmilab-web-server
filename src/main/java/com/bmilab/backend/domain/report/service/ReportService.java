@@ -5,7 +5,7 @@ import com.bmilab.backend.domain.file.enums.FileDomainType;
 import com.bmilab.backend.domain.file.repository.FileInformationRepository;
 import com.bmilab.backend.domain.file.service.FileService;
 import com.bmilab.backend.domain.project.entity.Project;
-import com.bmilab.backend.domain.project.repository.ProjectRepository;
+import com.bmilab.backend.domain.project.service.ProjectService;
 import com.bmilab.backend.domain.report.dto.query.GetAllReportsQueryResult;
 import com.bmilab.backend.domain.report.dto.request.ReportRequest;
 import com.bmilab.backend.domain.report.dto.response.ReportFindAllResponse;
@@ -27,9 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class ReportService {
     private final ReportRepository reportRepository;
     private final UserService userService;
-    private final ProjectRepository projectRepository;
     private final FileInformationRepository fileInformationRepository;
     private final FileService fileService;
+    private final ProjectService projectService;
 
     public Report findReportById(Long reportId) {
         return reportRepository.findById(reportId)
@@ -40,8 +40,9 @@ public class ReportService {
     public void createReport(Long userId, ReportRequest request) {
         User user = userService.findUserById(userId);
 
-        Project project = projectRepository.findById(request.projectId())
-                .orElse(null);
+        Long projectId = request.projectId();
+
+        Project project = (projectId != null) ? projectService.findProjectById(projectId) : null;
 
         Report report = Report.builder()
                 .user(user)
@@ -62,8 +63,9 @@ public class ReportService {
     public void updateReport(Long userId, Long reportId, ReportRequest request) {
         User user = userService.findUserById(userId);
 
-        Project project = projectRepository.findById(request.projectId())
-                .orElse(null);
+        Long projectId = request.projectId();
+
+        Project project = (projectId != null) ? projectService.findProjectById(projectId) : null;
 
         Report report = findReportById(reportId);
 
