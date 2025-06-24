@@ -87,7 +87,8 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                                         .where(participant.project.eq(project)),
                                 "participantCount"
                         ),
-                        project.status
+                        project.status,
+                        project.isPrivate
                 ))
                 .from(project)
                 .where(

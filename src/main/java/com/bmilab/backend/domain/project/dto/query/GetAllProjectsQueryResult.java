@@ -32,4 +32,6 @@ public class GetAllProjectsQueryResult {
     private Long participantCount;
 
     private ProjectStatus status;
+
+    private boolean isPrivate;
 }

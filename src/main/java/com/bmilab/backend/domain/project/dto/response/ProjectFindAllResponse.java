@@ -45,7 +45,10 @@ public record ProjectFindAllResponse(
             int participantCount,
 
             @Schema(description = "연구 상태", example = "IN_PROGRESS")
-            ProjectStatus status
+            ProjectStatus status,
+
+            @Schema(description = "연구 비공개 여부")
+            boolean isPrivate
     ) {
         public static ProjectSummary from(GetAllProjectsQueryResult queryResult) {
             return ProjectSummary.builder()
@@ -63,6 +66,7 @@ public record ProjectFindAllResponse(
                     )
                     .participantCount(queryResult.getParticipantCount().intValue())
                     .status(queryResult.getStatus())
+
                     .build();
         }
     }
