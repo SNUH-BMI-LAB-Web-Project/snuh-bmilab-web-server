@@ -154,6 +154,7 @@ public class UserService {
                 .title(request.title())
                 .startYearMonth(request.startYearMonth())
                 .endYearMonth(request.endYearMonth())
+                .status(request.status())
                 .build();
 
         userEducationRepository.save(userEducation);
