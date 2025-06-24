@@ -2,6 +2,7 @@ package com.bmilab.backend.domain.project.repository;
 
 import com.bmilab.backend.domain.project.dto.condition.ProjectFilterCondition;
 import com.bmilab.backend.domain.project.dto.query.GetAllProjectsQueryResult;
+import com.bmilab.backend.domain.project.dto.query.SearchProjectQueryResult;
 import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.project.entity.QProject;
 import com.bmilab.backend.domain.project.entity.QProjectParticipant;
@@ -32,6 +33,37 @@ import org.springframework.data.support.PageableExecutionUtils;
 @RequiredArgsConstructor
 public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
     private final JPAQueryFactory queryFactory;
+
+    @Override
+    public List<SearchProjectQueryResult> searchProject(Long userId, boolean all, String keyword) {
+        QProject project = QProject.project;
+        QProjectParticipant participant = QProjectParticipant.projectParticipant;
+
+        BooleanExpression participantContains = userId != null
+                ? JPAExpressions.selectOne()
+                .from(participant)
+                .where(
+                        participant.user.id.eq(userId),
+                        participant.project.eq(project)
+                ).exists()
+                : null;
+
+        BooleanExpression userFilter = (all) ? null : project.author.id.eq(userId).or(participantContains);
+
+        BooleanExpression titleContains = (keyword != null) ? project.title.containsIgnoreCase(keyword) : null;
+
+        return queryFactory
+                .select(
+                        Projections.constructor(
+                                SearchProjectQueryResult.class,
+                                project.id.as("projectId"),
+                                project.title
+                        )
+                )
+                .from(project)
+                .where(userFilter, titleContains)
+                .fetch();
+    }
 
     @Override
     public Page<GetAllProjectsQueryResult> findAllBySearch(String keyword, Pageable pageable,
@@ -146,11 +178,12 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
         return PageableExecutionUtils.getPage(results, pageable, () -> count);
     }
 
-    private OrderSpecifier<?>[] getOrderSpecifiers(Pageable pageable, Class<?> clazz, String alias, OrderSpecifier<?> defaultSort) {
+    private OrderSpecifier<?>[] getOrderSpecifiers(Pageable pageable, Class<?> clazz, String alias,
+                                                   OrderSpecifier<?> defaultSort) {
         PathBuilder<?> pathBuilder = new PathBuilder<>(clazz, alias);
 
         if (!pageable.getSort().isSorted()) {
-            return new OrderSpecifier[]{ defaultSort };
+            return new OrderSpecifier[]{defaultSort};
         }
 
         return pageable.getSort().stream()

@@ -6,6 +6,7 @@ import com.bmilab.backend.domain.project.dto.request.ProjectRequest;
 import com.bmilab.backend.domain.project.dto.response.ProjectDetail;
 import com.bmilab.backend.domain.project.dto.response.ProjectFileFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse;
+import com.bmilab.backend.domain.project.dto.response.SearchProjectResponse;
 import com.bmilab.backend.domain.project.enums.ProjectCategory;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.project.service.ProjectService;
@@ -131,5 +132,14 @@ public class ProjectController implements ProjectApi {
 
         projectService.deleteProjectById(userAuthInfo.getUserId(), projectId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<SearchProjectResponse> searchProject(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @RequestParam(required = false, defaultValue = "true") boolean all,
+            @RequestParam(required = false) String keyword
+    ) {
+        return ResponseEntity.ok(projectService.searchProject(userAuthInfo.getUserId(), all, keyword));
     }
 }
