@@ -19,4 +19,6 @@ public interface UserRepository extends JpaRepository<User, Long>, UserRepositor
             + "OR u.email LIKE CONCAT('%', :name, '%') "
             + "OR u.department LIKE CONCAT('%', :name, '%')")
     List<User> searchUsersByKeyword (String name);
+
+    List<User> findTop10ByOrderByIdDesc();
 }

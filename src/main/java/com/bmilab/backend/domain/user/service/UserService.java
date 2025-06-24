@@ -134,8 +134,15 @@ public class UserService {
     }
 
     public SearchUserResponse searchUsers(String keyword) {
-        List<User> users = userRepository.searchUsersByKeyword(keyword);
+        List<User> users;
+
+        if (keyword == null || keyword.trim().isEmpty()) {
+            users = userRepository.findTop10ByOrderByIdDesc();
+        } else {
+            users = userRepository.searchUsersByKeyword(keyword);
+        }
 
         return SearchUserResponse.of(users);
     }
 }
+
