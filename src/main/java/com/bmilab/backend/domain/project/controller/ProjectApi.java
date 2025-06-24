@@ -171,6 +171,8 @@ public interface ProjectApi {
             @RequestParam(required = false) Long leaderId,
             @RequestParam(required = false) ProjectCategory category,
             @RequestParam(required = false) ProjectStatus status,
+            @RequestParam(required = false) String pi,
+            @RequestParam(required = false) String practicalProfessor,
             @PageableDefault(sort = "createdAt", direction = Direction.DESC) @ParameterObject Pageable pageable
     );
 
