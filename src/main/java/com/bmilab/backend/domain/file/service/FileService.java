@@ -25,10 +25,13 @@ public class FileService {
     private final S3Service s3Service;
     private final FileInformationRepository fileInformationRepository;
 
-    public FilePresignedUrlResponse generatePresignedUrl(String fileKey, String contentType) {
+    public FilePresignedUrlResponse generatePresignedUrl(FileDomainType domainType, String fileName,
+            String contentType) {
+        UUID uuid = UUID.randomUUID();
+        String fileKey = domainType.name().toLowerCase() + "/" + uuid + "_" + fileName;
         URL presignedUrl = s3Service.generatePresignedUploadUrl(fileKey, contentType, 10L);
 
-        return new FilePresignedUrlResponse(presignedUrl.toString());
+        return new FilePresignedUrlResponse(uuid, presignedUrl.toString());
     }
 
     @Transactional
@@ -36,6 +39,7 @@ public class FileService {
         String fileKey = request.domainType().name().toLowerCase() + "/" + URLEncoder.encode(request.fileName(), StandardCharsets.UTF_8);
 
         FileInformation fileInformation = FileInformation.builder()
+                .id(request.uuid())
                 .name(request.fileName())
                 .extension(request.extension())
                 .domainType(request.domainType())
