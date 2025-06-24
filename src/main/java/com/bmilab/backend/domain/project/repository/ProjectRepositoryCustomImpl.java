@@ -45,6 +45,11 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 
         BooleanExpression titleContains = keyword != null ? project.title.containsIgnoreCase(keyword) : null;
 
+        BooleanExpression piContains = condition.pi() != null ? project.pi.containsIgnoreCase(condition.pi()) : null;
+
+        BooleanExpression practicalProfessorContains = condition.practicalProfessor() != null ?
+                project.practicalProfessor.containsIgnoreCase(condition.practicalProfessor()) : null;
+
         BooleanExpression leaderNameContains = keyword != null
                 ? JPAExpressions.selectOne()
                 .from(participant)
@@ -91,7 +96,7 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                 ))
                 .from(project)
                 .where(
-                        Expressions.anyOf(titleContains, leaderNameContains),
+                        Expressions.anyOf(titleContains, leaderNameContains, piContains, practicalProfessorContains),
                         statusFilter,
                         categoryFilter,
                         leaderFilter
