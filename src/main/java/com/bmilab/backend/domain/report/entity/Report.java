@@ -43,8 +43,8 @@ public class Report {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "project_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JoinColumn(name = "project_id")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private Project project;
 
     @Column(nullable = false)
