@@ -26,36 +26,6 @@ public class RSSService {
     private static final String NTIS_RSS_URL = "https://www.ntis.go.kr/rndgate/unRndRss.xml";
     private final ObjectMapper objectMapper;
 
-//    public NTISAssignmentResponse getAllNTISAssignments(int startIndex, int endIndex) {
-//        RestClient restClient = RestClient.create(NTIS_RSS_URL);
-//
-//        String bodyText = restClient.get()
-//                .uri((uriBuilder) -> uriBuilder
-//                        .queryParam("prt", endIndex)
-//                        .queryParam("Fi", startIndex)
-//                        .build()
-//                )
-//                .retrieve().body(String.class);
-//
-//        JSONObject bodyObject = XML.toJSONObject(Objects.requireNonNull(bodyText));
-//
-//        JSONArray items = bodyObject.getJSONObject("rss")
-//                .getJSONObject("channel")
-//                .getJSONArray("item");
-//
-//        JSONObject jsonObject = new JSONObject();
-//
-//        jsonObject.put("items", items);
-//
-//        try {
-//            return objectMapper.readValue(jsonObject.toString(), NTISAssignmentResponse.class);
-//        } catch (JsonProcessingException e) {
-//            log.error(e.getMessage());
-//            return null;
-//        }
-//    }
-
-
     public NTISAssignmentResponse getAllRecentNTISAssignments() {
         RestClient restClient = RestClient.create(NTIS_RSS_URL);
 

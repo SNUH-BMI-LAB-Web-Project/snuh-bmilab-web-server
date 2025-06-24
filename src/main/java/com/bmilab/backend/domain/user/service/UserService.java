@@ -1,7 +1,5 @@
 package com.bmilab.backend.domain.user.service;
 
-import com.bmilab.backend.domain.leave.entity.Leave;
-import com.bmilab.backend.domain.leave.repository.LeaveRepository;
 import com.bmilab.backend.domain.user.dto.query.UserDetailQueryResult;
 import com.bmilab.backend.domain.user.dto.query.UserInfoQueryResult;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserPasswordRequest;
@@ -33,9 +31,17 @@ import org.springframework.web.multipart.MultipartFile;
 @Transactional(readOnly = true)
 public class UserService {
     private final UserRepository userRepository;
-    private final LeaveRepository leaveRepository;
     private final PasswordEncoder passwordEncoder;
     private final S3Service s3Service;
+
+    public User findUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+    }
+
+    public List<User> findAllUsersById(Iterable<Long> userIds) {
+        return userRepository.findAllById(userIds);
+    }
 
     public UserFindAllResponse getAllUsers(int pageNo, String criteria) {
         PageRequest pageRequest = PageRequest.of(pageNo, 10, Sort.by(Direction.DESC, criteria));
@@ -45,7 +51,7 @@ public class UserService {
         return UserFindAllResponse.of(results);
     }
 
-    public UserDetail getUserById(long userId) {
+    public UserDetail getUserDetailById(long userId) {
         UserDetailQueryResult result = userRepository.findUserDetailsById(userId)
                 .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
 
@@ -55,9 +61,8 @@ public class UserService {
     public CurrentUserDetail getCurrentUser(Long userId) {
         UserDetailQueryResult result = userRepository.findUserDetailsById(userId)
                 .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
-        List<Leave> leaves = leaveRepository.findAllByUserId(userId);
 
-        return CurrentUserDetail.from(result, leaves);
+        return CurrentUserDetail.from(result, result.leaves());
     }
 
     @Transactional
@@ -71,8 +76,7 @@ public class UserService {
 
     @Transactional
     public void updatePassword(Long userId, UpdateUserPasswordRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+        User user = findUserById(userId);
 
         if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
             throw new ApiException(UserErrorCode.PASSWORD_MISMATCH);
