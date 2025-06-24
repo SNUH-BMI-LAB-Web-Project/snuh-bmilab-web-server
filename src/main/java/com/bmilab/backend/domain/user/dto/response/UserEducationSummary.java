@@ -1,6 +1,7 @@
 package com.bmilab.backend.domain.user.dto.response;
 
 import com.bmilab.backend.domain.user.entity.UserEducation;
+import com.bmilab.backend.domain.user.enums.EnrollmentStatus;
 import java.time.YearMonth;
 import lombok.Builder;
 
@@ -9,7 +10,8 @@ public record UserEducationSummary(
         Long educationId,
         String title,
         YearMonth startYearMonth,
-        YearMonth endYearMonth
+        YearMonth endYearMonth,
+        EnrollmentStatus status
 ) {
     public static UserEducationSummary from(UserEducation education) {
         return UserEducationSummary.builder()
@@ -17,6 +19,7 @@ public record UserEducationSummary(
                 .title(education.getTitle())
                 .startYearMonth(education.getStartYearMonth())
                 .endYearMonth(education.getEndYearMonth())
+                .status(education.getStatus())
                 .build();
     }
 }
