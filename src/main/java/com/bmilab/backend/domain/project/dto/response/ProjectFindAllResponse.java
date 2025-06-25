@@ -66,7 +66,7 @@ public record ProjectFindAllResponse(
                     )
                     .participantCount(queryResult.getParticipantCount().intValue())
                     .status(queryResult.getStatus())
-
+                    .isPrivate(queryResult.isPrivate())
                     .build();
         }
     }
