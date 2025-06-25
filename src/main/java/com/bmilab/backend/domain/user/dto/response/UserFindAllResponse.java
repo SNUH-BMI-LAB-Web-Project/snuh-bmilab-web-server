@@ -53,6 +53,9 @@ public record UserFindAllResponse(
             @Schema(description = "좌석 번호", example = "12-30")
             String seatNumber,
 
+            @Schema(description = "전화번호", example = "010-1234-5678")
+            String phoneNumber,
+
             @Schema(description = "학력", example = "국민대학교 소프트웨어학부 재학 중")
             String education
     ) {
@@ -74,6 +77,7 @@ public record UserFindAllResponse(
                                     .toList()
                     )
                     .seatNumber(userInfo.getSeatNumber())
+                    .phoneNumber(userInfo.getPhoneNumber())
                     .education(userInfo.getEducation())
                     .build();
         }
