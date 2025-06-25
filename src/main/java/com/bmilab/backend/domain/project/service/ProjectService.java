@@ -223,7 +223,14 @@ public class ProjectService {
         validateProjectAccessPermission(project, user, ProjectAccessPermission.DELETE, false);
 
         fileService.deleteAllFileByDomainTypeAndEntityId(FileDomainType.PROJECT, project.getId());
+        log.info("Deleting project with id = {}", projectId);
+        boolean exists = projectRepository.existsById(projectId);
+        log.info("Project exists before delete? {}", exists);
+
         projectRepository.deleteById(projectId);
+
+        boolean stillExists = projectRepository.existsById(projectId);
+        log.info("Project exists after delete? {}", stillExists);
     }
 
     @Transactional
@@ -350,6 +357,10 @@ public class ProjectService {
     }
 
     private ProjectAccessPermission getAccessPermission(Project project, User user) {
+        if (project.canBeEditedBy(user)) {
+            return ProjectAccessPermission.DELETE;
+        }
+
         Optional<ProjectParticipant> participant = projectParticipantRepository.findByProjectAndUser(project, user);
 
         if (participant.isEmpty()) {
@@ -362,7 +373,7 @@ public class ProjectService {
             return ProjectAccessPermission.EDIT;
         }
 
-        if (projectParticipant.isLeader() || project.canBeEditedBy(user)) {
+        if (projectParticipant.isLeader()) {
             return ProjectAccessPermission.DELETE;
         }
 

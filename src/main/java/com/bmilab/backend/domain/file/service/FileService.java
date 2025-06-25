@@ -68,10 +68,6 @@ public class FileService {
     public void deleteAllFileByDomainTypeAndEntityId(FileDomainType domainType, Long entityId) {
         List<FileInformation> files = fileInformationRepository.findAllByDomainTypeAndEntityId(domainType, entityId);
 
-        if (files.isEmpty()) {
-            return;
-        }
-
         fileInformationRepository.deleteAll(files);
     }
 }
