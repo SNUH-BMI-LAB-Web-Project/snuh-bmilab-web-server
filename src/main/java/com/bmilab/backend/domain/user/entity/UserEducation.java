@@ -1,6 +1,7 @@
 package com.bmilab.backend.domain.user.entity;
 
 import com.bmilab.backend.domain.user.enums.EnrollmentStatus;
+import com.bmilab.backend.global.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -25,7 +26,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserEducation {
+public class UserEducation extends BaseTimeEntity {
     @Id
     @Column(name = "user_education_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)

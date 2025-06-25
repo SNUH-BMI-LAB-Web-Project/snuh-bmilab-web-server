@@ -2,9 +2,9 @@ package com.bmilab.backend.domain.project.entity;
 
 import com.bmilab.backend.domain.project.enums.TimelineType;
 import com.bmilab.backend.domain.user.entity.User;
+import com.bmilab.backend.global.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -24,7 +24,6 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "timelines")
@@ -32,8 +31,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@EntityListeners(AuditingEntityListener.class)
-public class Timeline {
+public class Timeline extends BaseTimeEntity {
     @Id
     @GeneratedValue
     private Long id;
