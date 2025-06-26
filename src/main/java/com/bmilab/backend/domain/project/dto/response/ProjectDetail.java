@@ -44,6 +44,9 @@ public record ProjectDetail(
         @Schema(description = "연구 분야", example = "NLP")
         ProjectCategory category,
 
+        @Schema(description = "연구 비공개 여부")
+        boolean isPrivate,
+
         @Schema(description = "연구 상태", example = "IN_PROGRESS")
         ProjectStatus status,
 
@@ -96,6 +99,7 @@ public record ProjectDetail(
                                 .toList()
                 )
                 .category(project.getCategory())
+                .isPrivate(project.isPrivate())
                 .status(project.getStatus())
                 .irbId(project.getIrbId())
                 .drbId(project.getDrbId())
