@@ -50,6 +50,9 @@ public record ProjectRequest(
         boolean isWaiting,
 
         @Schema(description = "연구 분야", example = "NLP")
-        ProjectCategory category
+        ProjectCategory category,
+
+        @Schema(description = "연구 비공개 여부")
+        boolean isPrivate
 ) {
 }

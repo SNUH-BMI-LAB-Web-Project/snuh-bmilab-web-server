@@ -95,7 +95,8 @@ public class Project {
             LocalDate startDate,
             LocalDate endDate,
             ProjectCategory category,
-            ProjectStatus status
+            ProjectStatus status,
+            boolean isPrivate
     ) {
         this.title = title;
         this.content = content;
@@ -103,6 +104,7 @@ public class Project {
         this.endDate = endDate;
         this.category = category;
         this.status = status;
+        this.isPrivate = isPrivate;
     }
 
     public void complete(LocalDate endDate) {

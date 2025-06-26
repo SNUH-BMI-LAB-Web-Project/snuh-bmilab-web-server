@@ -90,6 +90,7 @@ public class ProjectService {
                 .irbId(request.irbId())
                 .drbId(request.drbId())
                 .category(request.category())
+                .isPrivate(request.isPrivate())
                 .build();
 
         projectRepository.save(project);
@@ -198,7 +199,8 @@ public class ProjectService {
                 startDate,
                 endDate,
                 request.category(),
-                status
+                status,
+                request.isPrivate()
         );
 
         List<Long> updatedParticipantIds = request.participantIds();
