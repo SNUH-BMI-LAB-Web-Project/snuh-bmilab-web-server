@@ -5,6 +5,7 @@ import com.bmilab.backend.domain.project.dto.request.ProjectRequest;
 import com.bmilab.backend.domain.project.dto.response.ProjectDetail;
 import com.bmilab.backend.domain.project.dto.response.ProjectFileFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse;
+import com.bmilab.backend.domain.project.dto.response.SearchProjectResponse;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.report.dto.response.ReportFindAllResponse;
 import com.bmilab.backend.global.exception.ErrorResponse;
@@ -212,5 +213,20 @@ public interface ProjectApi {
     ResponseEntity<Void> deleteProjectById(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @PathVariable Long projectId
+    );
+
+    @Operation(summary = "연구 검색", description = "연구 이름으로 목록을 간단하게 검색하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "연구 검색 성공"
+                    )
+            }
+    )
+    ResponseEntity<SearchProjectResponse> searchProject(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @RequestParam(required = false, defaultValue = "true") boolean all,
+            @RequestParam(required = false) String keyword
     );
 }
