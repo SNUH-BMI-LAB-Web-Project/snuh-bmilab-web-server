@@ -92,6 +92,21 @@ public class UserService {
 
         result.userInfo().updateComment(request.comment());
         result.userLeave().updateAnnualLeaveCount(request.annualLeaveCount());
+
+        result.user().update(
+                request.name(),
+                request.email(),
+                request.organization(),
+                request.department(),
+                request.affiliation()
+        );
+
+        result.userInfo().update(
+                request.seatNumber(),
+                request.phoneNumber()
+        );
+
+        updateCategories(result.user(), request.newCategoryIds(), request.deletedCategoryIds());
     }
 
     @Transactional
