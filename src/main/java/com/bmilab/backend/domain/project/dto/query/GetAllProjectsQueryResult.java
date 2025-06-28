@@ -1,7 +1,7 @@
 package com.bmilab.backend.domain.project.dto.query;
 
-import com.bmilab.backend.domain.project.enums.ProjectCategory;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
+import com.bmilab.backend.domain.projectcategory.entity.ProjectCategory;
 import com.bmilab.backend.domain.user.entity.User;
 import java.time.LocalDate;
 import java.util.List;
@@ -34,4 +34,6 @@ public class GetAllProjectsQueryResult {
     private ProjectStatus status;
 
     private boolean isPrivate;
+
+    private boolean isAccessible;
 }

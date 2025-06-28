@@ -51,7 +51,6 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
         BooleanExpression userFilter = (all) ? null : project.author.id.eq(userId).or(participantContains);
 
         BooleanExpression titleContains = (keyword != null) ? project.title.containsIgnoreCase(keyword) : null;
-
         return queryFactory
                 .select(
                         Projections.constructor(
@@ -65,9 +64,10 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                 .fetch();
     }
 
+    //TODO: 연구 전체 조회 쿼리 리팩터링하기
     @Override
-    public Page<GetAllProjectsQueryResult> findAllBySearch(String keyword, Pageable pageable,
-                                                           ProjectFilterCondition condition) {
+    public Page<GetAllProjectsQueryResult> findAllByFiltering(Long userId, String keyword, Pageable pageable,
+                                                              ProjectFilterCondition condition) {
 
         QProject project = QProject.project;
         QProjectParticipant participant = QProjectParticipant.projectParticipant;
@@ -105,7 +105,20 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
         BooleanExpression statusFilter = condition.status() != null ? project.status.eq(condition.status()) : null;
 
         BooleanExpression categoryFilter =
-                condition.category() != null ? project.category.eq(condition.category()) : null;
+                condition.categoryId() != null ? project.category.id.eq(condition.categoryId()) : null;
+
+        BooleanExpression isAccessible = userId != null ?
+                project.author.id.eq(userId)
+                        .or(
+                                JPAExpressions.selectOne()
+                                        .from(participant)
+                                        .where(
+                                                participant.user.id.eq(userId),
+                                                participant.project.eq(project)
+                                        )
+                                        .exists()
+                        )
+                : null;
 
         List<GetAllProjectsQueryResult> results = queryFactory
                 .select(Projections.constructor(
@@ -125,7 +138,8 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                                 "participantCount"
                         ),
                         project.status,
-                        project.isPrivate
+                        project.isPrivate,
+                        isAccessible
                 ))
                 .from(project)
                 .where(

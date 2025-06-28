@@ -5,7 +5,6 @@ import com.bmilab.backend.domain.project.dto.request.ProjectRequest;
 import com.bmilab.backend.domain.project.dto.response.ProjectDetail;
 import com.bmilab.backend.domain.project.dto.response.ProjectFileFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse;
-import com.bmilab.backend.domain.project.enums.ProjectCategory;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.report.dto.response.ReportFindAllResponse;
 import com.bmilab.backend.global.exception.ErrorResponse;
@@ -167,9 +166,10 @@ public interface ProjectApi {
     )
     @PageableAsQueryParam
     ResponseEntity<ProjectFindAllResponse> getAllProjects(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Long leaderId,
-            @RequestParam(required = false) ProjectCategory category,
+            @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) ProjectStatus status,
             @RequestParam(required = false) String pi,
             @RequestParam(required = false) String practicalProfessor,
@@ -185,7 +185,10 @@ public interface ProjectApi {
                     )
             }
     )
-    ResponseEntity<ProjectDetail> getProjectById(@PathVariable Long projectId);
+    ResponseEntity<ProjectDetail> getProjectById(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long projectId
+    );
 
     @Operation(summary = "연구 삭제", description = "연구 삭제하는 DELETE API")
     @ApiResponses(

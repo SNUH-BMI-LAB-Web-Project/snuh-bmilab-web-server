@@ -8,8 +8,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface ProjectRepositoryCustom {
-    Page<GetAllProjectsQueryResult> findAllBySearch(String keyword, Pageable pageable,
-                                                    ProjectFilterCondition condition);
+    Page<GetAllProjectsQueryResult> findAllByFiltering(Long userId, String keyword, Pageable pageable,
+                                                       ProjectFilterCondition condition);
 
     List<SearchProjectQueryResult> searchProject(Long userId, boolean all, String keyword);
 }

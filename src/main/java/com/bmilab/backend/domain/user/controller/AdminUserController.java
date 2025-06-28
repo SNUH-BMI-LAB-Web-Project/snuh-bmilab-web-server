@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
-@RequestMapping("/admin/users")
-@RequiredArgsConstructor
 @OnlyAdmin
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/admin/users")
 public class AdminUserController implements AdminUserApi {
     private final AuthService authService;
     private final UserService userService;

@@ -29,6 +29,8 @@ import com.bmilab.backend.domain.project.repository.ProjectFileRepository;
 import com.bmilab.backend.domain.project.repository.ProjectParticipantRepository;
 import com.bmilab.backend.domain.project.repository.ProjectRepository;
 import com.bmilab.backend.domain.project.repository.TimelineRepository;
+import com.bmilab.backend.domain.projectcategory.entity.ProjectCategory;
+import com.bmilab.backend.domain.projectcategory.service.ProjectCategoryService;
 import com.bmilab.backend.domain.report.dto.query.GetAllReportsQueryResult;
 import com.bmilab.backend.domain.report.dto.response.ReportFindAllResponse;
 import com.bmilab.backend.domain.report.repository.ReportRepository;
@@ -64,6 +66,7 @@ public class ProjectService {
     private final TimelineRepository timelineRepository;
     private final ReportRepository reportRepository;
     private final UserService userService;
+    private final ProjectCategoryService projectCategoryService;
 
     public Project findProjectById(Long projectId) {
         return projectRepository.findById(projectId)
@@ -77,6 +80,7 @@ public class ProjectService {
         LocalDate startDate = request.startDate();
         LocalDate endDate = request.endDate();
         ProjectStatus status = (request.isWaiting()) ? ProjectStatus.WAITING : calculateProjectStatus(startDate, endDate);
+        ProjectCategory category = projectCategoryService.findProjectCategoryById(request.categoryId());
 
         Project project = Project.builder()
                 .title(request.title())
@@ -89,7 +93,7 @@ public class ProjectService {
                 .practicalProfessor(request.practicalProfessor())
                 .irbId(request.irbId())
                 .drbId(request.drbId())
-                .category(request.category())
+                .category(category)
                 .isPrivate(request.isPrivate())
                 .build();
 
@@ -156,8 +160,8 @@ public class ProjectService {
         files.forEach(file -> file.updateDomain(FileDomainType.PROJECT, project.getId()));
     }
 
-    public ProjectFindAllResponse getAllProjects(Pageable pageable, String search, ProjectFilterCondition condition) {
-        Page<GetAllProjectsQueryResult> queryResults = projectRepository.findAllBySearch(search, pageable, condition);
+    public ProjectFindAllResponse getAllProjects(Long userId, Pageable pageable, String search, ProjectFilterCondition condition) {
+        Page<GetAllProjectsQueryResult> queryResults = projectRepository.findAllByFiltering(userId, search, pageable, condition);
 
         return ProjectFindAllResponse
                 .builder()
@@ -171,14 +175,17 @@ public class ProjectService {
                 .build();
     }
 
-    public ProjectDetail getProjectDetailById(Long projectId) {
+    public ProjectDetail getProjectDetailById(Long userId, Long projectId) {
         Project project = findProjectById(projectId);
+        User user = userService.findUserById(userId);
 
         List<ProjectParticipant> participants = projectParticipantRepository.findAllByProjectId(projectId);
 
         List<ProjectFile> projectFiles = projectFileRepository.findAllByProjectId(projectId);
 
-        return ProjectDetail.from(project, participants, projectFiles);
+        boolean isAccessible = !getAccessPermission(project, user).isNotGranted(ProjectAccessPermission.EDIT);
+
+        return ProjectDetail.from(project, participants, projectFiles, isAccessible);
     }
 
     @Transactional
@@ -187,6 +194,7 @@ public class ProjectService {
         Project project = findProjectById(projectId);
         LocalDate startDate = request.startDate();
         LocalDate endDate = request.endDate();
+        ProjectCategory category = projectCategoryService.findProjectCategoryById(request.categoryId());
 
         ProjectStatus status =
                 (request.isWaiting()) ? ProjectStatus.WAITING : calculateProjectStatus(startDate, endDate);
@@ -198,7 +206,7 @@ public class ProjectService {
                 request.content(),
                 startDate,
                 endDate,
-                request.category(),
+                category,
                 status,
                 request.isPrivate()
         );
@@ -225,14 +233,7 @@ public class ProjectService {
         validateProjectAccessPermission(project, user, ProjectAccessPermission.DELETE, false);
 
         fileService.deleteAllFileByDomainTypeAndEntityId(FileDomainType.PROJECT, project.getId());
-        log.info("Deleting project with id = {}", projectId);
-        boolean exists = projectRepository.existsById(projectId);
-        log.info("Project exists before delete? {}", exists);
-
         projectRepository.deleteById(projectId);
-
-        boolean stillExists = projectRepository.existsById(projectId);
-        log.info("Project exists after delete? {}", stillExists);
     }
 
     @Transactional

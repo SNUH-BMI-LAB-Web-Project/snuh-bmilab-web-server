@@ -7,7 +7,6 @@ import com.bmilab.backend.domain.project.dto.response.ProjectDetail;
 import com.bmilab.backend.domain.project.dto.response.ProjectFileFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.SearchProjectResponse;
-import com.bmilab.backend.domain.project.enums.ProjectCategory;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.project.service.ProjectService;
 import com.bmilab.backend.domain.report.dto.response.ReportFindAllResponse;
@@ -99,14 +98,16 @@ public class ProjectController implements ProjectApi {
             @RequestParam(required = false) LocalDate endDate
     ) {
 
-        return ResponseEntity.ok(projectService.getReportsByProject(userAuthInfo.getUserId(), projectId, userId, startDate, endDate));
+        return ResponseEntity.ok(
+                projectService.getReportsByProject(userAuthInfo.getUserId(), projectId, userId, startDate, endDate));
     }
 
     @GetMapping
     public ResponseEntity<ProjectFindAllResponse> getAllProjects(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Long leaderId,
-            @RequestParam(required = false) ProjectCategory category,
+            @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) ProjectStatus status,
             @RequestParam(required = false) String pi,
             @RequestParam(required = false) String practicalProfessor,
@@ -114,14 +115,18 @@ public class ProjectController implements ProjectApi {
     ) {
 
         return ResponseEntity.ok(
-                projectService.getAllProjects(pageable, search, ProjectFilterCondition.of(leaderId, category, status, pi, practicalProfessor))
+                projectService.getAllProjects(userAuthInfo.getUserId(), pageable, search,
+                        ProjectFilterCondition.of(leaderId, categoryId, status, pi, practicalProfessor))
         );
     }
 
     @GetMapping("/{projectId}")
-    public ResponseEntity<ProjectDetail> getProjectById(@PathVariable Long projectId) {
+    public ResponseEntity<ProjectDetail> getProjectById(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long projectId
+    ) {
 
-        return ResponseEntity.ok(projectService.getProjectDetailById(projectId));
+        return ResponseEntity.ok(projectService.getProjectDetailById(userAuthInfo.getUserId(), projectId));
     }
 
     @DeleteMapping("/{projectId}")
