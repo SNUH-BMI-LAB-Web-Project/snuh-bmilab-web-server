@@ -31,11 +31,6 @@ public class AdminProjectCategoryController implements AdminProjectCategoryApi {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping
-    public ResponseEntity<ProjectCategoryFindAllResponse> getAllProjectCategories() {
-        return ResponseEntity.ok(projectCategoryService.getAllProjectCategories());
-    }
-
     @PutMapping("/{categoryId}")
     public ResponseEntity<Void> updateProjectCategory(
             @PathVariable Long categoryId,
