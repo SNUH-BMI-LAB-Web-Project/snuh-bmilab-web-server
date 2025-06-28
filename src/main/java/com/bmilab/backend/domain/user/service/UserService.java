@@ -57,8 +57,8 @@ public class UserService {
         return userRepository.findAllById(userIds);
     }
 
-    public UserFindAllResponse getAllUsers(int pageNo, String criteria) {
-        PageRequest pageRequest = PageRequest.of(pageNo, 10, Sort.by(Direction.DESC, criteria));
+    public UserFindAllResponse getAllUsers(int pageNo, int size, String criteria) {
+        PageRequest pageRequest = PageRequest.of(pageNo, size, Sort.by(Direction.DESC, criteria));
 
         Page<UserInfoQueryResult> results = userRepository.findAllUserInfosPagination(pageRequest);
 

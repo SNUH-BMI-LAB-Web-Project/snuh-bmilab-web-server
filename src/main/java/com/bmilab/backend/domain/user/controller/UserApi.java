@@ -36,6 +36,7 @@ public interface UserApi {
     )
     ResponseEntity<UserFindAllResponse> getAllUsers(
             @RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
+            @RequestParam(required = false, defaultValue = "10") int size,
             @RequestParam(required = false, defaultValue = "createdAt", value = "criteria") String criteria);
 
     @Operation(summary = "현재 사용자 정보 상세 조회", description = "현재 로그인한 사용자 정보를 상세 조회하는 GET API")

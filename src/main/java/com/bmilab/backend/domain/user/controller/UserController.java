@@ -33,9 +33,11 @@ public class UserController implements UserApi {
     @GetMapping
     public ResponseEntity<UserFindAllResponse> getAllUsers(
             @RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
-            @RequestParam(required = false, defaultValue = "createdAt", value = "criteria") String criteria) {
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "createdAt", value = "criteria") String criteria
+    ) {
 
-        return ResponseEntity.ok(userService.getAllUsers(pageNo, criteria));
+        return ResponseEntity.ok(userService.getAllUsers(pageNo, size, criteria));
     }
 
     @GetMapping("/search")
