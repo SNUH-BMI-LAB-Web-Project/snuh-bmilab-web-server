@@ -43,7 +43,6 @@ public class ProjectUpdateEventListener {
                                 .name(dto.name())
                                 .organization(dto.organization())
                                 .department(dto.department())
-                                .affiliation(dto.affiliation())
                                 .build()
                 )
                 .forEach(externalProfessorRepository::save);

@@ -420,7 +420,7 @@ public class ProjectService {
     }
 
     private String convertToExProfessorString(ExternalProfessorSummary exProfessor) {
-        return exProfessor.name() + "/" + exProfessor.organization() + "/" + exProfessor.department() + "/" + exProfessor.affiliation();
+        return exProfessor.name() + "/" + exProfessor.organization() + "/" + exProfessor.department();
     }
 
     private void validateProjectAccessPermission(Project project, User user, ProjectAccessPermission permission,

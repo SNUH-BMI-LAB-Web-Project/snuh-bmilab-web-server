@@ -33,7 +33,4 @@ public class ExternalProfessor extends BaseTimeEntity {
 
     @Column(nullable = false)
     private String department;
-
-    @Column(nullable = false)
-    private String affiliation;
 }

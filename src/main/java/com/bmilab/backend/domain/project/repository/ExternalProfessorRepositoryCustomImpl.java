@@ -6,7 +6,6 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -24,7 +23,6 @@ public class ExternalProfessorRepositoryCustomImpl implements ExternalProfessorR
                         ep.name.eq(key.name())
                                 .and(ep.organization.eq(key.organization()))
                                 .and(ep.department.eq(key.department()))
-                                .and(ep.affiliation.eq(key.affiliation()))
                 )
         );
 
@@ -33,8 +31,7 @@ public class ExternalProfessorRepositoryCustomImpl implements ExternalProfessorR
                         ExternalProfessorSummary.class,
                         ep.name,
                         ep.organization,
-                        ep.department,
-                        ep.affiliation
+                        ep.department
                 ))
                 .from(ep)
                 .where(conditionBuilder)
