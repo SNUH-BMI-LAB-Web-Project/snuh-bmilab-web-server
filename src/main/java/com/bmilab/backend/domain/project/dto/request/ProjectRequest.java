@@ -1,5 +1,6 @@
 package com.bmilab.backend.domain.project.dto.request;
 
+import com.bmilab.backend.domain.project.dto.ExternalProfessorSummary;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.List;
@@ -24,11 +25,11 @@ public record ProjectRequest(
         @Schema(description = "연구 종료일 (있으면)", example = "2025-06-30")
         LocalDate endDate,
 
-        @Schema(description = "PI", example = "김광수")
-        String pi,
+        @Schema(description = "PI")
+        List<ExternalProfessorSummary> piList,
 
-        @Schema(description = "실무 교수", example = "김광수")
-        String practicalProfessor,
+        @Schema(description = "실무 교수")
+        List<ExternalProfessorSummary> practicalProfessors,
 
         @Schema(description = "IRB 번호 (있으면)", example = "IRB-DSEB-...")
         String irbId,
