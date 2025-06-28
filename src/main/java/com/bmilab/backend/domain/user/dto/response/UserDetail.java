@@ -8,6 +8,7 @@ import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.entity.UserEducation;
 import com.bmilab.backend.domain.user.entity.UserInfo;
 import com.bmilab.backend.domain.user.enums.Role;
+import com.bmilab.backend.domain.user.enums.UserAffiliation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.List;
@@ -30,8 +31,8 @@ public record UserDetail(
         @Schema(description = "부서", example = "개발팀")
         String department,
 
-        @Schema(description = "소속 (있으면)", example = "소속")
-        String affiliation,
+        @Schema(description = "소속 (있으면)", example = "MASTERS_STUDENT")
+        UserAffiliation affiliation,
 
         @Schema(description = "사용자 역할", example = "USER")
         Role role,

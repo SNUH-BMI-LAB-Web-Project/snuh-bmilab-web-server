@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/project-categories")
 @RequiredArgsConstructor
-public class ProjectCategoryController {
+public class ProjectCategoryController implements ProjectCategoryApi {
     private final ProjectCategoryService projectCategoryService;
 
     @GetMapping

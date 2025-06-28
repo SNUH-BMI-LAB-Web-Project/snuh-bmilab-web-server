@@ -1,5 +1,6 @@
 package com.bmilab.backend.domain.user.dto.request;
 
+import com.bmilab.backend.domain.user.enums.UserAffiliation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.List;
@@ -20,8 +21,8 @@ public record RegisterUserRequest(
         @Schema(description = "부서", example = "개발팀")
         String department,
 
-        @Schema(description = "소속 (있으면)", example = "소속")
-        String affiliation,
+        @Schema(description = "소속 (있으면)", example = "MASTERS_STUDENT")
+        UserAffiliation affiliation,
 
         @Schema(description = "총 연차 개수", example = "15.0")
         Double annualLeaveCount,

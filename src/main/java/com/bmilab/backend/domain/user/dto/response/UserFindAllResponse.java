@@ -4,6 +4,7 @@ import com.bmilab.backend.domain.projectcategory.dto.response.ProjectCategorySum
 import com.bmilab.backend.domain.user.dto.query.UserInfoQueryResult;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.entity.UserInfo;
+import com.bmilab.backend.domain.user.enums.UserAffiliation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 import lombok.Builder;
@@ -40,8 +41,8 @@ public record UserFindAllResponse(
             @Schema(description = "부서", example = "개발팀")
             String department,
 
-            @Schema(description = "소속 (있으면)", example = "소속")
-            String affiliation,
+            @Schema(description = "소속 (있으면)", example = "MASTERS_STUDENT")
+            UserAffiliation affiliation,
 
             @Schema(description = "프로필 이미지 URL", example = "https://cdn.example.com/profiles/user1.png")
             String profileImageUrl,
