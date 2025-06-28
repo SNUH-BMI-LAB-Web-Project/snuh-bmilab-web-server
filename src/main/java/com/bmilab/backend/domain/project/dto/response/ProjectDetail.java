@@ -83,6 +83,9 @@ public record ProjectDetail(
         Map<Boolean, List<ProjectParticipant>> leaderPartitioned = participants.stream()
                 .collect(Collectors.partitioningBy(ProjectParticipant::isLeader));
 
+        String pi = project.getPi();
+        String practicalProfessor = project.getPracticalProfessor();
+
         return ProjectDetail
                 .builder()
                 .projectId(project.getId())
@@ -110,14 +113,16 @@ public record ProjectDetail(
                 .irbId(project.getIrbId())
                 .drbId(project.getDrbId())
                 .piList(
-                        project.getPIList().stream()
-                                .map(ExternalProfessorSummary::from)
-                                .toList()
+                        pi == null ? List.of() :
+                                project.getPIList().stream()
+                                        .map(ExternalProfessorSummary::from)
+                                        .toList()
                 )
                 .practicalProfessors(
-                        project.getPracticalProfessorList().stream()
-                                .map(ExternalProfessorSummary::from)
-                                .toList()
+                        practicalProfessor == null ? List.of() :
+                                project.getPracticalProfessorList().stream()
+                                        .map(ExternalProfessorSummary::from)
+                                        .toList()
                 )
                 .files(projectFiles.stream()
                         .filter(file -> file.getType() == ProjectFileType.GENERAL)

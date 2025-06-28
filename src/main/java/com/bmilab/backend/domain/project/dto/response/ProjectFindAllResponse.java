@@ -8,6 +8,8 @@ import com.bmilab.backend.domain.user.dto.response.UserSummary;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import lombok.Builder;
 
@@ -56,6 +58,9 @@ public record ProjectFindAllResponse(
             boolean isAccessible
     ) {
         public static ProjectSummary from(GetAllProjectsQueryResult queryResult) {
+            String pi = queryResult.getPi();
+            String practicalProfessor = queryResult.getPracticalProfessor();
+
             return ProjectSummary.builder()
                     .projectId(queryResult.getProjectId())
                     .title(queryResult.getTitle())
@@ -63,12 +68,14 @@ public record ProjectFindAllResponse(
                     .startDate(queryResult.getStartDate())
                     .endDate(queryResult.getEndDate())
                     .piList(
-                            Arrays.stream(queryResult.getPi().split(","))
-                                    .map(ExternalProfessorSummary::from).toList()
+                            pi == null ? List.of() :
+                                    Arrays.stream(pi.split(","))
+                                            .map(ExternalProfessorSummary::from).toList()
                     )
                     .practicalProfessors(
-                            Arrays.stream(queryResult.getPracticalProfessor().split(","))
-                                    .map(ExternalProfessorSummary::from).toList()
+                            practicalProfessor == null ? List.of() :
+                                    Arrays.stream(practicalProfessor.split(","))
+                                            .map(ExternalProfessorSummary::from).toList()
                     )
                     .leaders(queryResult.getLeaders()
                             .stream()

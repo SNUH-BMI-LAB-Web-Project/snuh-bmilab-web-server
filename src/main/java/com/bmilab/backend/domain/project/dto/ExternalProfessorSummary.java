@@ -6,6 +6,10 @@ public record ExternalProfessorSummary(
         String department
 ) {
     public static ExternalProfessorSummary from(String exProfessorString) {
+        if (exProfessorString == null) {
+            return new ExternalProfessorSummary(null, null, null);
+        }
+
         String[] split = exProfessorString.split("/");
 
         if (split.length != 3) {
