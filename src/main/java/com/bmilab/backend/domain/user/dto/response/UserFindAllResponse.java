@@ -60,8 +60,8 @@ public record UserFindAllResponse(
             String education
     ) {
         public static UserItem from(UserInfoQueryResult queryResult) {
-            User user = queryResult.user();
-            UserInfo userInfo = queryResult.userInfo();
+            User user = queryResult.getUser();
+            UserInfo userInfo = queryResult.getUserInfo();
 
             return UserItem.builder()
                     .userId(user.getId())
@@ -72,7 +72,7 @@ public record UserFindAllResponse(
                     .affiliation(user.getAffiliation())
                     .profileImageUrl(user.getProfileImageUrl())
                     .categories(
-                            queryResult.categories()
+                            queryResult.getCategories()
                                     .stream()
                                     .map(ProjectCategorySummary::from)
                                     .toList()
