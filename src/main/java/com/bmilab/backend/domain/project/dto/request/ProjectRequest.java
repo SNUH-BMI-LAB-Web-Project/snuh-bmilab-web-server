@@ -1,6 +1,5 @@
 package com.bmilab.backend.domain.project.dto.request;
 
-import com.bmilab.backend.domain.project.enums.ProjectCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.List;
@@ -49,8 +48,8 @@ public record ProjectRequest(
         @Schema(description = "대기 상태 여부", example = "false")
         boolean isWaiting,
 
-        @Schema(description = "연구 분야", example = "NLP")
-        ProjectCategory category,
+        @Schema(description = "연구 분야 아이디", example = "1")
+        Long categoryId,
 
         @Schema(description = "연구 비공개 여부")
         boolean isPrivate

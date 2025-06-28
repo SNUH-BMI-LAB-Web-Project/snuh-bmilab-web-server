@@ -1,7 +1,8 @@
 package com.bmilab.backend.domain.user.dto.response;
 
 import com.bmilab.backend.domain.leave.entity.UserLeave;
-import com.bmilab.backend.domain.project.enums.ProjectCategory;
+import com.bmilab.backend.domain.projectcategory.dto.response.ProjectCategorySummary;
+import com.bmilab.backend.domain.projectcategory.entity.ProjectCategory;
 import com.bmilab.backend.domain.user.dto.query.UserDetailQueryResult;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.entity.UserEducation;
@@ -9,7 +10,6 @@ import com.bmilab.backend.domain.user.entity.UserInfo;
 import com.bmilab.backend.domain.user.enums.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 import lombok.Builder;
 
@@ -45,8 +45,8 @@ public record UserDetail(
         @Schema(description = "사용한 연차 수", example = "3.5")
         Double usedLeaveCount,
 
-        @Schema(description = "연구 분야 목록", example = "[\"NLP\", \"Bioinformatics\"]")
-        List<ProjectCategory> categories,
+        @Schema(description = "연구 분야 목록")
+        List<ProjectCategorySummary> categories,
 
         @Schema(description = "좌석 번호", example = "12-30")
         String seatNumber,
@@ -63,7 +63,12 @@ public record UserDetail(
         @Schema(description = "입사일", example = "2023-03-01")
         LocalDate joinedAt
 ) {
-    public static UserDetail from(UserDetailQueryResult queryResult, List<UserEducation> educations, boolean includeComment) {
+    public static UserDetail from(
+            UserDetailQueryResult queryResult,
+            List<UserEducation> educations,
+            List<ProjectCategory> categories,
+            boolean includeComment
+    ) {
         User user = queryResult.user();
         UserLeave userLeave = queryResult.userLeave();
         UserInfo userInfo = queryResult.userInfo();
@@ -81,11 +86,7 @@ public record UserDetail(
                 .comment((includeComment) ? userInfo.getComment() : null)
                 .annualLeaveCount(userLeave.getAnnualLeaveCount())
                 .usedLeaveCount(userLeave.getUsedLeaveCount())
-                .categories(
-                        Arrays.stream(userInfo.getCategory().split(","))
-                                .map(ProjectCategory::valueOf)
-                                .toList()
-                )
+                .categories(categories.stream().map(ProjectCategorySummary::from).toList())
                 .seatNumber(userInfo.getSeatNumber())
                 .phoneNumber(userInfo.getPhoneNumber())
                 .educations(educations.stream().map(UserEducationSummary::from).toList())

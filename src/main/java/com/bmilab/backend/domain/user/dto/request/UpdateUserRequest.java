@@ -1,6 +1,5 @@
 package com.bmilab.backend.domain.user.dto.request;
 
-import com.bmilab.backend.domain.project.enums.ProjectCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.util.List;
 
@@ -20,8 +19,11 @@ public record UpdateUserRequest(
         @Schema(description = "소속 (있으면)", example = "소속")
         String affiliation,
 
-        @Schema(description = "연구 분야 목록", example = "[\"NLP\", \"BIOINFORMATICS\"]")
-        List<ProjectCategory> categories,
+        @Schema(description = "추가된 연구 분야 ID 목록", example = "[1, 2, 3]")
+        List<Long> newCategoryIds,
+
+        @Schema(description = "삭제된 연구 분야 ID 목록", example = "[1, 2, 3]")
+        List<Long> deletedCategoryIds,
 
         @Schema(description = "전화번호", example = "010-5678-1234")
         String phoneNumber,

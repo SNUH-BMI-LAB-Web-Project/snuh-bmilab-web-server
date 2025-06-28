@@ -1,11 +1,10 @@
 package com.bmilab.backend.domain.user.dto.response;
 
-import com.bmilab.backend.domain.project.enums.ProjectCategory;
+import com.bmilab.backend.domain.projectcategory.dto.response.ProjectCategorySummary;
 import com.bmilab.backend.domain.user.dto.query.UserInfoQueryResult;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.entity.UserInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.Arrays;
 import java.util.List;
 import lombok.Builder;
 import org.springframework.data.domain.Page;
@@ -47,8 +46,8 @@ public record UserFindAllResponse(
             @Schema(description = "프로필 이미지 URL", example = "https://cdn.example.com/profiles/user1.png")
             String profileImageUrl,
 
-            @Schema(description = "연구 분야 목록", example = "[\"NLP\", \"Bioinformatics\"]")
-            List<ProjectCategory> categories,
+            @Schema(description = "연구 분야 목록")
+            List<ProjectCategorySummary> categories,
 
             @Schema(description = "좌석 번호", example = "12-30")
             String seatNumber,
@@ -72,8 +71,9 @@ public record UserFindAllResponse(
                     .affiliation(user.getAffiliation())
                     .profileImageUrl(user.getProfileImageUrl())
                     .categories(
-                            Arrays.stream(userInfo.getCategory().split(","))
-                                    .map(ProjectCategory::valueOf)
+                            queryResult.categories()
+                                    .stream()
+                                    .map(ProjectCategorySummary::from)
                                     .toList()
                     )
                     .seatNumber(userInfo.getSeatNumber())

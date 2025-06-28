@@ -2,23 +2,16 @@ package com.bmilab.backend.domain.user.service;
 
 import com.bmilab.backend.domain.leave.entity.UserLeave;
 import com.bmilab.backend.domain.leave.repository.UserLeaveRepository;
-import com.bmilab.backend.domain.project.enums.ProjectCategory;
 import com.bmilab.backend.domain.user.dto.request.LoginRequest;
 import com.bmilab.backend.domain.user.dto.request.RegisterUserRequest;
-import com.bmilab.backend.domain.user.dto.request.UserEducationRequest;
 import com.bmilab.backend.domain.user.dto.response.LoginResponse;
 import com.bmilab.backend.domain.user.entity.User;
-import com.bmilab.backend.domain.user.entity.UserEducation;
-import com.bmilab.backend.domain.user.entity.UserInfo;
 import com.bmilab.backend.domain.user.enums.Role;
 import com.bmilab.backend.domain.user.exception.UserErrorCode;
-import com.bmilab.backend.domain.user.repository.UserEducationRepository;
-import com.bmilab.backend.domain.user.repository.UserInfoRepository;
 import com.bmilab.backend.domain.user.repository.UserRepository;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.jwt.TokenProvider;
 import java.time.Duration;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,8 +26,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
     private final UserLeaveRepository userLeaveRepository;
-    private final UserInfoRepository userInfoRepository;
-    private final UserEducationRepository userEducationRepository;
+    private final UserService userService;
 
     public LoginResponse login(@RequestBody LoginRequest request) {
         User user = userRepository.findByEmail(request.email())
@@ -71,41 +63,8 @@ public class AuthService {
 
         userLeaveRepository.save(userLeave);
 
-        UserInfo userInfo = UserInfo.builder()
-                .user(user)
-                .seatNumber(request.seatNumber())
-                .phoneNumber(request.phoneNumber())
-                .joinedAt(request.joinedAt())
-                .category(
-                        String.join(",",
-                                request.categories()
-                                        .stream()
-                                        .map(ProjectCategory::name)
-                                        .toList()
-                        )
-                )
-                .build();
-
-        userInfoRepository.save(userInfo);
-
-        List<UserEducationRequest> educationRequests = request.educations();
-
-        if (educationRequests.isEmpty()) {
-            return;
-        }
-
-        List<UserEducation> educations = educationRequests.stream()
-                .map(it ->
-                        UserEducation.builder()
-                                .user(user)
-                                .title(it.title())
-                                .startYearMonth(it.startYearMonth())
-                                .endYearMonth(it.endYearMonth())
-                                .status(it.status())
-                                .build()
-                )
-                .toList();
-
-        userEducationRepository.saveAll(educations);
+        userService.saveUserInfo(user, request.seatNumber(), request.phoneNumber(), request.joinedAt());
+        userService.saveUserEducations(user, request.educations());
+        userService.saveUserCategories(user, request.categoryIds());
     }
 }

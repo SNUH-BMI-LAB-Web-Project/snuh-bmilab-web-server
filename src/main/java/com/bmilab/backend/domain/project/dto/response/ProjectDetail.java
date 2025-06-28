@@ -3,9 +3,9 @@ package com.bmilab.backend.domain.project.dto.response;
 import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.project.entity.ProjectFile;
 import com.bmilab.backend.domain.project.entity.ProjectParticipant;
-import com.bmilab.backend.domain.project.enums.ProjectCategory;
 import com.bmilab.backend.domain.project.enums.ProjectFileType;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
+import com.bmilab.backend.domain.projectcategory.dto.response.ProjectCategorySummary;
 import com.bmilab.backend.domain.user.dto.response.UserSummary;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
@@ -42,10 +42,13 @@ public record ProjectDetail(
         List<UserSummary> participants,
 
         @Schema(description = "연구 분야", example = "NLP")
-        ProjectCategory category,
+        ProjectCategorySummary category,
 
         @Schema(description = "연구 비공개 여부")
         boolean isPrivate,
+
+        @Schema(description = "연구 페이지 접근 가능 여부")
+        boolean isAccessible,
 
         @Schema(description = "연구 상태", example = "IN_PROGRESS")
         ProjectStatus status,
@@ -74,7 +77,7 @@ public record ProjectDetail(
         @Schema(description = "연구 생성 시각", example = "2025-04-22T10:15:00")
         LocalDateTime createdAt
 ) {
-    public static ProjectDetail from(Project project, List<ProjectParticipant> participants, List<ProjectFile> projectFiles) {
+    public static ProjectDetail from(Project project, List<ProjectParticipant> participants, List<ProjectFile> projectFiles, boolean isAccessible) {
         Map<Boolean, List<ProjectParticipant>> leaderPartitioned = participants.stream()
                 .collect(Collectors.partitioningBy(ProjectParticipant::isLeader));
 
@@ -98,8 +101,9 @@ public record ProjectDetail(
                                 .map(it -> UserSummary.from(it.getUser()))
                                 .toList()
                 )
-                .category(project.getCategory())
+                .category(ProjectCategorySummary.from(project.getCategory()))
                 .isPrivate(project.isPrivate())
+                .isAccessible(isAccessible)
                 .status(project.getStatus())
                 .irbId(project.getIrbId())
                 .drbId(project.getDrbId())

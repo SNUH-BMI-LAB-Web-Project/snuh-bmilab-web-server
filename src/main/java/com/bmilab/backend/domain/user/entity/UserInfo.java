@@ -1,6 +1,5 @@
 package com.bmilab.backend.domain.user.entity;
 
-import com.bmilab.backend.domain.project.enums.ProjectCategory;
 import com.bmilab.backend.global.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,8 +34,6 @@ public class UserInfo extends BaseTimeEntity {
     @JoinColumn(name = "user_id", unique = true, nullable = false)
     private User user;
 
-    private String category;
-
     @Column(name = "seat_num")
     private String seatNumber;
 
@@ -54,8 +51,7 @@ public class UserInfo extends BaseTimeEntity {
         this.comment = comment;
     }
 
-    public void update(List<ProjectCategory> categories, String seatNumber, String phoneNumber) {
-        this.category = String.join(",", categories.stream().map(ProjectCategory::name).toList());
+    public void update(String seatNumber, String phoneNumber) {
         this.seatNumber = seatNumber;
         this.phoneNumber = phoneNumber;
     }

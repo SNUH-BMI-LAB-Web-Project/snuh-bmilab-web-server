@@ -1,5 +1,6 @@
 package com.bmilab.backend.domain.user.service;
 
+import com.bmilab.backend.domain.projectcategory.entity.ProjectCategory;
 import com.bmilab.backend.domain.user.dto.query.UserDetailQueryResult;
 import com.bmilab.backend.domain.user.dto.query.UserInfoQueryResult;
 import com.bmilab.backend.domain.user.dto.request.UserEducationRequest;
@@ -11,12 +12,17 @@ import com.bmilab.backend.domain.user.dto.response.UserDetail;
 import com.bmilab.backend.domain.user.dto.response.UserFindAllResponse;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.entity.UserEducation;
+import com.bmilab.backend.domain.user.entity.UserInfo;
+import com.bmilab.backend.domain.user.entity.UserProjectCategory;
 import com.bmilab.backend.domain.user.event.UserEducationUpdateEvent;
 import com.bmilab.backend.domain.user.exception.UserErrorCode;
 import com.bmilab.backend.domain.user.repository.UserEducationRepository;
+import com.bmilab.backend.domain.user.repository.UserInfoRepository;
+import com.bmilab.backend.domain.user.repository.UserProjectCategoryRepository;
 import com.bmilab.backend.domain.user.repository.UserRepository;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.external.s3.S3Service;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
@@ -37,8 +43,10 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final S3Service s3Service;
-    private final UserEducationRepository userEducationRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final UserEducationRepository userEducationRepository;
+    private final UserProjectCategoryRepository userProjectCategoryRepository;
+    private final UserInfoRepository userInfoRepository;
 
     public User findUserById(Long userId) {
         return userRepository.findById(userId)
@@ -57,20 +65,24 @@ public class UserService {
         return UserFindAllResponse.of(results);
     }
 
-    public UserDetail getUserDetailById(long userId) {
-        UserDetailQueryResult result = userRepository.findUserDetailsById(userId)
-                .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
-        List<UserEducation> educations = userEducationRepository.findAllByUser(result.user());
-
-        return UserDetail.from(result, educations, true);
+    public UserDetail getUserDetailById(Long userId) {
+        return getUserDetailById(userId, true);
     }
 
     public UserDetail getCurrentUser(Long userId) {
+        return getUserDetailById(userId, false);
+    }
+
+    private UserDetail getUserDetailById(Long userId, boolean includeComment) {
         UserDetailQueryResult result = userRepository.findUserDetailsById(userId)
                 .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
         List<UserEducation> educations = userEducationRepository.findAllByUser(result.user());
+        List<ProjectCategory> categories = userProjectCategoryRepository.findAllByUser(result.user())
+                .stream()
+                .map(UserProjectCategory::getCategory)
+                .toList();
 
-        return UserDetail.from(result, educations, false);
+        return UserDetail.from(result, educations, categories, includeComment);
     }
 
     @Transactional
@@ -117,10 +129,51 @@ public class UserService {
         );
 
         result.userInfo().update(
-                request.categories(),
                 request.seatNumber(),
                 request.phoneNumber()
         );
+
+        updateCategories(result.user(), request.newCategoryIds(), request.deletedCategoryIds());
+    }
+
+    private void updateCategories(User user, List<Long> newCategoryIds, List<Long> deletedCategoryIds) {
+        saveUserCategories(user, newCategoryIds);
+        deletedCategoryIds.forEach(userProjectCategoryRepository::deleteById);
+    }
+
+    public void saveUserCategories(User user, List<Long> newCategoryIds) {
+        newCategoryIds.stream().map((newCategoryId) ->
+                        UserProjectCategory.builder()
+                                .user(user)
+                                .category(ProjectCategory.builder().id(newCategoryId).build())
+                                .build()
+                )
+                .forEach(userProjectCategoryRepository::save);
+    }
+
+    public void saveUserInfo(User user, String seatNumber, String phoneNumber, LocalDate joinedAt) {
+        UserInfo userInfo = UserInfo.builder()
+                .user(user)
+                .seatNumber(seatNumber)
+                .phoneNumber(phoneNumber)
+                .joinedAt(joinedAt)
+                .build();
+
+        userInfoRepository.save(userInfo);
+    }
+
+    public void saveUserEducations(User user, List<UserEducationRequest> educationRequests) {
+        educationRequests.stream()
+                .map(it ->
+                        UserEducation.builder()
+                                .user(user)
+                                .title(it.title())
+                                .startYearMonth(it.startYearMonth())
+                                .endYearMonth(it.endYearMonth())
+                                .status(it.status())
+                                .build()
+                )
+                .forEach(userEducationRepository::save);
     }
 
     private String uploadProfileImage(Long userId, MultipartFile file) {

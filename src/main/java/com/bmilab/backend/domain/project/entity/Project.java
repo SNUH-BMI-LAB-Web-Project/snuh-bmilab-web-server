@@ -1,7 +1,7 @@
 package com.bmilab.backend.domain.project.entity;
 
-import com.bmilab.backend.domain.project.enums.ProjectCategory;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
+import com.bmilab.backend.domain.projectcategory.entity.ProjectCategory;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.enums.Role;
 import com.bmilab.backend.global.entity.BaseTimeEntity;
@@ -20,6 +20,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "projects")
@@ -50,7 +52,9 @@ public class Project extends BaseTimeEntity {
     @Column(name = "end_date")
     private LocalDate endDate;
 
-    @Column(nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private ProjectCategory category;
 
     @Column(nullable = false)
