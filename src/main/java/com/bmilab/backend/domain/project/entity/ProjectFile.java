@@ -2,9 +2,9 @@ package com.bmilab.backend.domain.project.entity;
 
 import com.bmilab.backend.domain.file.entity.FileInformation;
 import com.bmilab.backend.domain.project.enums.ProjectFileType;
+import com.bmilab.backend.global.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -20,7 +20,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "project_files")
@@ -28,8 +27,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@EntityListeners(AuditingEntityListener.class)
-public class ProjectFile {
+public class ProjectFile extends BaseTimeEntity {
     @Id
     @Column(name = "project_file_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
