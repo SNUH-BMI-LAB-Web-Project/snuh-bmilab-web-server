@@ -15,6 +15,7 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -85,6 +86,8 @@ public class Project extends BaseTimeEntity {
             String content,
             LocalDate startDate,
             LocalDate endDate,
+            List<String> piList,
+            List<String> practicalProfessorList,
             ProjectCategory category,
             ProjectStatus status,
             boolean isPrivate
@@ -93,6 +96,8 @@ public class Project extends BaseTimeEntity {
         this.content = content;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.pi = String.join(",", piList);
+        this.practicalProfessor = String.join(",", practicalProfessorList);
         this.category = category;
         this.status = status;
         this.isPrivate = isPrivate;
@@ -101,5 +106,13 @@ public class Project extends BaseTimeEntity {
     public void complete(LocalDate endDate) {
         this.endDate = endDate;
         this.status = ProjectStatus.COMPLETED;
+    }
+
+    public List<String> getPIList() {
+        return List.of(pi.split(","));
+    }
+
+    public List<String> getPracticalProfessorList() {
+        return List.of(practicalProfessor.split(","));
     }
 }

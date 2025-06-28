@@ -1,5 +1,6 @@
 package com.bmilab.backend.domain.project.dto.response;
 
+import com.bmilab.backend.domain.project.dto.ExternalProfessorSummary;
 import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.project.entity.ProjectFile;
 import com.bmilab.backend.domain.project.entity.ProjectParticipant;
@@ -59,11 +60,11 @@ public record ProjectDetail(
         @Schema(description = "연구 DRB 번호", example = "DRB-DFEF-...")
         String drbId,
 
-        @Schema(description = "PI", example = "김광수")
-        String pi,
+        @Schema(description = "PI 목록")
+        List<ExternalProfessorSummary> piList,
 
-        @Schema(description = "실무 교수", example = "김광수")
-        String practicalProfessor,
+        @Schema(description = "실무 교수 목록")
+        List<ExternalProfessorSummary> practicalProfessors,
 
         @Schema(description = "첨부된 파일 정보 목록")
         List<ProjectFileSummary> files,
@@ -77,7 +78,8 @@ public record ProjectDetail(
         @Schema(description = "연구 생성 시각", example = "2025-04-22T10:15:00")
         LocalDateTime createdAt
 ) {
-    public static ProjectDetail from(Project project, List<ProjectParticipant> participants, List<ProjectFile> projectFiles, boolean isAccessible) {
+    public static ProjectDetail from(Project project, List<ProjectParticipant> participants,
+                                     List<ProjectFile> projectFiles, boolean isAccessible) {
         Map<Boolean, List<ProjectParticipant>> leaderPartitioned = participants.stream()
                 .collect(Collectors.partitioningBy(ProjectParticipant::isLeader));
 
@@ -107,8 +109,16 @@ public record ProjectDetail(
                 .status(project.getStatus())
                 .irbId(project.getIrbId())
                 .drbId(project.getDrbId())
-                .pi(project.getPi())
-                .practicalProfessor(project.getPracticalProfessor())
+                .piList(
+                        project.getPIList().stream()
+                                .map(ExternalProfessorSummary::from)
+                                .toList()
+                )
+                .practicalProfessors(
+                        project.getPracticalProfessorList().stream()
+                                .map(ExternalProfessorSummary::from)
+                                .toList()
+                )
                 .files(projectFiles.stream()
                         .filter(file -> file.getType() == ProjectFileType.GENERAL)
                         .map(ProjectFileSummary::from)

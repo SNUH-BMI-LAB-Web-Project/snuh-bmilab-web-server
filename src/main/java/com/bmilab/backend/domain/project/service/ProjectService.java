@@ -8,6 +8,7 @@ import com.bmilab.backend.domain.file.service.FileService;
 import com.bmilab.backend.domain.project.dto.condition.ProjectFilterCondition;
 import com.bmilab.backend.domain.project.dto.query.GetAllProjectsQueryResult;
 import com.bmilab.backend.domain.project.dto.query.GetAllTimelinesQueryResult;
+import com.bmilab.backend.domain.project.dto.ExternalProfessorSummary;
 import com.bmilab.backend.domain.project.dto.request.ProjectCompleteRequest;
 import com.bmilab.backend.domain.project.dto.request.ProjectRequest;
 import com.bmilab.backend.domain.project.dto.response.ProjectDetail;
@@ -24,6 +25,7 @@ import com.bmilab.backend.domain.project.enums.ProjectAccessPermission;
 import com.bmilab.backend.domain.project.enums.ProjectFileType;
 import com.bmilab.backend.domain.project.enums.ProjectParticipantType;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
+import com.bmilab.backend.domain.project.event.ProjectUpdateEvent;
 import com.bmilab.backend.domain.project.exception.ProjectErrorCode;
 import com.bmilab.backend.domain.project.repository.ProjectFileRepository;
 import com.bmilab.backend.domain.project.repository.ProjectParticipantRepository;
@@ -47,6 +49,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -59,6 +62,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProjectService {
     private final ProjectRepository projectRepository;
     private final S3Service s3Service;
+    private final ApplicationEventPublisher eventPublisher;
     private final ProjectParticipantRepository projectParticipantRepository;
     private final FileInformationRepository fileInformationRepository;
     private final ProjectFileRepository projectFileRepository;
@@ -79,8 +83,17 @@ public class ProjectService {
 
         LocalDate startDate = request.startDate();
         LocalDate endDate = request.endDate();
-        ProjectStatus status = (request.isWaiting()) ? ProjectStatus.WAITING : calculateProjectStatus(startDate, endDate);
+        ProjectStatus status =
+                (request.isWaiting()) ? ProjectStatus.WAITING : calculateProjectStatus(startDate, endDate);
         ProjectCategory category = projectCategoryService.findProjectCategoryById(request.categoryId());
+        List<String> piList = request.piList()
+                .stream()
+                .map(this::convertToExProfessorString)
+                .toList();
+        List<String> practicalProfessors = request.practicalProfessors()
+                .stream()
+                .map(this::convertToExProfessorString)
+                .toList();
 
         Project project = Project.builder()
                 .title(request.title())
@@ -89,8 +102,8 @@ public class ProjectService {
                 .startDate(request.startDate())
                 .endDate(request.endDate())
                 .status(status)
-                .pi(request.pi())
-                .practicalProfessor(request.practicalProfessor())
+                .pi(String.join(",", piList))
+                .practicalProfessor(String.join(",", practicalProfessors))
                 .irbId(request.irbId())
                 .drbId(request.drbId())
                 .category(category)
@@ -136,6 +149,8 @@ public class ProjectService {
 
             projectParticipantRepository.save(projectParticipant);
         });
+
+        eventPublisher.publishEvent(new ProjectUpdateEvent(project));
     }
 
     public void createProjectFiles(List<UUID> fileIds, Project project, ProjectFileType fileType) {
@@ -160,8 +175,10 @@ public class ProjectService {
         files.forEach(file -> file.updateDomain(FileDomainType.PROJECT, project.getId()));
     }
 
-    public ProjectFindAllResponse getAllProjects(Long userId, Pageable pageable, String search, ProjectFilterCondition condition) {
-        Page<GetAllProjectsQueryResult> queryResults = projectRepository.findAllByFiltering(userId, search, pageable, condition);
+    public ProjectFindAllResponse getAllProjects(Long userId, Pageable pageable, String search,
+                                                 ProjectFilterCondition condition) {
+        Page<GetAllProjectsQueryResult> queryResults = projectRepository.findAllByFiltering(userId, search, pageable,
+                condition);
 
         return ProjectFindAllResponse
                 .builder()
@@ -201,11 +218,22 @@ public class ProjectService {
 
         validateProjectAccessPermission(project, editor, ProjectAccessPermission.EDIT, false);
 
+        List<String> piList = request.piList()
+                .stream()
+                .map(this::convertToExProfessorString)
+                .toList();
+        List<String> practicalProfessors = request.practicalProfessors()
+                .stream()
+                .map(this::convertToExProfessorString)
+                .toList();
+
         project.update(
                 request.title(),
                 request.content(),
                 startDate,
                 endDate,
+                piList,
+                practicalProfessors,
                 category,
                 status,
                 request.isPrivate()
@@ -223,6 +251,8 @@ public class ProjectService {
         createProjectFiles(request.fileIds(), project, ProjectFileType.GENERAL);
         createProjectFiles(request.irbFileIds(), project, ProjectFileType.IRB);
         createProjectFiles(request.drbFileIds(), project, ProjectFileType.DRB);
+
+        eventPublisher.publishEvent(new ProjectUpdateEvent(project));
     }
 
     @Transactional
@@ -347,7 +377,8 @@ public class ProjectService {
         return new ProjectFileFindAllResponse(fileSummaries);
     }
 
-    public ReportFindAllResponse getReportsByProject(Long userId, Long projectId, Long filterUserId, LocalDate startDate, LocalDate endDate) {
+    public ReportFindAllResponse getReportsByProject(Long userId, Long projectId, Long filterUserId,
+                                                     LocalDate startDate, LocalDate endDate) {
         User user = userService.findUserById(userId);
         Project project = findProjectById(projectId);
 
@@ -383,15 +414,20 @@ public class ProjectService {
         return ProjectAccessPermission.NONE;
     }
 
-    private void validateProjectAccessPermission(Project project, User user, ProjectAccessPermission permission, boolean needPrivate) {
+    public SearchProjectResponse searchProject(Long userId, boolean all, String keyword) {
+        return SearchProjectResponse.of(projectRepository.searchProject(userId, all, keyword));
+    }
+
+    private String convertToExProfessorString(ExternalProfessorSummary exProfessor) {
+        return exProfessor.name() + "/" + exProfessor.organization() + "/" + exProfessor.department() + "/" + exProfessor.affiliation();
+    }
+
+    private void validateProjectAccessPermission(Project project, User user, ProjectAccessPermission permission,
+                                                 boolean needPrivate) {
         boolean shouldValidate = !needPrivate || project.isPrivate();
 
         if (shouldValidate && getAccessPermission(project, user).isNotGranted(permission)) {
             throw new ApiException(ProjectErrorCode.PROJECT_ACCESS_DENIED);
         }
-    }
-
-    public SearchProjectResponse searchProject(Long userId, boolean all, String keyword) {
-        return SearchProjectResponse.of(projectRepository.searchProject(userId, all, keyword));
     }
 }
