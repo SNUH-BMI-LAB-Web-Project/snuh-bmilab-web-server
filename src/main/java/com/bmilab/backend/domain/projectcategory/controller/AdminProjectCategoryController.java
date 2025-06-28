@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/project-categories")
-public class AdminProjectCategoryController {
+public class AdminProjectCategoryController implements AdminProjectCategoryApi {
 
     private final ProjectCategoryService projectCategoryService;
 
