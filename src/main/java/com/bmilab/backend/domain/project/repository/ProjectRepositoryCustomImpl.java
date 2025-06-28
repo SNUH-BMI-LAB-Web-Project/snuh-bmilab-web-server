@@ -64,6 +64,28 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                 .fetch();
     }
 
+    @Override
+    public List<Project> findAllByUser(User user) {
+        QProject project = QProject.project;
+        QProjectParticipant participant = QProjectParticipant.projectParticipant;
+
+        BooleanExpression participantContains = user != null
+                ? JPAExpressions.selectOne()
+                .from(participant)
+                .where(
+                        participant.user.eq(user),
+                        participant.project.eq(project)
+                ).exists()
+                : null;
+
+        return queryFactory
+                .selectFrom(project)
+                .where(
+                        ExpressionUtils.anyOf(participantContains, project.author.eq(user))
+                )
+                .fetch();
+    }
+
     //TODO: 연구 전체 조회 쿼리 리팩터링하기
     @Override
     public Page<GetAllProjectsQueryResult> findAllByFiltering(Long userId, String keyword, Pageable pageable,

@@ -6,6 +6,7 @@ import com.bmilab.backend.domain.project.dto.response.ProjectDetail;
 import com.bmilab.backend.domain.project.dto.response.ProjectFileFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.SearchProjectResponse;
+import com.bmilab.backend.domain.project.dto.response.UserProjectFindAllResponse;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.report.dto.response.ReportFindAllResponse;
 import com.bmilab.backend.global.exception.ErrorResponse;
@@ -229,4 +230,15 @@ public interface ProjectApi {
             @RequestParam(required = false, defaultValue = "true") boolean all,
             @RequestParam(required = false) String keyword
     );
+
+    @Operation(summary = "사용자 연구 조회", description = "사용자가 참여하는 연구 목록을 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "사용자 연구 조회 성공"
+                    )
+            }
+    )
+    ResponseEntity<UserProjectFindAllResponse> getUserProjects(@PathVariable Long userId);
 }

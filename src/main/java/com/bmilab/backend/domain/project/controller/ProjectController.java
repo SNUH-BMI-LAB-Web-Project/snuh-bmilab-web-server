@@ -7,6 +7,7 @@ import com.bmilab.backend.domain.project.dto.response.ProjectDetail;
 import com.bmilab.backend.domain.project.dto.response.ProjectFileFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.SearchProjectResponse;
+import com.bmilab.backend.domain.project.dto.response.UserProjectFindAllResponse;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.project.service.ProjectService;
 import com.bmilab.backend.domain.report.dto.response.ReportFindAllResponse;
@@ -146,5 +147,10 @@ public class ProjectController implements ProjectApi {
             @RequestParam(required = false) String keyword
     ) {
         return ResponseEntity.ok(projectService.searchProject(userAuthInfo.getUserId(), all, keyword));
+    }
+
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<UserProjectFindAllResponse> getUserProjects(@PathVariable Long userId) {
+        return ResponseEntity.ok(projectService.getUserProjects(userId));
     }
 }

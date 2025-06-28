@@ -17,6 +17,7 @@ import com.bmilab.backend.domain.project.dto.response.ProjectFileSummary;
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse.ProjectSummary;
 import com.bmilab.backend.domain.project.dto.response.SearchProjectResponse;
+import com.bmilab.backend.domain.project.dto.response.UserProjectFindAllResponse;
 import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.project.entity.ProjectFile;
 import com.bmilab.backend.domain.project.entity.ProjectParticipant;
@@ -429,5 +430,12 @@ public class ProjectService {
         if (shouldValidate && getAccessPermission(project, user).isNotGranted(permission)) {
             throw new ApiException(ProjectErrorCode.PROJECT_ACCESS_DENIED);
         }
+    }
+
+    public UserProjectFindAllResponse getUserProjects(Long userId) {
+        User user = userService.findUserById(userId);
+        List<Project> projects = projectRepository.findAllByUser(user);
+
+        return UserProjectFindAllResponse.of(projects);
     }
 }
