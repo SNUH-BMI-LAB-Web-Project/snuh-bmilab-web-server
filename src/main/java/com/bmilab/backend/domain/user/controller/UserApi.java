@@ -3,6 +3,7 @@ package com.bmilab.backend.domain.user.controller;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserPasswordRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserRequest;
 import com.bmilab.backend.domain.user.dto.request.UserEducationRequest;
+import com.bmilab.backend.domain.user.dto.request.UserSearchConditionRequest;
 import com.bmilab.backend.domain.user.dto.response.SearchUserResponse;
 import com.bmilab.backend.domain.user.dto.response.UserDetail;
 import com.bmilab.backend.domain.user.dto.response.UserFindAllResponse;
@@ -17,6 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -105,7 +107,7 @@ public interface UserApi {
             }
     )
     ResponseEntity<SearchUserResponse> searchUsers(
-            @RequestParam(required = false) String keyword
+            @ModelAttribute UserSearchConditionRequest request
     );
 
     @Operation(summary = "사용자 학력 추가", description = "사용자의 학력을 추가하기 위한 PATCH API")
