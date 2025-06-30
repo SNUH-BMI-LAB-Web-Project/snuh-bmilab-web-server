@@ -43,10 +43,10 @@ public record TimelineFindAllResponse(
             @Schema(description = "타임라인 날짜", example = "2025-05-10")
             LocalDate date,
 
-            @Schema(description = "타임라인 시작 시간 (24시간제)", example = "14:00")
+            @Schema(type = "string", description = "타임라인 시작 시간 (24시간제)", example = "14:00")
             LocalTime startTime,
 
-            @Schema(description = "타임라인 종료 시간 (24시간제)", example = "15:30")
+            @Schema(type = "string", description = "타임라인 종료 시간 (24시간제)", example = "15:30")
             LocalTime endTime,
 
             @Schema(description = "미팅 장소", example = "7층 회의실 1")
