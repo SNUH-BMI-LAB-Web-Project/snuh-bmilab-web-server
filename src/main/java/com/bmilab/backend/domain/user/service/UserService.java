@@ -161,7 +161,9 @@ public class UserService {
     private void updateCategories(User user, List<Long> newCategoryIds, List<Long> deletedCategoryIds) {
 
         saveUserCategories(user, newCategoryIds);
-        deletedCategoryIds.forEach(userProjectCategoryRepository::deleteById);
+        deletedCategoryIds.forEach((deletedCategoryId) -> {
+            userProjectCategoryRepository.deleteByUserIdAndCategoryId(user.getId(), deletedCategoryId);
+        });
     }
 
     public void saveUserCategories(User user, List<Long> newCategoryIds) {
