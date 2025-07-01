@@ -1,6 +1,7 @@
 package com.bmilab.backend.domain.project.controller;
 
 import com.bmilab.backend.domain.project.dto.response.RSSResponse;
+import com.bmilab.backend.domain.project.enums.RssSearchType;
 import com.bmilab.backend.global.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -30,7 +31,8 @@ public interface RSSApi {
     ResponseEntity<RSSResponse> getAllRssAssignments(
             @RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
             @RequestParam(required = false, defaultValue = "10") int size,
-            @RequestParam(required = false) String search,
+            @RequestParam(required = false) RssSearchType searchType,
+            @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Long minBudget,
             @RequestParam(required = false) Long maxBudget
     );
