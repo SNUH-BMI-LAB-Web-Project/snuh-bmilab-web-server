@@ -156,7 +156,10 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                         ExpressionUtils.as(
                                 JPAExpressions.select(participant.count())
                                         .from(participant)
-                                        .where(participant.project.eq(project)),
+                                        .where(
+                                                participant.project.eq(project),
+                                                participant.type.ne(ProjectParticipantType.LEADER)
+                                        ),
                                 "participantCount"
                         ),
                         project.status,
