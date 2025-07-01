@@ -2,7 +2,7 @@ package com.bmilab.backend.domain.user.controller;
 
 import com.bmilab.backend.domain.user.dto.request.RegisterUserRequest;
 import com.bmilab.backend.domain.user.dto.request.AdminUpdateUserRequest;
-import com.bmilab.backend.domain.user.dto.request.UpdateUserRequest;
+import com.bmilab.backend.domain.user.dto.request.UserAccountEmailRequest;
 import com.bmilab.backend.domain.user.dto.response.UserDetail;
 import com.bmilab.backend.domain.user.service.AuthService;
 import com.bmilab.backend.domain.user.service.UserService;
@@ -17,9 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 @OnlyAdmin
 @RestController
@@ -56,6 +54,16 @@ public class AdminUserController implements AdminUserApi {
     public ResponseEntity<Void> deleteUserById(@PathVariable Long userId) {
 
         userService.deleteUserById(userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{userId}/account-email")
+    public ResponseEntity<Void> sendAccountEmail(
+            @PathVariable Long userId,
+            @RequestBody UserAccountEmailRequest request
+    ) {
+
+        userService.sendAccountEmail(userId, request);
         return ResponseEntity.ok().build();
     }
 }

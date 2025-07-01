@@ -3,6 +3,7 @@ package com.bmilab.backend.domain.user.service;
 import com.bmilab.backend.domain.projectcategory.entity.ProjectCategory;
 import com.bmilab.backend.domain.user.dto.query.UserDetailQueryResult;
 import com.bmilab.backend.domain.user.dto.query.UserInfoQueryResult;
+import com.bmilab.backend.domain.user.dto.request.UserAccountEmailRequest;
 import com.bmilab.backend.domain.user.dto.request.UserEducationRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserPasswordRequest;
 import com.bmilab.backend.domain.user.dto.request.AdminUpdateUserRequest;
@@ -20,6 +21,7 @@ import com.bmilab.backend.domain.user.repository.UserEducationRepository;
 import com.bmilab.backend.domain.user.repository.UserInfoRepository;
 import com.bmilab.backend.domain.user.repository.UserProjectCategoryRepository;
 import com.bmilab.backend.domain.user.repository.UserRepository;
+import com.bmilab.backend.global.email.EmailSender;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.external.s3.S3Service;
 import java.time.LocalDate;
@@ -43,6 +45,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final S3Service s3Service;
+    private final EmailSender emailSender;
     private final ApplicationEventPublisher eventPublisher;
     private final UserEducationRepository userEducationRepository;
     private final UserProjectCategoryRepository userProjectCategoryRepository;
@@ -235,5 +238,12 @@ public class UserService {
     public void deleteEducations(Long userId, Long userEducationId) {
         userEducationRepository.deleteById(userEducationId);
         eventPublisher.publishEvent(new UserEducationUpdateEvent(userId));
+    }
+
+    public void sendAccountEmail(Long userId, UserAccountEmailRequest request) {
+        User user = findUserById(userId);
+        String email = user.getEmail();
+
+        emailSender.sendAsync(email, user.getName(), request.password());
     }
 }
