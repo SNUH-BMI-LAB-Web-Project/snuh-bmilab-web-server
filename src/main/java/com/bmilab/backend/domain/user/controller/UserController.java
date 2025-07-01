@@ -10,6 +10,7 @@ import com.bmilab.backend.domain.user.dto.response.UserFindAllResponse;
 import com.bmilab.backend.domain.user.service.UserService;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -45,7 +46,7 @@ public class UserController implements UserApi {
 
     @GetMapping("/search")
     public ResponseEntity<SearchUserResponse> searchUsers(
-            @ModelAttribute UserSearchConditionRequest request
+            @ParameterObject @ModelAttribute UserSearchConditionRequest request
     ) {
         return ResponseEntity.ok(userService.searchUsers(request));
     }
