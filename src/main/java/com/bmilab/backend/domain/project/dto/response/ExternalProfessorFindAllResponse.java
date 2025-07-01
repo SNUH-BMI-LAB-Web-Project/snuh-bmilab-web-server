@@ -16,12 +16,14 @@ public record ExternalProfessorFindAllResponse(
     }
 
     public record ExternalProfessorItem(
+            Long professorId,
             String name,
             String organization,
             String department
     ) {
         public static ExternalProfessorItem from(ExternalProfessor externalProfessor) {
             return new ExternalProfessorItem(
+                    externalProfessor.getId(),
                     externalProfessor.getName(),
                     externalProfessor.getOrganization(),
                     externalProfessor.getDepartment()
