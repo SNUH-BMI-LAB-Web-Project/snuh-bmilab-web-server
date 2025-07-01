@@ -15,6 +15,7 @@ import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,33 +52,6 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         return Optional.ofNullable(result);
     }
 
-//    @Override
-//    public Page<UserInfoQueryResult> findAllUserInfosPagination(Pageable pageable) {
-//        QUser user = QUser.user;
-//        QUserInfo userInfo = QUserInfo.userInfo;
-//
-//        List<UserInfoQueryResult> results = queryFactory
-//                .select(Projections.constructor(
-//                        UserInfoQueryResult.class,
-//                        user,
-//                        userInfo
-//                ))
-//                .from(user)
-//                .innerJoin(userInfo).on(userInfo.user.eq(user))
-//                .offset(pageable.getOffset())
-//                .limit(pageable.getPageSize())
-//                .fetch();
-//
-//        Long count = Optional.ofNullable(
-//                queryFactory
-//                        .select(user.count())
-//                        .from(user)
-//                        .fetchOne()
-//        ).orElse(0L);
-//
-//        return PageableExecutionUtils.getPage(results, pageable, () -> count);
-//    }
-
     @Override
     public Page<UserInfoQueryResult> findAllUserInfosPagination(Pageable pageable) {
         QUser user = QUser.user;
@@ -85,14 +59,24 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         QUserProjectCategory userProjectCategory = QUserProjectCategory.userProjectCategory;
         QProjectCategory category = QProjectCategory.projectCategory;
 
+        List<Long> userIds = queryFactory
+                .select(user.id)
+                .from(user)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        if (userIds.isEmpty()) {
+            PageableExecutionUtils.getPage(Collections.emptyList(), pageable, () -> 0L);
+        }
+
         List<Tuple> rows = queryFactory
                 .select(user, userInfo, category)
                 .from(user)
                 .innerJoin(userInfo).on(userInfo.user.eq(user))
                 .leftJoin(userProjectCategory).on(userProjectCategory.user.eq(user))
                 .leftJoin(category).on(userProjectCategory.category.eq(category))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
+                .where(user.id.in(userIds))
                 .fetch();
 
         Map<Long, UserInfoQueryResult> resultMap = new LinkedHashMap<>();
@@ -107,11 +91,11 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
             if (existing == null) {
                 List<ProjectCategory> categories = new ArrayList<>();
-                if (c != null) categories.add(c);
+                if (c != null) {
+                    categories.add(c);
+                }
 
-                UserInfoQueryResult result = new UserInfoQueryResult(u, ui, categories);
-
-                resultMap.put(userId, result);
+                resultMap.put(userId, new UserInfoQueryResult(u, ui, categories));
             } else {
                 if (c != null && !existing.getCategories().contains(c)) {
                     existing.getCategories().add(c);
@@ -121,13 +105,11 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
         List<UserInfoQueryResult> results = new ArrayList<>(resultMap.values());
 
-        Long count = Optional.ofNullable(
-                queryFactory
-                        .select(user.count())
-                        .from(user)
-                        .fetchOne()
-        ).orElse(0L);
+        Long total = queryFactory
+                .select(user.count())
+                .from(user)
+                .fetchOne();
 
-        return PageableExecutionUtils.getPage(results, pageable, () -> count);
+        return PageableExecutionUtils.getPage(results, pageable, () -> total != null ? total : 0L);
     }
 }
