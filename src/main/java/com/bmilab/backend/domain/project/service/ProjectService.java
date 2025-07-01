@@ -423,7 +423,7 @@ public class ProjectService {
         return exProfessor.name() + "/" + exProfessor.organization() + "/" + exProfessor.department();
     }
 
-    private void validateProjectAccessPermission(Project project, User user, ProjectAccessPermission permission,
+    public void validateProjectAccessPermission(Project project, User user, ProjectAccessPermission permission,
                                                  boolean needPrivate) {
         boolean shouldValidate = !needPrivate || project.isPrivate();
 
