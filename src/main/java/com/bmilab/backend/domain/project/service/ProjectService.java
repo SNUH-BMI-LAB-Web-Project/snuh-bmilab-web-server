@@ -233,8 +233,8 @@ public class ProjectService {
                 request.content(),
                 startDate,
                 endDate,
-                piList,
-                practicalProfessors,
+                piList.isEmpty() ? null : piList,
+                practicalProfessors.isEmpty() ? null : practicalProfessors,
                 category,
                 status,
                 request.isPrivate()
