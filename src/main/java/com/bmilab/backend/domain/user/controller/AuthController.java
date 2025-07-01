@@ -14,10 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController implements AuthApi {
+
     private final AuthService authService;
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+
         return ResponseEntity.ok(authService.login(request));
     }
 }

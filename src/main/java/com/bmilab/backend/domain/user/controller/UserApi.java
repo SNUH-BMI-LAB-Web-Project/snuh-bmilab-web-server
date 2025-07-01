@@ -3,7 +3,7 @@ package com.bmilab.backend.domain.user.controller;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserPasswordRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserRequest;
 import com.bmilab.backend.domain.user.dto.request.UserEducationRequest;
-import com.bmilab.backend.domain.user.dto.request.UserSearchConditionRequest;
+import com.bmilab.backend.domain.user.dto.query.UserSearchCondition;
 import com.bmilab.backend.domain.user.dto.response.SearchUserResponse;
 import com.bmilab.backend.domain.user.dto.response.UserDetail;
 import com.bmilab.backend.domain.user.dto.response.UserFindAllResponse;
@@ -107,7 +107,7 @@ public interface UserApi {
             }
     )
     ResponseEntity<SearchUserResponse> searchUsers(
-            @ModelAttribute UserSearchConditionRequest request
+            @ModelAttribute UserSearchCondition request
     );
 
     @Operation(summary = "사용자 학력 추가", description = "사용자의 학력을 추가하기 위한 PATCH API")

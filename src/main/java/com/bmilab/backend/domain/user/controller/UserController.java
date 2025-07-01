@@ -3,7 +3,7 @@ package com.bmilab.backend.domain.user.controller;
 import com.bmilab.backend.domain.user.dto.request.UserEducationRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserPasswordRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserRequest;
-import com.bmilab.backend.domain.user.dto.request.UserSearchConditionRequest;
+import com.bmilab.backend.domain.user.dto.query.UserSearchCondition;
 import com.bmilab.backend.domain.user.dto.response.SearchUserResponse;
 import com.bmilab.backend.domain.user.dto.response.UserDetail;
 import com.bmilab.backend.domain.user.dto.response.UserFindAllResponse;
@@ -46,7 +46,7 @@ public class UserController implements UserApi {
 
     @GetMapping("/search")
     public ResponseEntity<SearchUserResponse> searchUsers(
-            @ParameterObject @ModelAttribute UserSearchConditionRequest request
+            @ParameterObject @ModelAttribute UserSearchCondition request
     ) {
         return ResponseEntity.ok(userService.searchUsers(request));
     }

@@ -7,7 +7,7 @@ import com.bmilab.backend.domain.user.dto.request.AdminUpdateUserRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserPasswordRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserRequest;
 import com.bmilab.backend.domain.user.dto.request.UserEducationRequest;
-import com.bmilab.backend.domain.user.dto.request.UserSearchConditionRequest;
+import com.bmilab.backend.domain.user.dto.query.UserSearchCondition;
 import com.bmilab.backend.domain.user.dto.response.SearchUserResponse;
 import com.bmilab.backend.domain.user.dto.response.UserDetail;
 import com.bmilab.backend.domain.user.dto.response.UserFindAllResponse;
@@ -218,7 +218,7 @@ public class UserService {
         userRepository.deleteById(userId);
     }
 
-    public SearchUserResponse searchUsers(UserSearchConditionRequest condition) {
+    public SearchUserResponse searchUsers(UserSearchCondition condition) {
         List<User> users = userRepository.searchUsersByCondition(condition);
 
         return SearchUserResponse.of(users, condition);

@@ -6,7 +6,7 @@ import com.bmilab.backend.domain.projectcategory.entity.ProjectCategory;
 import com.bmilab.backend.domain.projectcategory.entity.QProjectCategory;
 import com.bmilab.backend.domain.user.dto.query.UserDetailQueryResult;
 import com.bmilab.backend.domain.user.dto.query.UserInfoQueryResult;
-import com.bmilab.backend.domain.user.dto.request.UserSearchConditionRequest;
+import com.bmilab.backend.domain.user.dto.query.UserSearchCondition;
 import com.bmilab.backend.domain.user.entity.QUser;
 import com.bmilab.backend.domain.user.entity.QUserInfo;
 import com.bmilab.backend.domain.user.entity.QUserProjectCategory;
@@ -140,7 +140,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
     }
 
     @Override
-    public List<User> searchUsersByCondition(UserSearchConditionRequest condition) {
+    public List<User> searchUsersByCondition(UserSearchCondition condition) {
 
         QUser user = QUser.user;
         QUserInfo userInfo = QUserInfo.userInfo;

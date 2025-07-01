@@ -2,7 +2,7 @@ package com.bmilab.backend.domain.user.repository;
 
 import com.bmilab.backend.domain.user.dto.query.UserDetailQueryResult;
 import com.bmilab.backend.domain.user.dto.query.UserInfoQueryResult;
-import com.bmilab.backend.domain.user.dto.request.UserSearchConditionRequest;
+import com.bmilab.backend.domain.user.dto.query.UserSearchCondition;
 import com.bmilab.backend.domain.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,5 +15,5 @@ public interface UserRepositoryCustom {
 
     Page<UserInfoQueryResult> findAllUserInfosPagination(Pageable pageable);
 
-    List<User> searchUsersByCondition(UserSearchConditionRequest condition);
+    List<User> searchUsersByCondition(UserSearchCondition condition);
 }

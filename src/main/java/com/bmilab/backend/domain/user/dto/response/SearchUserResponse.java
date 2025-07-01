@@ -1,6 +1,6 @@
 package com.bmilab.backend.domain.user.dto.response;
 
-import com.bmilab.backend.domain.user.dto.request.UserSearchConditionRequest;
+import com.bmilab.backend.domain.user.dto.query.UserSearchCondition;
 import com.bmilab.backend.domain.user.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -20,7 +20,7 @@ public record SearchUserResponse(
         String sort
 
 ) {
-    public static SearchUserResponse of(List<User> users, UserSearchConditionRequest condition) {
+    public static SearchUserResponse of(List<User> users, UserSearchCondition condition) {
         return new SearchUserResponse(
             users.stream()
                     .map(UserSummary::from)
