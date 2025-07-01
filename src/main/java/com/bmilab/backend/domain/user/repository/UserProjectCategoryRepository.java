@@ -8,5 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface UserProjectCategoryRepository extends JpaRepository<UserProjectCategory, Long> {
     List<UserProjectCategory> findAllByUser(User user);
 
-    boolean deleteByUserIdAndCategoryId(Long userId, Long categoryId);
+    void deleteByUserIdAndCategoryId(Long userId, Long categoryId);
 }
