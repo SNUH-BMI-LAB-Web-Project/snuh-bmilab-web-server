@@ -9,8 +9,10 @@ import com.bmilab.backend.domain.project.dto.condition.ProjectFilterCondition;
 import com.bmilab.backend.domain.project.dto.query.GetAllProjectsQueryResult;
 import com.bmilab.backend.domain.project.dto.query.GetAllTimelinesQueryResult;
 import com.bmilab.backend.domain.project.dto.ExternalProfessorSummary;
+import com.bmilab.backend.domain.project.dto.request.ExternalProfessorRequest;
 import com.bmilab.backend.domain.project.dto.request.ProjectCompleteRequest;
 import com.bmilab.backend.domain.project.dto.request.ProjectRequest;
+import com.bmilab.backend.domain.project.dto.response.ExternalProfessorFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.ProjectDetail;
 import com.bmilab.backend.domain.project.dto.response.ProjectFileFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.ProjectFileSummary;
@@ -18,6 +20,7 @@ import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse.ProjectSummary;
 import com.bmilab.backend.domain.project.dto.response.SearchProjectResponse;
 import com.bmilab.backend.domain.project.dto.response.UserProjectFindAllResponse;
+import com.bmilab.backend.domain.project.entity.ExternalProfessor;
 import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.project.entity.ProjectFile;
 import com.bmilab.backend.domain.project.entity.ProjectParticipant;
@@ -28,6 +31,7 @@ import com.bmilab.backend.domain.project.enums.ProjectParticipantType;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.project.event.ProjectUpdateEvent;
 import com.bmilab.backend.domain.project.exception.ProjectErrorCode;
+import com.bmilab.backend.domain.project.repository.ExternalProfessorRepository;
 import com.bmilab.backend.domain.project.repository.ProjectFileRepository;
 import com.bmilab.backend.domain.project.repository.ProjectParticipantRepository;
 import com.bmilab.backend.domain.project.repository.ProjectRepository;
@@ -72,6 +76,7 @@ public class ProjectService {
     private final ReportRepository reportRepository;
     private final UserService userService;
     private final ProjectCategoryService projectCategoryService;
+    private final ExternalProfessorRepository externalProfessorRepository;
 
     public Project findProjectById(Long projectId) {
         return projectRepository.findById(projectId)
@@ -437,5 +442,38 @@ public class ProjectService {
         List<Project> projects = projectRepository.findAllByUser(user);
 
         return UserProjectFindAllResponse.of(projects);
+    }
+
+    @Transactional
+    public void createExternalProfessor(ExternalProfessorRequest request) {
+        ExternalProfessor externalProfessor = ExternalProfessor.builder()
+                .name(request.name())
+                .organization(request.organization())
+                .department(request.department())
+                .build();
+
+        externalProfessorRepository.save(externalProfessor);
+    }
+
+    @Transactional
+    public void updateExternalProfessor(Long professorId, ExternalProfessorRequest request) {
+        ExternalProfessor externalProfessor = externalProfessorRepository.findById(professorId)
+                .orElseThrow(() -> new ApiException(ProjectErrorCode.EXTERNAL_PROFESSOR_NOT_FOUND));
+
+        externalProfessor.update(request.name(), request.organization(), request.department());
+    }
+
+    public ExternalProfessorFindAllResponse getAllExternalProfessors() {
+        List<ExternalProfessor> externalProfessors = externalProfessorRepository.findAll();
+
+        return ExternalProfessorFindAllResponse.of(externalProfessors);
+    }
+
+    @Transactional
+    public void deleteExternalProfessor(Long professorId) {
+        ExternalProfessor externalProfessor = externalProfessorRepository.findById(professorId)
+                .orElseThrow(() -> new ApiException(ProjectErrorCode.EXTERNAL_PROFESSOR_NOT_FOUND));
+
+        externalProfessorRepository.delete(externalProfessor);
     }
 }
