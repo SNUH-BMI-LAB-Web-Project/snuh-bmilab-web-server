@@ -7,6 +7,7 @@ import com.bmilab.backend.domain.project.dto.response.ProjectFileFindAllResponse
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.SearchProjectResponse;
 import com.bmilab.backend.domain.project.dto.response.UserProjectFindAllResponse;
+import com.bmilab.backend.domain.project.enums.ProjectSortOption;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.report.dto.response.ReportFindAllResponse;
 import com.bmilab.backend.global.exception.ErrorResponse;
@@ -17,18 +18,18 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.time.LocalDate;
-import java.util.UUID;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.time.LocalDate;
+import java.util.UUID;
 
 @Tag(name = "Project", description = "연구 API")
 public interface ProjectApi {
@@ -170,12 +171,13 @@ public interface ProjectApi {
     ResponseEntity<ProjectFindAllResponse> getAllProjects(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestParam(required = false) String search,
+            @RequestParam(required = false) ProjectSortOption sort,
             @RequestParam(required = false) Long leaderId,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) ProjectStatus status,
             @RequestParam(required = false) String pi,
             @RequestParam(required = false) String practicalProfessor,
-            @PageableDefault(sort = "createdAt", direction = Direction.DESC) @ParameterObject Pageable pageable
+            @PageableDefault(size = 10) @ParameterObject Pageable pageable
     );
 
     @Operation(summary = "연구 상세 조회", description = "ID로 연구를 상세 조회하는 GET API")

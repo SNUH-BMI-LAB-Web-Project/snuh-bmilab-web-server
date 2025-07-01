@@ -7,58 +7,53 @@ import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.project.entity.QProject;
 import com.bmilab.backend.domain.project.entity.QProjectParticipant;
 import com.bmilab.backend.domain.project.enums.ProjectParticipantType;
+import com.bmilab.backend.domain.project.enums.ProjectSortOption;
 import com.bmilab.backend.domain.user.entity.QUser;
 import com.bmilab.backend.domain.user.entity.User;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.ExpressionUtils;
-import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @RequiredArgsConstructor
 public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
+
     private final JPAQueryFactory queryFactory;
 
     @Override
     public List<SearchProjectQueryResult> searchProject(Long userId, boolean all, String keyword) {
+
         QProject project = QProject.project;
         QProjectParticipant participant = QProjectParticipant.projectParticipant;
 
-        BooleanExpression participantContains = userId != null
-                ? JPAExpressions.selectOne()
+        BooleanExpression participantContains = userId != null ? JPAExpressions.selectOne()
                 .from(participant)
-                .where(
-                        participant.user.id.eq(userId),
-                        participant.project.eq(project)
-                ).exists()
-                : null;
+                .where(participant.user.id.eq(userId), participant.project.eq(project))
+                .exists() : null;
 
         BooleanExpression userFilter = (all) ? null : project.author.id.eq(userId).or(participantContains);
 
         BooleanExpression titleContains = (keyword != null) ? project.title.containsIgnoreCase(keyword) : null;
-        return queryFactory
-                .select(
-                        Projections.constructor(
-                                SearchProjectQueryResult.class,
-                                project.id.as("projectId"),
-                                project.title
-                        )
-                )
+        return queryFactory.select(Projections.constructor(
+                        SearchProjectQueryResult.class,
+                        project.id.as("projectId"),
+                        project.title
+                ))
                 .from(project)
                 .where(userFilter, titleContains)
                 .fetch();
@@ -66,30 +61,29 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 
     @Override
     public List<Project> findAllByUser(User user) {
+
         QProject project = QProject.project;
         QProjectParticipant participant = QProjectParticipant.projectParticipant;
 
-        BooleanExpression participantContains = user != null
-                ? JPAExpressions.selectOne()
+        BooleanExpression participantContains = user != null ? JPAExpressions.selectOne()
                 .from(participant)
-                .where(
-                        participant.user.eq(user),
-                        participant.project.eq(project)
-                ).exists()
-                : null;
+                .where(participant.user.eq(user), participant.project.eq(project))
+                .exists() : null;
 
-        return queryFactory
-                .selectFrom(project)
-                .where(
-                        ExpressionUtils.anyOf(participantContains, project.author.eq(user))
-                )
+        return queryFactory.selectFrom(project)
+                .where(ExpressionUtils.anyOf(participantContains, project.author.eq(user)))
                 .fetch();
     }
 
     //TODO: 연구 전체 조회 쿼리 리팩터링하기
     @Override
-    public Page<GetAllProjectsQueryResult> findAllByFiltering(Long userId, String keyword, Pageable pageable,
-                                                              ProjectFilterCondition condition) {
+    public Page<GetAllProjectsQueryResult> findAllByFiltering(
+            Long userId,
+            String keyword,
+            ProjectSortOption sort,
+            ProjectFilterCondition condition,
+            Pageable pageable
+    ) {
 
         QProject project = QProject.project;
         QProjectParticipant participant = QProjectParticipant.projectParticipant;
@@ -101,49 +95,35 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 
         BooleanExpression piContains = condition.pi() != null ? project.pi.containsIgnoreCase(condition.pi()) : null;
 
-        BooleanExpression practicalProfessorContains = condition.practicalProfessor() != null ?
-                project.practicalProfessor.containsIgnoreCase(condition.practicalProfessor()) : null;
+        BooleanExpression practicalProfessorContains = condition.practicalProfessor() != null
+                ? project.practicalProfessor.containsIgnoreCase(condition.practicalProfessor())
+                : null;
 
-        BooleanExpression leaderNameContains = keyword != null
-                ? JPAExpressions.selectOne()
-                .from(participant)
-                .join(participant.user, user)
-                .where(
+        BooleanExpression leaderNameContains =
+                keyword != null ? JPAExpressions.selectOne().from(participant).join(participant.user, user).where(
                         participant.project.eq(project),
                         participant.type.eq(ProjectParticipantType.LEADER),
                         user.name.containsIgnoreCase(keyword)
-                ).exists()
-                : null;
+                ).exists() : null;
 
-        BooleanExpression leaderFilter = condition.leaderId() != null
-                ? JPAExpressions.selectOne()
+        BooleanExpression leaderFilter = condition.leaderId() != null ? JPAExpressions.selectOne()
                 .from(participant)
                 .join(participant.user, user)
-                .where(
-                        participant.user.id.eq(condition.leaderId())
-                ).exists()
-                : null;
+                .where(participant.user.id.eq(condition.leaderId()))
+                .exists() : null;
 
         BooleanExpression statusFilter = condition.status() != null ? project.status.eq(condition.status()) : null;
 
         BooleanExpression categoryFilter =
                 condition.categoryId() != null ? project.category.id.eq(condition.categoryId()) : null;
 
-        BooleanExpression isAccessible = userId != null ?
-                project.author.id.eq(userId)
-                        .or(
-                                JPAExpressions.selectOne()
-                                        .from(participant)
-                                        .where(
-                                                participant.user.id.eq(userId),
-                                                participant.project.eq(project)
-                                        )
-                                        .exists()
-                        )
-                : null;
+        BooleanExpression isAccessible = userId != null ? project.author.id.eq(userId)
+                .or(JPAExpressions.selectOne()
+                        .from(participant)
+                        .where(participant.user.id.eq(userId), participant.project.eq(project))
+                        .exists()) : null;
 
-        List<GetAllProjectsQueryResult> results = queryFactory
-                .select(Projections.constructor(
+        List<GetAllProjectsQueryResult> results = queryFactory.select(Projections.constructor(
                         GetAllProjectsQueryResult.class,
                         project.id,
                         project.title,
@@ -156,8 +136,7 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                         ExpressionUtils.as(
                                 JPAExpressions.select(participant.count())
                                         .from(participant)
-                                        .where(participant.project.eq(project)),
-                                "participantCount"
+                                        .where(participant.project.eq(project)), "participantCount"
                         ),
                         project.status,
                         project.isPrivate,
@@ -170,27 +149,17 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                         categoryFilter,
                         leaderFilter
                 )
-                .orderBy(getOrderSpecifiers(pageable, Project.class, "project", project.createdAt.desc()))
+                .orderBy(getCustomSortOrderSpecifier(sort,project))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        Long count = Optional.ofNullable(
-                queryFactory
-                        .select(project.count())
-                        .from(project)
-                        .where(
-                                Expressions.anyOf(titleContains, leaderNameContains),
-                                statusFilter,
-                                categoryFilter,
-                                leaderFilter
-                        )
-                        .fetchOne()
-        ).orElse(0L);
+        Long count = Optional.ofNullable(queryFactory.select(project.count())
+                .from(project)
+                .where(Expressions.anyOf(titleContains, leaderNameContains), statusFilter, categoryFilter, leaderFilter)
+                .fetchOne()).orElse(0L);
 
-        List<Long> projectIds = results.stream()
-                .map(GetAllProjectsQueryResult::getProjectId)
-                .toList();
+        List<Long> projectIds = results.stream().map(GetAllProjectsQueryResult::getProjectId).toList();
 
         List<Tuple> leaderResults = queryFactory.select(participant.project.id, user)
                 .from(participant)
@@ -205,28 +174,30 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                         Collectors.mapping(it -> it.get(1, User.class), Collectors.toList())
                 ));
 
-        results.forEach(it ->
-                it.setLeaders(
-                        leadersMap.getOrDefault(it.getProjectId(), List.of())
-                )
-        );
+        results.forEach(it -> it.setLeaders(leadersMap.getOrDefault(it.getProjectId(), List.of())));
 
         return PageableExecutionUtils.getPage(results, pageable, () -> count);
     }
 
-    private OrderSpecifier<?>[] getOrderSpecifiers(Pageable pageable, Class<?> clazz, String alias,
-                                                   OrderSpecifier<?> defaultSort) {
-        PathBuilder<?> pathBuilder = new PathBuilder<>(clazz, alias);
+    private OrderSpecifier<?>[] getCustomSortOrderSpecifier(ProjectSortOption sort, QProject project) {
 
-        if (!pageable.getSort().isSorted()) {
-            return new OrderSpecifier[]{defaultSort};
-        }
-
-        return pageable.getSort().stream()
-                .map(order -> new OrderSpecifier<>(
-                        order.isAscending() ? Order.ASC : Order.DESC,
-                        pathBuilder.get(order.getProperty(), Comparable.class)
-                ))
-                .toArray(OrderSpecifier[]::new);
+        return switch (sort != null ? sort : ProjectSortOption.END_DATE_DESC) {
+            case START_DATE_DESC -> new OrderSpecifier[] {
+                    project.startDate.desc()
+            };
+            case START_DATE_ASC -> new OrderSpecifier[] {
+                    project.startDate.asc()
+            };
+            case END_DATE_ASC -> new OrderSpecifier[] {
+                    project.endDate.asc()
+            };
+            default -> new OrderSpecifier[] {
+                    Expressions.numberTemplate(
+                            Integer.class,
+                            "case when {0} is null then 0 else 1 end",
+                            project.endDate
+                    ).asc(), project.endDate.desc(), project.startDate.desc()
+            };
+        };
     }
 }
