@@ -155,7 +155,8 @@ public interface ProjectApi {
             @PathVariable Long projectId,
             @RequestParam(required = false) Long userId,
             @RequestParam(required = false) LocalDate startDate,
-            @RequestParam(required = false) LocalDate endDate
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) String keyword
     );
 
     @Operation(summary = "모든 연구 조회", description = "모든 연구를 조회하는 GET API")

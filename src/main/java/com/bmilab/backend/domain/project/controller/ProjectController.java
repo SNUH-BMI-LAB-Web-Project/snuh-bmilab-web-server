@@ -98,7 +98,8 @@ public class ProjectController implements ProjectApi {
             @PathVariable Long projectId,
             @RequestParam(required = false) Long userId,
             @RequestParam(required = false) LocalDate startDate,
-            @RequestParam(required = false) LocalDate endDate
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) String keyword
     ) {
 
         return ResponseEntity.ok(projectService.getReportsByProject(
@@ -106,7 +107,8 @@ public class ProjectController implements ProjectApi {
                 projectId,
                 userId,
                 startDate,
-                endDate
+                endDate,
+                null
         ));
     }
 
@@ -163,5 +165,11 @@ public class ProjectController implements ProjectApi {
     public ResponseEntity<UserProjectFindAllResponse> getUserProjects(@PathVariable Long userId) {
 
         return ResponseEntity.ok(projectService.getUserProjects(userId));
+    }
+
+    @GetMapping("/users/me")
+    public ResponseEntity<UserProjectFindAllResponse> getMyProjects(@AuthenticationPrincipal UserAuthInfo userAuthInfo) {
+
+        return ResponseEntity.ok(projectService.getUserProjects(userAuthInfo.getUserId()));
     }
 }

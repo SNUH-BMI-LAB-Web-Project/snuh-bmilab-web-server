@@ -14,6 +14,10 @@ public record ProjectCategorySummary(
         String name
 ) {
     public static ProjectCategorySummary from(ProjectCategory projectCategory) {
+        if (projectCategory == null) {
+            return null;
+        }
+
         return ProjectCategorySummary.builder()
                 .categoryId(projectCategory.getId())
                 .name(projectCategory.getName())
