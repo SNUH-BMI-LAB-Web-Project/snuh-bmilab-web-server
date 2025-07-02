@@ -7,6 +7,7 @@ import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.project.entity.QProject;
 import com.bmilab.backend.domain.project.entity.QProjectParticipant;
 import com.bmilab.backend.domain.project.enums.ProjectParticipantType;
+import com.bmilab.backend.domain.projectcategory.entity.QProjectCategory;
 import com.bmilab.backend.domain.user.entity.QUser;
 import com.bmilab.backend.domain.user.entity.User;
 import com.querydsl.core.Tuple;
@@ -87,6 +88,7 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
         QProject project = QProject.project;
         QProjectParticipant participant = QProjectParticipant.projectParticipant;
         QUser user = QUser.user;
+        QProjectCategory category = QProjectCategory.projectCategory;
 
         Expression<List<User>> listNullExpression = Expressions.constant(Collections.emptyList());
 
@@ -114,7 +116,7 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
         BooleanExpression statusFilter = condition.status() != null ? project.status.eq(condition.status()) : null;
 
         BooleanExpression categoryFilter =
-                condition.categoryId() != null ? project.category.id.eq(condition.categoryId()) : null;
+                (condition.categoryId() != null) ? project.category.id.eq(condition.categoryId()) : null;
 
         BooleanExpression isAccessible = userId != null ? project.author.id.eq(userId)
                 .or(JPAExpressions.selectOne()
@@ -142,6 +144,7 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                         isAccessible
                 ))
                 .from(project)
+                .leftJoin(project.category, category)
                 .where(
                         ExpressionUtils.anyOf(titleContains, leaderNameContains, piContains, practicalProfessorContains),
                         statusFilter,
