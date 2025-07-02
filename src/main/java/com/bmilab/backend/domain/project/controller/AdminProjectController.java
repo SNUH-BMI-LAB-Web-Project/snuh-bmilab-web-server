@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/admin/projects")
 @RequiredArgsConstructor
-public class AdminProjectController {
+public class AdminProjectController implements AdminProjectApi{
 
     private final ProjectService projectService;
 
