@@ -48,6 +48,7 @@ public class AuthService {
                 .name(request.name())
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
+                .role(request.role())
                 .organization(request.organization())
                 .department(request.department())
                 .affiliation(request.affiliation())
