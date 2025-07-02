@@ -25,8 +25,11 @@ public class FileService {
     private final S3Service s3Service;
     private final FileInformationRepository fileInformationRepository;
 
-    public FilePresignedUrlResponse generatePresignedUrl(FileDomainType domainType, String fileName,
-            String contentType) {
+    public FilePresignedUrlResponse generatePresignedUrl(
+            FileDomainType domainType,
+            String fileName,
+            String contentType
+    ) {
         UUID uuid = UUID.randomUUID();
         String fileKey = domainType.name().toLowerCase() + "/" + uuid + "_" + fileName;
         URL presignedUrl = s3Service.generatePresignedUploadUrl(fileKey, contentType, 10L);
@@ -36,7 +39,8 @@ public class FileService {
 
     @Transactional
     public FileSummary uploadFile(UploadFileRequest request) {
-        String fileKey = request.domainType().name().toLowerCase() + "/" + URLEncoder.encode(request.fileName(), StandardCharsets.UTF_8);
+        String fileKey = request.domainType().name().toLowerCase() + "/" + request.uuid() + "_" + URLEncoder.encode(
+                request.fileName(), StandardCharsets.UTF_8);
 
         FileInformation fileInformation = FileInformation.builder()
                 .id(request.uuid())
@@ -60,6 +64,15 @@ public class FileService {
         if (!domainType.equals(fileInformation.getDomainType())) {
             throw new ApiException(FileErrorCode.FILE_DOMAIN_MISMATCH);
         }
+
+        s3Service.deleteFile(fileInformation.getUploadUrl());
+        fileInformationRepository.deleteById(fileId);
+    }
+
+    @Transactional
+    public void deleteFile(UUID fileId) {
+        FileInformation fileInformation = fileInformationRepository.findById(fileId)
+                .orElseThrow(() -> new ApiException(FileErrorCode.FILE_NOT_FOUND));
 
         s3Service.deleteFile(fileInformation.getUploadUrl());
         fileInformationRepository.deleteById(fileId);

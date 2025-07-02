@@ -96,8 +96,9 @@ public class Project extends BaseTimeEntity {
         this.content = content;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.pi = String.join(",", piList);
-        this.practicalProfessor = String.join(",", practicalProfessorList);
+        this.pi = (piList == null || piList.isEmpty()) ? null : String.join(",", piList);
+        this.practicalProfessor = (practicalProfessorList == null || practicalProfessorList.isEmpty()) ? null
+                : String.join(",", practicalProfessorList);
         this.category = category;
         this.status = status;
         this.isPrivate = isPrivate;

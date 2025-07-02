@@ -10,9 +10,12 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,5 +45,12 @@ public class FileController implements FileApi {
     public ResponseEntity<FileSummary> uploadFile(@RequestBody UploadFileRequest request) {
 
         return ResponseEntity.ok(fileService.uploadFile(request));
+    }
+
+    @DeleteMapping("/{fileId}")
+    public ResponseEntity<Void> deleteFile(@PathVariable UUID fileId) {
+
+        fileService.deleteFile(fileId);
+        return ResponseEntity.ok().build();
     }
 }
