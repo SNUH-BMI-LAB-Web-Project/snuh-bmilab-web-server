@@ -132,16 +132,17 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         String filterBy = condition.filterBy();
         String filterValue = condition.filterValue();
 
+
         if (filterBy != null && filterValue != null) {
             switch (filterBy) {
-                case "name" -> conditionBuilder.and(user.name.eq(filterValue));
-                case "email" -> conditionBuilder.and(user.email.eq(filterValue));
-                case "department" -> conditionBuilder.and(user.department.eq(filterValue));
-                case "organization" -> conditionBuilder.and(user.organization.eq(filterValue));
+                case "name" -> conditionBuilder.and(user.name.containsIgnoreCase(filterValue));
+                case "email" -> conditionBuilder.and(user.email.containsIgnoreCase(filterValue));
+                case "department" -> conditionBuilder.and(user.department.containsIgnoreCase(filterValue));
+                case "organization" -> conditionBuilder.and(user.organization.containsIgnoreCase(filterValue));
                 case "affiliation" -> conditionBuilder.and(user.affiliation.eq(UserAffiliation.valueOf(filterValue.toUpperCase())));
-                case "projectName" -> conditionBuilder.and(category.name.eq(filterValue));
-                case "seatNumber" -> conditionBuilder.and(userInfo.seatNumber.eq(filterValue));
-                case "phoneNumber" -> conditionBuilder.and(userInfo.phoneNumber.eq(filterValue));
+                case "projectName" -> conditionBuilder.and(category.name.containsIgnoreCase(filterValue));
+                case "seatNumber" -> conditionBuilder.and(userInfo.seatNumber.containsIgnoreCase(filterValue));
+                case "phoneNumber" -> conditionBuilder.and(userInfo.phoneNumber.containsIgnoreCase(filterValue));
             }
         }
 
