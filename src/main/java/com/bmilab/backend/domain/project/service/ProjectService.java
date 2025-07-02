@@ -28,7 +28,6 @@ import com.bmilab.backend.domain.project.entity.ProjectParticipantId;
 import com.bmilab.backend.domain.project.enums.ProjectAccessPermission;
 import com.bmilab.backend.domain.project.enums.ProjectFileType;
 import com.bmilab.backend.domain.project.enums.ProjectParticipantType;
-import com.bmilab.backend.domain.project.enums.ProjectSortOption;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.project.event.ProjectUpdateEvent;
 import com.bmilab.backend.domain.project.exception.ProjectErrorCode;
@@ -179,16 +178,13 @@ public class ProjectService {
 
     public ProjectFindAllResponse getAllProjects(
             Long userId,
-            String search,
-            ProjectSortOption sort,
-            ProjectFilterCondition condition,
+            String search, ProjectFilterCondition condition,
             Pageable pageable
     ) {
 
         Page<GetAllProjectsQueryResult> queryResults = projectRepository.findAllByFiltering(
                 userId,
                 search,
-                sort,
                 condition,
                 pageable
         );
