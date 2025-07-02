@@ -9,17 +9,26 @@ import com.bmilab.backend.domain.report.entity.Report;
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.RequiredArgsConstructor;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class ReportRepositoryCustomImpl implements ReportRepositoryCustom {
+
     private final JPAQueryFactory queryFactory;
 
-    public List<GetAllReportsQueryResult> findAllWithFiles(Long userId, Long projectId, LocalDate startDate, LocalDate endDate) {
+    public List<GetAllReportsQueryResult> findAllWithFiles(
+            Long userId,
+            Long projectId,
+            LocalDate startDate,
+            LocalDate endDate,
+            String keyword
+    ) {
+
         QFileInformation file = QFileInformation.fileInformation;
         QReport report = QReport.report;
 
@@ -29,17 +38,17 @@ public class ReportRepositoryCustomImpl implements ReportRepositoryCustom {
 
         BooleanExpression dateBetween = dateBetween(startDate, endDate, report);
 
-        List<Report> reports = queryFactory
-                .selectFrom(report)
-                .where(ExpressionUtils.allOf(
-                        userFilter,
-                        projectFilter,
-                        dateBetween
-                ))
+        BooleanExpression keywordFilter = (keyword != null && !keyword.isBlank())
+                ? report.content.containsIgnoreCase(keyword)
+                .or(report.project.title.containsIgnoreCase(keyword))
+                .or(report.user.name.containsIgnoreCase(keyword))
+                : null;
+
+        List<Report> reports = queryFactory.selectFrom(report)
+                .where(ExpressionUtils.allOf(userFilter, projectFilter, dateBetween))
                 .fetch();
 
-        Map<Long, List<FileInformation>> fileMap = queryFactory
-                .selectFrom(file)
+        Map<Long, List<FileInformation>> fileMap = queryFactory.selectFrom(file)
                 .where(
                         file.domainType.eq(FileDomainType.REPORT),
                         file.entityId.in(reports.stream().map(Report::getId).toList())
@@ -49,14 +58,12 @@ public class ReportRepositoryCustomImpl implements ReportRepositoryCustom {
                 .collect(Collectors.groupingBy(FileInformation::getEntityId));
 
         return reports.stream()
-                .map(r -> new GetAllReportsQueryResult(
-                        r,
-                        fileMap.getOrDefault(r.getId(), List.of())
-                ))
+                .map(r -> new GetAllReportsQueryResult(r, fileMap.getOrDefault(r.getId(), List.of())))
                 .toList();
     }
 
     public BooleanExpression dateBetween(LocalDate startDate, LocalDate endDate, QReport report) {
+
         if (startDate != null && endDate != null) {
             return report.date.between(startDate, endDate);
         } else if (startDate != null) {
