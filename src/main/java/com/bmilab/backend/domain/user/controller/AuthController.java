@@ -22,4 +22,9 @@ public class AuthController implements AuthApi {
 
         return ResponseEntity.ok(authService.login(request));
     }
+
+    @PostMapping("/test-login")
+    public ResponseEntity<LoginResponse> testLogin() {
+        return ResponseEntity.ok(authService.issueTestToken());
+    }
 }

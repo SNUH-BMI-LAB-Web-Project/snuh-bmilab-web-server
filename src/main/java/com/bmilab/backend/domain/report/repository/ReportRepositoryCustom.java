@@ -7,7 +7,14 @@ import java.util.List;
 
 public interface ReportRepositoryCustom {
 
-    List<GetAllReportsQueryResult> findAllWithFiles(
+    List<GetAllReportsQueryResult> findReportsByUser(
+            Long userId,
+            Long projectId,
+            LocalDate startDate,
+            LocalDate endDate
+    );
+
+    List<GetAllReportsQueryResult> findReportsByCondition(
             Long userId,
             Long projectId,
             LocalDate startDate,

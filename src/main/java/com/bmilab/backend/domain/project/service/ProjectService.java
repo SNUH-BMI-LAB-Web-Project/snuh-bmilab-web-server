@@ -397,8 +397,8 @@ public class ProjectService {
 
         validateProjectAccessPermission(project, user, ProjectAccessPermission.EDIT, true);
 
-        List<GetAllReportsQueryResult> results = reportRepository.findAllWithFiles(filterUserId, projectId,
-                startDate, endDate, keyword);
+        List<GetAllReportsQueryResult> results = reportRepository.findReportsByUser(filterUserId, projectId,
+                startDate, endDate);
 
         return ReportFindAllResponse.of(results);
     }
