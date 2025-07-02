@@ -18,7 +18,8 @@ public class ProjectParticipantRepositoryCustomImpl implements ProjectParticipan
                 .from(projectParticipant)
                 .where(
                         projectParticipant.project.id.eq(projectId)
-                                .and((leader) ? projectParticipant.type.eq(ProjectParticipantType.LEADER) : null)
+                                .and(projectParticipant.type.eq(
+                                        leader ? ProjectParticipantType.LEADER : ProjectParticipantType.PARTICIPANT))
                 )
                 .fetch();
     }

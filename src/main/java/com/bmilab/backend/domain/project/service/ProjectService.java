@@ -251,8 +251,6 @@ public class ProjectService {
         List<Long> updatedLeaderIds = request.leaderIds();
         List<Long> leaderIds = projectParticipantRepository.findAllUserIdsByProjectIdAndLeader(projectId, true);
 
-        log.info("updatedLeaderIds: {}, leaderIds: {}", updatedLeaderIds, leaderIds);
-
         updateParticipants(project, updatedParticipantIds, participantIds, false);
         updateParticipants(project, updatedLeaderIds, leaderIds, true);
 
@@ -327,19 +325,13 @@ public class ProjectService {
 
         intersection.retainAll(updatedIds);
 
-        log.info("(updateParticipants) intersection: {}", intersection);
-
         Set<Long> newIds = new HashSet<>(updatedIds);
 
         newIds.removeAll(intersection);
 
-        log.info("(updateParticipants) newIds: {}", newIds);
-
         Set<Long> deletedIds = new HashSet<>(participantIds);
 
         deletedIds.removeAll(intersection);
-
-        log.info("(updateParticipants) deletedIds: {}", deletedIds);
 
         List<User> newUsers = userService.findAllUsersById(newIds);
 
