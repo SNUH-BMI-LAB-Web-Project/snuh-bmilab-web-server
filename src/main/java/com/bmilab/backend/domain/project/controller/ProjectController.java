@@ -164,4 +164,10 @@ public class ProjectController implements ProjectApi {
 
         return ResponseEntity.ok(projectService.getUserProjects(userId));
     }
+
+    @GetMapping("/users/me")
+    public ResponseEntity<UserProjectFindAllResponse> getMyProjects(@AuthenticationPrincipal UserAuthInfo userAuthInfo) {
+
+        return ResponseEntity.ok(projectService.getUserProjects(userAuthInfo.getUserId()));
+    }
 }
