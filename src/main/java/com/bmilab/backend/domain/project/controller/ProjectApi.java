@@ -7,7 +7,6 @@ import com.bmilab.backend.domain.project.dto.response.ProjectFileFindAllResponse
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.SearchProjectResponse;
 import com.bmilab.backend.domain.project.dto.response.UserProjectFindAllResponse;
-import com.bmilab.backend.domain.project.enums.ProjectSortOption;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.report.dto.response.ReportFindAllResponse;
 import com.bmilab.backend.global.exception.ErrorResponse;
@@ -21,6 +20,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springdoc.core.converters.models.PageableAsQueryParam;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -171,13 +171,12 @@ public interface ProjectApi {
     ResponseEntity<ProjectFindAllResponse> getAllProjects(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) ProjectSortOption sort,
             @RequestParam(required = false) Long leaderId,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) ProjectStatus status,
             @RequestParam(required = false) String pi,
             @RequestParam(required = false) String practicalProfessor,
-            @PageableDefault(size = 10) @ParameterObject Pageable pageable
+            @PageableDefault(size = 10, sort = "endDate", direction = Sort.Direction.DESC) @ParameterObject Pageable pageable
     );
 
     @Operation(summary = "연구 상세 조회", description = "ID로 연구를 상세 조회하는 GET API")

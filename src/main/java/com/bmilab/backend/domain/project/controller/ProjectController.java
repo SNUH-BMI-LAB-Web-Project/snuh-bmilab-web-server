@@ -16,6 +16,7 @@ import com.bmilab.backend.global.security.UserAuthInfo;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -114,19 +115,17 @@ public class ProjectController implements ProjectApi {
     public ResponseEntity<ProjectFindAllResponse> getAllProjects(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) ProjectSortOption sort,
             @RequestParam(required = false) Long leaderId,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) ProjectStatus status,
             @RequestParam(required = false) String pi,
             @RequestParam(required = false) String practicalProfessor,
-            @PageableDefault(size = 10) @ParameterObject Pageable pageable
+            @PageableDefault(size = 10, sort = "endDate", direction = Sort.Direction.DESC) @ParameterObject Pageable pageable
     ) {
 
         return ResponseEntity.ok(projectService.getAllProjects(
                 userAuthInfo.getUserId(),
                 search,
-                sort,
                 ProjectFilterCondition.of(leaderId, categoryId, status, pi, practicalProfessor),
                 pageable
         ));

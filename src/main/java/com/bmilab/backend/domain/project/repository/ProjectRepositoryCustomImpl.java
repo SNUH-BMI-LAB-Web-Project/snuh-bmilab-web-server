@@ -7,7 +7,6 @@ import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.project.entity.QProject;
 import com.bmilab.backend.domain.project.entity.QProjectParticipant;
 import com.bmilab.backend.domain.project.enums.ProjectParticipantType;
-import com.bmilab.backend.domain.project.enums.ProjectSortOption;
 import com.bmilab.backend.domain.user.entity.QUser;
 import com.bmilab.backend.domain.user.entity.User;
 import com.querydsl.core.Tuple;
@@ -22,6 +21,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.support.PageableExecutionUtils;
 
 import java.util.Collections;
@@ -80,7 +80,6 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
     public Page<GetAllProjectsQueryResult> findAllByFiltering(
             Long userId,
             String keyword,
-            ProjectSortOption sort,
             ProjectFilterCondition condition,
             Pageable pageable
     ) {
@@ -144,60 +143,94 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                 ))
                 .from(project)
                 .where(
-                        Expressions.anyOf(titleContains, leaderNameContains, piContains, practicalProfessorContains),
+                        ExpressionUtils.anyOf(titleContains, leaderNameContains, piContains, practicalProfessorContains),
                         statusFilter,
                         categoryFilter,
                         leaderFilter
                 )
-                .orderBy(getCustomSortOrderSpecifier(sort,project))
+                .orderBy(getCustomSortOrderSpecifier(pageable,project))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
         Long count = Optional.ofNullable(queryFactory.select(project.count())
                 .from(project)
-                .where(Expressions.anyOf(titleContains, leaderNameContains), statusFilter, categoryFilter, leaderFilter)
+                .where(ExpressionUtils.anyOf(titleContains, leaderNameContains), statusFilter, categoryFilter,
+                        leaderFilter, isAccessible)
                 .fetchOne()).orElse(0L);
 
-        List<Long> projectIds = results.stream().map(GetAllProjectsQueryResult::getProjectId).toList();
+        List<Long> projectIds = results.stream()
+                .map(GetAllProjectsQueryResult::getProjectId)
+                .toList();
 
-        List<Tuple> leaderResults = queryFactory.select(participant.project.id, user)
-                .from(participant)
-                .join(participant.user, user)
-                .where(participant.project.id.in(projectIds), participant.type.eq(ProjectParticipantType.LEADER))
-                .fetch();
+        Map<Long, List<User>> leadersMap;
 
-        Map<Long, List<User>> leadersMap = leaderResults.stream()
-                .filter(it -> it.get(0, Long.class) != null && it.get(1, User.class) != null)
-                .collect(Collectors.groupingBy(
-                        it -> it.get(0, Long.class),
-                        Collectors.mapping(it -> it.get(1, User.class), Collectors.toList())
-                ));
+        if (!projectIds.isEmpty()) {
+            List<Tuple> leaderResults = queryFactory.select(participant.project.id, user)
+                    .from(participant)
+                    .join(participant.user, user)
+                    .where(
+                            participant.project.id.in(projectIds),
+                            participant.type.eq(ProjectParticipantType.LEADER)
+                    )
+                    .fetch();
+
+            leadersMap = leaderResults.stream()
+                    .filter(it -> it.get(0, Long.class) != null && it.get(1, User.class) != null)
+                    .collect(Collectors.groupingBy(
+                            it -> it.get(0, Long.class),
+                            Collectors.mapping(it -> it.get(1, User.class), Collectors.toList())
+                    ));
+        } else {
+            leadersMap = Collections.emptyMap();
+        }
 
         results.forEach(it -> it.setLeaders(leadersMap.getOrDefault(it.getProjectId(), List.of())));
 
         return PageableExecutionUtils.getPage(results, pageable, () -> count);
     }
 
-    private OrderSpecifier<?>[] getCustomSortOrderSpecifier(ProjectSortOption sort, QProject project) {
+    private OrderSpecifier<?>[] getCustomSortOrderSpecifier(Pageable pageable, QProject project) {
 
-        return switch (sort != null ? sort : ProjectSortOption.END_DATE_DESC) {
-            case START_DATE_DESC -> new OrderSpecifier[] {
-                    project.startDate.desc()
-            };
-            case START_DATE_ASC -> new OrderSpecifier[] {
-                    project.startDate.asc()
-            };
-            case END_DATE_ASC -> new OrderSpecifier[] {
-                    project.endDate.asc()
-            };
-            default -> new OrderSpecifier[] {
+        Sort sort = pageable.getSort();
+
+        if (sort.isUnsorted()) {
+            return new OrderSpecifier[]{
                     Expressions.numberTemplate(
                             Integer.class,
                             "case when {0} is null then 0 else 1 end",
                             project.endDate
-                    ).asc(), project.endDate.desc(), project.startDate.desc()
+                    ).asc(),
+                    project.endDate.desc(),
+                    project.startDate.desc()
             };
-        };
+        }
+        for(Sort.Order order : sort) {
+            boolean isDesc = order.isDescending();
+            String property = order.getProperty();
+
+            switch (property) {
+                case "startDate":
+                    return new OrderSpecifier[]{
+                            isDesc ? project.startDate.desc() : project.startDate.asc()
+                    };
+                case "endDate":
+                    return new OrderSpecifier[]{
+                            Expressions.numberTemplate(
+                                    Integer.class,
+                                    "case when {0} is null then 0 else 1 end",
+                                    project.endDate
+                            ).asc(), // null 우선
+                            isDesc ? project.endDate.desc() : project.endDate.asc()
+                    };
+                default:
+                    return new OrderSpecifier[]{
+                            project.endDate.desc()
+                    };
+            }
+
+        }
+
+        return new OrderSpecifier[]{ project.endDate.desc() };
     }
 }
