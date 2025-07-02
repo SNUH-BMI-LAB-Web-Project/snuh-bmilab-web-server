@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>임시 비밀번호 안내</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f4f4;">
+<table
+        cellpadding="0"
+        cellspacing="0"
+        width="100%"
+        style="background-color: #f4f4f4; padding: 40px 0;"
+>
+  <tr>
+    <td>
+      <table
+              cellpadding="0"
+              cellspacing="0"
+              width="600"
+              align="center"
+              style="
+              background-color: #ffffff;
+              padding: 30px;
+              font-family: Arial, sans-serif;
+              border-radius: 8px;
+              box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+            "
+      >
+        <!-- Header -->
+        <tr>
+          <td style="text-align: center; padding-bottom: 20px;">
+            <h2 style="color: #333333;">임시 비밀번호 안내</h2>
+          </td>
+        </tr>
+
+        <!-- Message -->
+        <tr>
+          <td style="color: #555555; font-size: 16px; line-height: 1.6;">
+            안녕하세요, <strong th:text="${username} + '님'">홍길동님</strong>.
+            <br /><br />
+            관리자에 의해 귀하의 계정이 생성되었습니다.<br />
+            아래의 임시 비밀번호로 로그인하신 후, <strong>반드시 비밀번호를 변경해 주세요.</strong>
+            <br /><br />
+          </td>
+        </tr>
+
+        <!-- Temporary Password -->
+        <tr>
+          <td
+                  style="
+                  margin: 20px 0;
+                  padding: 20px;
+                  background-color: #f8f9fa;
+                  border: 1px solid #ddd;
+                  border-radius: 6px;
+                  text-align: center;
+                  font-size: 20px;
+                  font-weight: bold;
+                  color: #007bff;
+                  letter-spacing: 1px;
+                "
+          >
+            <span th:text="${password}">TEMP1234!</span>
+          </td>
+        </tr>
+
+        <!-- Change Password CTA -->
+        <tr>
+          <td style="text-align: center; padding: 20px 0;">
+            <a
+                    href="https://example.com/change-password"
+                    style="
+                    display: inline-block;
+                    background-color: #007bff;
+                    color: #ffffff;
+                    padding: 12px 24px;
+                    text-decoration: none;
+                    border-radius: 4px;
+                    font-weight: bold;
+                  "
+            >
+              비밀번호 변경하기
+            </a>
+          </td>
+        </tr>
+
+        <!-- Security Note -->
+        <tr>
+          <td style="color: #999999; font-size: 13px; text-align: center;">
+            * 이 메일은 자동으로 발송되었으며, 회신하지 마세요.<br />
+            * 임시 비밀번호는 보안을 위해 노출에 유의해 주세요.
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td
+                  style="padding-top: 30px; text-align: center; color: #cccccc; font-size: 12px;"
+          >
+            &copy; 2025 SNUH BMI LAB. All rights reserved.
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

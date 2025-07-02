@@ -2,6 +2,7 @@ package com.bmilab.backend.domain.user.controller;
 
 import com.bmilab.backend.domain.user.dto.request.RegisterUserRequest;
 import com.bmilab.backend.domain.user.dto.request.AdminUpdateUserRequest;
+import com.bmilab.backend.domain.user.dto.request.UserAccountEmailRequest;
 import com.bmilab.backend.domain.user.dto.response.UserDetail;
 import com.bmilab.backend.global.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -74,4 +75,24 @@ public interface AdminUserApi {
             }
     )
     ResponseEntity<Void> deleteUserById(@PathVariable Long userId);
+
+
+    @Operation(summary = "사용자 계정 생성 이메일 보내기", description = "사용자에게 계정 생성 알림 이메일을 보내는 POST API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "이메일 보내기 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "사용자 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> sendAccountEmail(
+            @PathVariable Long userId,
+            @RequestBody UserAccountEmailRequest request
+    );
 }

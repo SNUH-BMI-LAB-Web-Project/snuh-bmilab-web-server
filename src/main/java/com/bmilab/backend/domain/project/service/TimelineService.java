@@ -9,6 +9,7 @@ import com.bmilab.backend.domain.project.dto.request.TimelineRequest;
 import com.bmilab.backend.domain.project.dto.response.TimelineFindAllResponse;
 import com.bmilab.backend.domain.project.entity.Timeline;
 import com.bmilab.backend.domain.project.entity.Project;
+import com.bmilab.backend.domain.project.enums.ProjectAccessPermission;
 import com.bmilab.backend.domain.project.exception.ProjectErrorCode;
 import com.bmilab.backend.domain.project.exception.TimelineErrorCode;
 import com.bmilab.backend.domain.project.repository.TimelineRepository;
@@ -31,6 +32,7 @@ public class TimelineService {
     private final FileService fileService;
     private final FileInformationRepository fileInformationRepository;
     private final UserService userService;
+    private final ProjectService projectService;
 
     public Timeline findTimelineById(Long timelineId) {
         return timelineRepository.findById(timelineId)
@@ -44,9 +46,7 @@ public class TimelineService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
 
-        if (!project.canBeEditedBy(recorder)) {
-            throw new ApiException(ProjectErrorCode.PROJECT_ACCESS_DENIED);
-        }
+        projectService.validateProjectAccessPermission(project, recorder, ProjectAccessPermission.EDIT, false);
 
         Timeline timeline = Timeline.builder()
                 .project(project)
@@ -81,9 +81,7 @@ public class TimelineService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
 
-        if (!project.canBeEditedBy(user)) {
-            throw new ApiException(ProjectErrorCode.PROJECT_ACCESS_DENIED);
-        }
+        projectService.validateProjectAccessPermission(project, user, ProjectAccessPermission.EDIT, false);
 
         fileService.deleteFile(FileDomainType.TIMELINE, fileId);
     }
@@ -95,9 +93,7 @@ public class TimelineService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
 
-        if (project.canBeEditedBy(user)) {
-            throw new ApiException(ProjectErrorCode.PROJECT_ACCESS_DENIED);
-        }
+        projectService.validateProjectAccessPermission(project, user, ProjectAccessPermission.EDIT, false);
 
         Timeline timeline = findTimelineById(timelineId);
 
@@ -123,9 +119,7 @@ public class TimelineService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
 
-        if (project.canBeEditedBy(user)) {
-            throw new ApiException(ProjectErrorCode.PROJECT_ACCESS_DENIED);
-        }
+        projectService.validateProjectAccessPermission(project, user, ProjectAccessPermission.EDIT, false);
 
         Timeline timeline = findTimelineById(timelineId);
 
