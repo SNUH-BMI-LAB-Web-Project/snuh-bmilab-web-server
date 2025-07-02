@@ -68,4 +68,13 @@ public class AuthService {
         userService.saveUserEducations(user, request.educations());
         userService.saveUserCategories(user, request.categoryIds());
     }
+
+    public LoginResponse issueTestToken() {
+        User user = userRepository.findByEmail("test@gmail.com")
+                .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+
+        String accessToken = tokenProvider.generateToken(user, Duration.ofDays(30));
+
+        return LoginResponse.of(accessToken, user);
+    }
 }
