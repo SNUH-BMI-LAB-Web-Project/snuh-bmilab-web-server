@@ -82,7 +82,7 @@ public class ReportRepositoryCustomImpl implements ReportRepositoryCustom {
                 : null;
 
         List<Report> reports = queryFactory.selectFrom(report)
-                .where(ExpressionUtils.allOf(userFilter, projectFilter, dateBetween))
+                .where(ExpressionUtils.allOf(userFilter, projectFilter, dateBetween, keywordFilter))
                 .fetch();
 
         Map<Long, List<FileInformation>> fileMap = queryFactory.selectFrom(file)
