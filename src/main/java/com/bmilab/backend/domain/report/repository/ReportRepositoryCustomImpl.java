@@ -21,7 +21,44 @@ public class ReportRepositoryCustomImpl implements ReportRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
-    public List<GetAllReportsQueryResult> findAllWithFiles(
+    public List<GetAllReportsQueryResult> findReportsByUser(Long userId, Long projectId, LocalDate startDate, LocalDate endDate) {
+        QFileInformation file = QFileInformation.fileInformation;
+        QReport report = QReport.report;
+
+        BooleanExpression projectFilter = projectId != null ? report.project.id.eq(projectId) : null;
+
+        BooleanExpression userFilter = userId != null ? report.user.id.eq(userId) : null;
+
+        BooleanExpression dateBetween = dateBetween(startDate, endDate, report);
+
+        List<Report> reports = queryFactory
+                .selectFrom(report)
+                .where(ExpressionUtils.allOf(
+                        userFilter,
+                        projectFilter,
+                        dateBetween
+                ))
+                .fetch();
+
+        Map<Long, List<FileInformation>> fileMap = queryFactory
+                .selectFrom(file)
+                .where(
+                        file.domainType.eq(FileDomainType.REPORT),
+                        file.entityId.in(reports.stream().map(Report::getId).toList())
+                )
+                .fetch()
+                .stream()
+                .collect(Collectors.groupingBy(FileInformation::getEntityId));
+
+        return reports.stream()
+                .map(r -> new GetAllReportsQueryResult(
+                        r,
+                        fileMap.getOrDefault(r.getId(), List.of())
+                ))
+                .toList();
+    }
+
+    public List<GetAllReportsQueryResult> findReportsByCondition(
             Long userId,
             Long projectId,
             LocalDate startDate,

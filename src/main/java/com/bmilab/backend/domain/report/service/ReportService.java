@@ -87,11 +87,28 @@ public class ReportService {
             Long userId,
             Long projectId,
             LocalDate startDate,
+            LocalDate endDate
+    ) {
+
+        List<GetAllReportsQueryResult> results = reportRepository.findReportsByUser(
+                userId,
+                projectId,
+                startDate,
+                endDate
+        );
+
+        return ReportFindAllResponse.of(results);
+    }
+
+    public ReportFindAllResponse getReportsByAllUser(
+            Long userId,
+            Long projectId,
+            LocalDate startDate,
             LocalDate endDate,
             String keyword
     ) {
 
-        List<GetAllReportsQueryResult> results = reportRepository.findAllWithFiles(
+        List<GetAllReportsQueryResult> results = reportRepository.findReportsByCondition(
                 userId,
                 projectId,
                 startDate,

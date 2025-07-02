@@ -62,16 +62,14 @@ public class ReportController implements ReportApi {
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestParam(required = false) Long projectId,
             @RequestParam(required = false) LocalDate startDate,
-            @RequestParam(required = false) LocalDate endDate,
-            @RequestParam(required = false) String keyword
+            @RequestParam(required = false) LocalDate endDate
     ) {
 
         return ResponseEntity.ok(reportService.getReportsByCurrentUser(
                 userAuthInfo.getUserId(),
                 projectId,
                 startDate,
-                endDate,
-                keyword
+                endDate
         ));
     }
 }
