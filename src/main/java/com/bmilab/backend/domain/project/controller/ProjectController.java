@@ -98,7 +98,8 @@ public class ProjectController implements ProjectApi {
             @PathVariable Long projectId,
             @RequestParam(required = false) Long userId,
             @RequestParam(required = false) LocalDate startDate,
-            @RequestParam(required = false) LocalDate endDate
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false) String keyword
     ) {
 
         return ResponseEntity.ok(projectService.getReportsByProject(
@@ -106,7 +107,8 @@ public class ProjectController implements ProjectApi {
                 projectId,
                 userId,
                 startDate,
-                endDate
+                endDate,
+                null
         ));
     }
 

@@ -15,16 +15,18 @@ import com.bmilab.backend.domain.report.repository.ReportRepository;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.service.UserService;
 import com.bmilab.backend.global.exception.ApiException;
-import java.time.LocalDate;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ReportService {
+
     private final ReportRepository reportRepository;
     private final UserService userService;
     private final FileInformationRepository fileInformationRepository;
@@ -32,12 +34,14 @@ public class ReportService {
     private final ProjectService projectService;
 
     public Report findReportById(Long reportId) {
+
         return reportRepository.findById(reportId)
                 .orElseThrow(() -> new ApiException(ReportErrorCode.REPORT_NOT_FOUND));
     }
 
     @Transactional
     public void createReport(Long userId, ReportRequest request) {
+
         User user = userService.findUserById(userId);
 
         Long projectId = request.projectId();
@@ -61,6 +65,7 @@ public class ReportService {
 
     @Transactional
     public void updateReport(Long userId, Long reportId, ReportRequest request) {
+
         User user = userService.findUserById(userId);
 
         Long projectId = request.projectId();
@@ -78,16 +83,28 @@ public class ReportService {
         files.forEach(file -> file.updateDomain(FileDomainType.REPORT, report.getId()));
     }
 
-    public ReportFindAllResponse getReportsByCurrentUser(Long userId, Long projectId, LocalDate startDate,
-                                                         LocalDate endDate) {
+    public ReportFindAllResponse getReportsByCurrentUser(
+            Long userId,
+            Long projectId,
+            LocalDate startDate,
+            LocalDate endDate,
+            String keyword
+    ) {
+
         List<GetAllReportsQueryResult> results = reportRepository.findAllWithFiles(
-                userId, projectId, startDate, endDate);
+                userId,
+                projectId,
+                startDate,
+                endDate,
+                keyword
+        );
 
         return ReportFindAllResponse.of(results);
     }
 
     @Transactional
     public void deleteReport(Long userId, Long reportId) {
+
         User user = userService.findUserById(userId);
 
         Report report = findReportById(reportId);
@@ -99,6 +116,7 @@ public class ReportService {
     }
 
     private void validateUserIsReportAuthor(User user, Report report) {
+
         if (!report.isAuthor(user)) {
             throw new ApiException(ReportErrorCode.REPORT_ACCESS_DENIED);
         }
