@@ -3,17 +3,20 @@ package com.bmilab.backend.domain.user.controller;
 import com.bmilab.backend.domain.user.dto.request.UserEducationRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserPasswordRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserRequest;
+import com.bmilab.backend.domain.user.dto.query.UserSearchCondition;
 import com.bmilab.backend.domain.user.dto.response.SearchUserResponse;
 import com.bmilab.backend.domain.user.dto.response.UserDetail;
 import com.bmilab.backend.domain.user.dto.response.UserFindAllResponse;
 import com.bmilab.backend.domain.user.service.UserService;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -28,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController implements UserApi {
+
     private final UserService userService;
 
     @GetMapping
@@ -42,9 +46,9 @@ public class UserController implements UserApi {
 
     @GetMapping("/search")
     public ResponseEntity<SearchUserResponse> searchUsers(
-            @RequestParam(required = false) String keyword
+            @ParameterObject @ModelAttribute UserSearchCondition request
     ) {
-        return ResponseEntity.ok(userService.searchUsers(keyword));
+        return ResponseEntity.ok(userService.searchUsers(request));
     }
 
     @GetMapping("/me")
@@ -81,6 +85,7 @@ public class UserController implements UserApi {
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestBody UserEducationRequest request
     ) {
+
         userService.addEducations(userAuthInfo.getUserId(), request);
         return ResponseEntity.ok().build();
     }
@@ -90,6 +95,7 @@ public class UserController implements UserApi {
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @PathVariable Long educationId
     ) {
+
         userService.deleteEducations(userAuthInfo.getUserId(), educationId);
         return ResponseEntity.ok().build();
     }

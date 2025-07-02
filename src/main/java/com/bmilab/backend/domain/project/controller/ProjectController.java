@@ -12,12 +12,10 @@ import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.project.service.ProjectService;
 import com.bmilab.backend.domain.report.dto.response.ReportFindAllResponse;
 import com.bmilab.backend.global.security.UserAuthInfo;
-import java.time.LocalDate;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,10 +30,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDate;
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/projects")
 @RequiredArgsConstructor
 public class ProjectController implements ProjectApi {
+
     private final ProjectService projectService;
 
     @PostMapping
@@ -99,8 +101,13 @@ public class ProjectController implements ProjectApi {
             @RequestParam(required = false) LocalDate endDate
     ) {
 
-        return ResponseEntity.ok(
-                projectService.getReportsByProject(userAuthInfo.getUserId(), projectId, userId, startDate, endDate));
+        return ResponseEntity.ok(projectService.getReportsByProject(
+                userAuthInfo.getUserId(),
+                projectId,
+                userId,
+                startDate,
+                endDate
+        ));
     }
 
     @GetMapping
@@ -112,13 +119,15 @@ public class ProjectController implements ProjectApi {
             @RequestParam(required = false) ProjectStatus status,
             @RequestParam(required = false) String pi,
             @RequestParam(required = false) String practicalProfessor,
-            @PageableDefault(size = 10, sort = "createdAt", direction = Direction.DESC) @ParameterObject Pageable pageable
+            @PageableDefault(size = 10, sort = "endDate", direction = Sort.Direction.DESC) @ParameterObject Pageable pageable
     ) {
 
-        return ResponseEntity.ok(
-                projectService.getAllProjects(userAuthInfo.getUserId(), pageable, search,
-                        ProjectFilterCondition.of(leaderId, categoryId, status, pi, practicalProfessor))
-        );
+        return ResponseEntity.ok(projectService.getAllProjects(
+                userAuthInfo.getUserId(),
+                search,
+                ProjectFilterCondition.of(leaderId, categoryId, status, pi, practicalProfessor),
+                pageable
+        ));
     }
 
     @GetMapping("/{projectId}")
@@ -146,11 +155,13 @@ public class ProjectController implements ProjectApi {
             @RequestParam(required = false, defaultValue = "true") boolean all,
             @RequestParam(required = false) String keyword
     ) {
+
         return ResponseEntity.ok(projectService.searchProject(userAuthInfo.getUserId(), all, keyword));
     }
 
     @GetMapping("/users/{userId}")
     public ResponseEntity<UserProjectFindAllResponse> getUserProjects(@PathVariable Long userId) {
+
         return ResponseEntity.ok(projectService.getUserProjects(userId));
     }
 }

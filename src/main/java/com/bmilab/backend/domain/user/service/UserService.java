@@ -5,9 +5,10 @@ import com.bmilab.backend.domain.user.dto.query.UserDetailQueryResult;
 import com.bmilab.backend.domain.user.dto.query.UserInfoQueryResult;
 import com.bmilab.backend.domain.user.dto.request.UserAccountEmailRequest;
 import com.bmilab.backend.domain.user.dto.request.UserEducationRequest;
-import com.bmilab.backend.domain.user.dto.request.UpdateUserPasswordRequest;
 import com.bmilab.backend.domain.user.dto.request.AdminUpdateUserRequest;
+import com.bmilab.backend.domain.user.dto.request.UpdateUserPasswordRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserRequest;
+import com.bmilab.backend.domain.user.dto.query.UserSearchCondition;
 import com.bmilab.backend.domain.user.dto.response.SearchUserResponse;
 import com.bmilab.backend.domain.user.dto.response.UserDetail;
 import com.bmilab.backend.domain.user.dto.response.UserFindAllResponse;
@@ -24,9 +25,6 @@ import com.bmilab.backend.domain.user.repository.UserRepository;
 import com.bmilab.backend.global.email.EmailSender;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.external.s3.S3Service;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -38,10 +36,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserService {
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final S3Service s3Service;
@@ -52,15 +55,17 @@ public class UserService {
     private final UserInfoRepository userInfoRepository;
 
     public User findUserById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+
+        return userRepository.findById(userId).orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
     }
 
     public List<User> findAllUsersById(Iterable<Long> userIds) {
+
         return userRepository.findAllById(userIds);
     }
 
     public UserFindAllResponse getAllUsers(int pageNo, int size, String criteria) {
+
         PageRequest pageRequest = PageRequest.of(pageNo, size, Sort.by(Direction.DESC, criteria));
 
         Page<UserInfoQueryResult> results = userRepository.findAllUserInfosPagination(pageRequest);
@@ -69,14 +74,17 @@ public class UserService {
     }
 
     public UserDetail getUserDetailById(Long userId) {
+
         return getUserDetailById(userId, true);
     }
 
     public UserDetail getCurrentUser(Long userId) {
+
         return getUserDetailById(userId, false);
     }
 
     private UserDetail getUserDetailById(Long userId, boolean includeComment) {
+
         UserDetailQueryResult result = userRepository.findUserDetailsById(userId)
                 .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
         List<UserEducation> educations = userEducationRepository.findAllByUser(result.user());
@@ -90,30 +98,30 @@ public class UserService {
 
     @Transactional
     public void updateUserById(Long userId, AdminUpdateUserRequest request) {
+
         UserDetailQueryResult result = userRepository.findUserDetailsById(userId)
                 .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
 
         result.userInfo().updateComment(request.comment());
         result.userLeave().updateAnnualLeaveCount(request.annualLeaveCount());
 
-        result.user().update(
-                request.name(),
-                request.email(),
-                request.organization(),
-                request.department(),
-                request.affiliation()
-        );
+        result.user()
+                .update(
+                        request.name(),
+                        request.email(),
+                        request.organization(),
+                        request.department(),
+                        request.affiliation()
+                );
 
-        result.userInfo().update(
-                request.seatNumber(),
-                request.phoneNumber()
-        );
+        result.userInfo().update(request.seatNumber(), request.phoneNumber());
 
         updateCategories(result.user(), request.newCategoryIds(), request.deletedCategoryIds());
     }
 
     @Transactional
     public void updatePassword(Long userId, UpdateUserPasswordRequest request) {
+
         User user = findUserById(userId);
 
         if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
@@ -129,6 +137,7 @@ public class UserService {
 
     @Transactional
     public void updateCurrentUser(Long userId, MultipartFile profileImage, UpdateUserRequest request) {
+
         UserDetailQueryResult result = userRepository.findUserDetailsById(userId)
                 .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
 
@@ -138,23 +147,22 @@ public class UserService {
             result.user().updateProfileImageUrl(profileImageUrl);
         }
 
-        result.user().update(
-                request.name(),
-                request.email(),
-                request.organization(),
-                request.department(),
-                request.affiliation()
-        );
+        result.user()
+                .update(
+                        request.name(),
+                        request.email(),
+                        request.organization(),
+                        request.department(),
+                        request.affiliation()
+                );
 
-        result.userInfo().update(
-                request.seatNumber(),
-                request.phoneNumber()
-        );
+        result.userInfo().update(request.seatNumber(), request.phoneNumber());
 
         updateCategories(result.user(), request.newCategoryIds(), request.deletedCategoryIds());
     }
 
     private void updateCategories(User user, List<Long> newCategoryIds, List<Long> deletedCategoryIds) {
+
         saveUserCategories(user, newCategoryIds);
         deletedCategoryIds.forEach((deletedCategoryId) -> {
             userProjectCategoryRepository.deleteByUserIdAndCategoryId(user.getId(), deletedCategoryId);
@@ -162,12 +170,12 @@ public class UserService {
     }
 
     public void saveUserCategories(User user, List<Long> newCategoryIds) {
-        newCategoryIds.stream().map((newCategoryId) ->
-                        UserProjectCategory.builder()
-                                .user(user)
-                                .category(ProjectCategory.builder().id(newCategoryId).build())
-                                .build()
-                )
+
+        newCategoryIds.stream()
+                .map((newCategoryId) -> UserProjectCategory.builder()
+                        .user(user)
+                        .category(ProjectCategory.builder().id(newCategoryId).build())
+                        .build())
                 .forEach(userProjectCategoryRepository::save);
     }
 
@@ -183,20 +191,20 @@ public class UserService {
     }
 
     public void saveUserEducations(User user, List<UserEducationRequest> educationRequests) {
+
         educationRequests.stream()
-                .map(it ->
-                        UserEducation.builder()
-                                .user(user)
-                                .title(it.title())
-                                .startYearMonth(it.startYearMonth())
-                                .endYearMonth(it.endYearMonth())
-                                .status(it.status())
-                                .build()
-                )
+                .map(it -> UserEducation.builder()
+                        .user(user)
+                        .title(it.title())
+                        .startYearMonth(it.startYearMonth())
+                        .endYearMonth(it.endYearMonth())
+                        .status(it.status())
+                        .build())
                 .forEach(userEducationRepository::save);
     }
 
     private String uploadProfileImage(Long userId, MultipartFile file) {
+
         String contentType = Objects.requireNonNull(file.getContentType());
 
         if (!contentType.contains("image")) {
@@ -210,17 +218,19 @@ public class UserService {
 
     @Transactional
     public void deleteUserById(Long userId) {
+
         userRepository.deleteById(userId);
     }
 
-    public SearchUserResponse searchUsers(String keyword) {
-        List<User> users = userRepository.searchUsersByKeyword(keyword);
+    public SearchUserResponse searchUsers(UserSearchCondition condition) {
+        List<User> users = userRepository.searchUsersByCondition(condition);
 
-        return SearchUserResponse.of(users);
+        return SearchUserResponse.of(users, condition);
     }
 
     @Transactional
     public void addEducations(Long userId, UserEducationRequest request) {
+
         User user = findUserById(userId);
         UserEducation userEducation = UserEducation.builder()
                 .user(user)
@@ -236,6 +246,7 @@ public class UserService {
 
     @Transactional
     public void deleteEducations(Long userId, Long userEducationId) {
+
         userEducationRepository.deleteById(userEducationId);
         eventPublisher.publishEvent(new UserEducationUpdateEvent(userId));
     }
