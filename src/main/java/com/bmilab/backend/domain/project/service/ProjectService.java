@@ -5,10 +5,10 @@ import com.bmilab.backend.domain.file.enums.FileDomainType;
 import com.bmilab.backend.domain.file.exception.FileErrorCode;
 import com.bmilab.backend.domain.file.repository.FileInformationRepository;
 import com.bmilab.backend.domain.file.service.FileService;
+import com.bmilab.backend.domain.project.dto.ExternalProfessorSummary;
 import com.bmilab.backend.domain.project.dto.condition.ProjectFilterCondition;
 import com.bmilab.backend.domain.project.dto.query.GetAllProjectsQueryResult;
 import com.bmilab.backend.domain.project.dto.query.GetAllTimelinesQueryResult;
-import com.bmilab.backend.domain.project.dto.ExternalProfessorSummary;
 import com.bmilab.backend.domain.project.dto.request.ExternalProfessorRequest;
 import com.bmilab.backend.domain.project.dto.request.ProjectCompleteRequest;
 import com.bmilab.backend.domain.project.dto.request.ProjectRequest;
@@ -28,6 +28,7 @@ import com.bmilab.backend.domain.project.entity.ProjectParticipantId;
 import com.bmilab.backend.domain.project.enums.ProjectAccessPermission;
 import com.bmilab.backend.domain.project.enums.ProjectFileType;
 import com.bmilab.backend.domain.project.enums.ProjectParticipantType;
+import com.bmilab.backend.domain.project.enums.ProjectSortOption;
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.project.event.ProjectUpdateEvent;
 import com.bmilab.backend.domain.project.exception.ProjectErrorCode;
@@ -169,9 +170,7 @@ public class ProjectService {
 
         List<FileInformation> files = fileInformationRepository.findAllById(fileIds);
 
-        List<ProjectFile> projectFiles = files.stream().map(file -> {
-            return ProjectFile.builder().fileInformation(file).type(fileType).build();
-        }).toList();
+        List<ProjectFile> projectFiles = files.stream().map(file -> ProjectFile.builder().fileInformation(file).type(fileType).build()).toList();
 
         projectFileRepository.saveAll(projectFiles);
 

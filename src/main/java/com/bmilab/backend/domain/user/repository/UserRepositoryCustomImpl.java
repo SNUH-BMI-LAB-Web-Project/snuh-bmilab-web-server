@@ -6,12 +6,16 @@ import com.bmilab.backend.domain.projectcategory.entity.ProjectCategory;
 import com.bmilab.backend.domain.projectcategory.entity.QProjectCategory;
 import com.bmilab.backend.domain.user.dto.query.UserDetailQueryResult;
 import com.bmilab.backend.domain.user.dto.query.UserInfoQueryResult;
+import com.bmilab.backend.domain.user.dto.query.UserSearchCondition;
 import com.bmilab.backend.domain.user.entity.QUser;
 import com.bmilab.backend.domain.user.entity.QUserInfo;
 import com.bmilab.backend.domain.user.entity.QUserProjectCategory;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.entity.UserInfo;
+import com.bmilab.backend.domain.user.enums.UserAffiliation;
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -29,12 +33,10 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 public class UserRepositoryCustomImpl implements UserRepositoryCustom {
-
     private final JPAQueryFactory queryFactory;
 
     @Override
     public Optional<UserDetailQueryResult> findUserDetailsById(Long userId) {
-
         QUser user = QUser.user;
         QUserInfo userInfo = QUserInfo.userInfo;
         QUserLeave userLeave = QUserLeave.userLeave;
@@ -94,7 +96,9 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
             if (existing == null) {
                 List<ProjectCategory> categories = new ArrayList<>();
-                if (c != null) categories.add(c);
+                if (c != null) {
+                    categories.add(c);
+                }
 
                 resultMap.put(userId, new UserInfoQueryResult(u, ui, categories));
             } else {
@@ -113,4 +117,48 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
         return PageableExecutionUtils.getPage(results, pageable, () -> total != null ? total : 0L);
     }
+
+
+    @Override
+    public List<User> searchUsersByCondition(UserSearchCondition condition) {
+
+        QUser user = QUser.user;
+        QUserInfo userInfo = QUserInfo.userInfo;
+        QUserProjectCategory userProjectCategory = QUserProjectCategory.userProjectCategory;
+        QProjectCategory category = QProjectCategory.projectCategory;
+
+        BooleanBuilder conditionBuilder = new BooleanBuilder();
+
+        String filterBy = condition.filterBy();
+        String filterValue = condition.filterValue();
+
+        if (filterBy != null && filterValue != null) {
+            switch (filterBy) {
+                case "name" -> conditionBuilder.and(user.name.eq(filterValue));
+                case "email" -> conditionBuilder.and(user.email.eq(filterValue));
+                case "department" -> conditionBuilder.and(user.department.eq(filterValue));
+                case "organization" -> conditionBuilder.and(user.organization.eq(filterValue));
+                case "affiliation" -> conditionBuilder.and(user.affiliation.eq(UserAffiliation.valueOf(filterValue.toUpperCase())));
+                case "projectName" -> conditionBuilder.and(category.name.eq(filterValue));
+                case "seatNumber" -> conditionBuilder.and(userInfo.seatNumber.eq(filterValue));
+                case "phoneNumber" -> conditionBuilder.and(userInfo.phoneNumber.eq(filterValue));
+            }
+        }
+
+        OrderSpecifier<String> orderSpecifier = "desc".equalsIgnoreCase(condition.sort())
+                ? user.name.desc()
+                : user.name.asc();
+
+        return queryFactory
+                .select(user)
+                .from(user)
+                .leftJoin(userInfo).on(userInfo.user.id.eq(user.id))
+                .leftJoin(userProjectCategory).on(userProjectCategory.user.id.eq(user.id))
+                .leftJoin(userProjectCategory.category, category)
+                .where(conditionBuilder)
+                .orderBy(orderSpecifier)
+                .distinct()
+                .fetch();
+    }
+
 }
