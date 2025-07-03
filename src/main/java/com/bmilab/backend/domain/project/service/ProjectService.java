@@ -213,9 +213,9 @@ public class ProjectService {
 
         List<ProjectFile> projectFiles = projectFileRepository.findAllByProjectId(projectId);
 
-        boolean isAccessible = !getAccessPermission(project, user).isNotGranted(ProjectAccessPermission.EDIT);
+        validateProjectAccessPermission(project, user, ProjectAccessPermission.EDIT, true);
 
-        return ProjectDetail.from(project, participants, projectFiles, isAccessible);
+        return ProjectDetail.from(project, participants, projectFiles, true);
     }
 
     @Transactional
