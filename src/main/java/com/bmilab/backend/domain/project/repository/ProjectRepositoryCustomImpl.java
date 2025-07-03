@@ -72,7 +72,7 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                 .exists() : null;
 
         return queryFactory.selectFrom(project)
-                .where(ExpressionUtils.anyOf(participantContains, project.author.eq(user)))
+                .where(participantContains)
                 .fetch();
     }
 
@@ -160,8 +160,11 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 
         Long count = Optional.ofNullable(queryFactory.select(project.count())
                 .from(project)
-                .where(ExpressionUtils.anyOf(titleContains, leaderNameContains), statusFilter, categoryFilter,
-                        leaderFilter, isAccessible)
+                .where(ExpressionUtils.anyOf(titleContains, leaderNameContains, piContains,
+                                practicalProfessorContains),
+                        statusFilter,
+                        categoryFilter,
+                        leaderFilter)
                 .fetchOne()).orElse(0L);
 
         List<Long> projectIds = results.stream()
