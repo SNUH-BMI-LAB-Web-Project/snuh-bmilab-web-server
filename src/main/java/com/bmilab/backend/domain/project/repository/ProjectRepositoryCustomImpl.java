@@ -137,7 +137,8 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                         ExpressionUtils.as(
                                 JPAExpressions.select(participant.count())
                                         .from(participant)
-                                        .where(participant.project.eq(project)), "participantCount"
+                                        .where(participant.project.eq(project),
+                                                participant.type.eq(ProjectParticipantType.PARTICIPANT)), "participantCount"
                         ),
                         project.status,
                         project.isPrivate,
@@ -146,12 +147,13 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                 .from(project)
                 .leftJoin(project.category, category)
                 .where(
-                        ExpressionUtils.anyOf(titleContains, leaderNameContains, piContains, practicalProfessorContains),
+                        ExpressionUtils.anyOf(titleContains, leaderNameContains, piContains,
+                                practicalProfessorContains),
                         statusFilter,
                         categoryFilter,
                         leaderFilter
                 )
-                .orderBy(getCustomSortOrderSpecifier(pageable,project))
+                .orderBy(getCustomSortOrderSpecifier(pageable, project))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -208,7 +210,7 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                     project.startDate.desc()
             };
         }
-        for(Sort.Order order : sort) {
+        for (Sort.Order order : sort) {
             boolean isDesc = order.isDescending();
             String property = order.getProperty();
 
@@ -234,6 +236,6 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
 
         }
 
-        return new OrderSpecifier[]{ project.endDate.desc() };
+        return new OrderSpecifier[]{project.endDate.desc()};
     }
 }
