@@ -27,7 +27,7 @@ import org.springframework.data.annotation.CreatedDate;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class ProjectParticipant extends BaseTimeEntity {
+public class ProjectParticipant {
     @EmbeddedId
     private ProjectParticipantId id;
 
