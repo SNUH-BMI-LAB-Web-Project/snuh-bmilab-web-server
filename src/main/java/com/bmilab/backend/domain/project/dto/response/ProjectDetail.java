@@ -76,7 +76,10 @@ public record ProjectDetail(
         List<ProjectFileSummary> drbFiles,
 
         @Schema(description = "연구 생성 시각", example = "2025-04-22T10:15:00")
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+
+        @Schema(description = "연구 최종 수정 시각", example = "2025-04-22T10:15:00")
+        LocalDateTime updatedAt
 ) {
     public static ProjectDetail from(Project project, List<ProjectParticipant> participants,
                                      List<ProjectFile> projectFiles, boolean isAccessible) {
@@ -140,6 +143,7 @@ public record ProjectDetail(
                         .collect(Collectors.toList())
                 )
                 .createdAt(project.getCreatedAt())
+                .updatedAt(project.getUpdatedAt())
                 .build();
     }
 }
