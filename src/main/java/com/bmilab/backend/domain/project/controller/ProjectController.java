@@ -3,6 +3,7 @@ package com.bmilab.backend.domain.project.controller;
 import com.bmilab.backend.domain.project.dto.condition.ProjectFilterCondition;
 import com.bmilab.backend.domain.project.dto.request.ProjectCompleteRequest;
 import com.bmilab.backend.domain.project.dto.request.ProjectRequest;
+import com.bmilab.backend.domain.project.dto.response.ExternalProfessorFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.ProjectDetail;
 import com.bmilab.backend.domain.project.dto.response.ProjectFileFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse;
@@ -160,6 +161,15 @@ public class ProjectController implements ProjectApi {
 
         return ResponseEntity.ok(projectService.searchProject(userAuthInfo.getUserId(), all, keyword));
     }
+
+    @GetMapping("/external-professors")
+    public ResponseEntity<ExternalProfessorFindAllResponse> getExternalProfessors(
+            @RequestParam(required = false) String name
+    ) {
+
+        return ResponseEntity.ok(projectService.getExternalProfessorsByName(name));
+    }
+
 
     @GetMapping("/users/{userId}")
     public ResponseEntity<UserProjectFindAllResponse> getUserProjects(@PathVariable Long userId) {

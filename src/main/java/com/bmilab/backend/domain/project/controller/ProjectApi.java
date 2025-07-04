@@ -2,6 +2,7 @@ package com.bmilab.backend.domain.project.controller;
 
 import com.bmilab.backend.domain.project.dto.request.ProjectCompleteRequest;
 import com.bmilab.backend.domain.project.dto.request.ProjectRequest;
+import com.bmilab.backend.domain.project.dto.response.ExternalProfessorFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.ProjectDetail;
 import com.bmilab.backend.domain.project.dto.response.ProjectFileFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.ProjectFindAllResponse;
@@ -233,14 +234,43 @@ public interface ProjectApi {
             @RequestParam(required = false) String keyword
     );
 
-    @Operation(summary = "사용자 연구 조회", description = "사용자가 참여하는 연구 목록을 조회하는 GET API")
+    @Operation(summary = "외부교수 목록 조회", description = "사용자가 연구 생성/수정할 때 외부교수 목록을 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "내 연구 조회 성공"
+                    )
+            }
+    )
+    ResponseEntity<ExternalProfessorFindAllResponse> getExternalProfessors(
+            @RequestParam(required = false) String name
+    );
+
+    @Operation(summary = "사용자 연구 조회", description = "사용자 ID로 사용자가 참여하는 연구 목록을 조회하는 GET API")
     @ApiResponses(
             value = {
                     @ApiResponse(
                             responseCode = "200",
                             description = "사용자 연구 조회 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "사용자 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
                     )
             }
     )
     ResponseEntity<UserProjectFindAllResponse> getUserProjects(@PathVariable Long userId);
+
+    @Operation(summary = "내 연구 조회", description = "현재 로그인한 사용자가 참여하는 연구 목록을 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "내 연구 조회 성공"
+                    )
+            }
+    )
+    ResponseEntity<UserProjectFindAllResponse> getMyProjects(@AuthenticationPrincipal UserAuthInfo userAuthInfo);
 }
