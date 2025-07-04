@@ -1,5 +1,6 @@
 package com.bmilab.backend.domain.user.controller;
 
+import com.bmilab.backend.domain.user.dto.request.FindPasswordEmailRequest;
 import com.bmilab.backend.domain.user.dto.request.UserEducationRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserPasswordRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserRequest;
@@ -33,6 +34,15 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserController implements UserApi {
 
     private final UserService userService;
+
+    @PatchMapping("/password")
+    public ResponseEntity<Void> sendFindPasswordEmail(
+            @RequestBody FindPasswordEmailRequest request
+    ) {
+
+        userService.sendFindPasswordEmail(request);
+        return ResponseEntity.ok().build();
+    }
 
     @GetMapping
     public ResponseEntity<UserFindAllResponse> getAllUsers(

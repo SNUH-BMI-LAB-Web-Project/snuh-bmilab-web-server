@@ -28,16 +28,16 @@ public class EmailSender {
     private final SpringTemplateEngine templateEngine;
 
     @Async
-    public void sendAsync(String email, String username, String password) {
+    public void sendAsync(String email, String title, String username, String password, String template) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
 
             MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
             messageHelper.setFrom(new InternetAddress(mailProperties.getUsername(), ORGANIZATION_NAME));
             messageHelper.setTo(email);
-            messageHelper.setSubject("[SNUH BMI Lab] 계정 생성 안내");
+            messageHelper.setSubject("[SNUH BMI Lab] " + title);
             messageHelper.setReplyTo(mailProperties.getUsername());
-            messageHelper.setText(setContext(username, password), true);
+            messageHelper.setText(template, true);
 
             message.addHeader("Precedence", "normal");
             message.addHeader("X-Auto-Response-Suppress", "OOF, AutoReply");
@@ -49,16 +49,31 @@ public class EmailSender {
         }
     }
 
+    public void sendAccountCreateEmailAsync(String email, String username, String password) {
+        sendAsync(email, "계정 생성 안내", username, password, getAccountCreateTemplate(username, password));
+    }
+
+    public void sendFindPasswordEmailAync(String email, String username, String password) {
+        sendAsync(email, "비밀번호 재설정 안내", username, password, getFindPasswordTemplate(username, password));
+    }
 
     private String generateMessageId() {
         return "<" + UUID.randomUUID() + "@%s>".formatted(mailProperties.getUsername().split("@")[1]);
     }
 
-    public String setContext(String username, String password) {
+    public String getAccountCreateTemplate(String username, String password) {
         Context context = new Context();
         context.setVariable("username", username);
         context.setVariable("password", password);
 
         return templateEngine.process("email/account-create-template", context);
+    }
+
+    public String getFindPasswordTemplate(String username, String password) {
+        Context context = new Context();
+        context.setVariable("username", username);
+        context.setVariable("password", password);
+
+        return templateEngine.process("email/find-password-template", context);
     }
 }

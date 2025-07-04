@@ -3,6 +3,7 @@ package com.bmilab.backend.domain.user.service;
 import com.bmilab.backend.domain.projectcategory.entity.ProjectCategory;
 import com.bmilab.backend.domain.user.dto.query.UserDetailQueryResult;
 import com.bmilab.backend.domain.user.dto.query.UserInfoQueryResult;
+import com.bmilab.backend.domain.user.dto.request.FindPasswordEmailRequest;
 import com.bmilab.backend.domain.user.dto.request.UserAccountEmailRequest;
 import com.bmilab.backend.domain.user.dto.request.UserEducationRequest;
 import com.bmilab.backend.domain.user.dto.request.AdminUpdateUserRequest;
@@ -260,12 +261,40 @@ public class UserService {
         User user = findUserById(userId);
         String email = user.getEmail();
 
-        emailSender.sendAsync(email, user.getName(), request.password());
+        emailSender.sendAccountCreateEmailAsync(email, user.getName(), request.password());
+    }
+
+    @Transactional
+    public void sendFindPasswordEmail(FindPasswordEmailRequest request) {
+        String email = request.email();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+
+        String newPassword = generateRandomPassword();
+
+        user.updatePassword(passwordEncoder.encode(newPassword));
+
+        emailSender.sendFindPasswordEmailAync(email, user.getName(), newPassword);
     }
 
     public void validateEmailDuplicate(String email) {
         if (userRepository.existsByEmail(email)) {
             throw new ApiException(UserErrorCode.DUPLICATE_EMAIL);
         }
+    }
+
+    private String generateRandomPassword() {
+        char[] charSet = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
+                'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
+
+        StringBuilder tempPw = new StringBuilder();
+
+        for (int i = 0; i < 10; i++) {
+            int idx = (int) (charSet.length * Math.random());
+            tempPw.append(charSet[idx]);
+        }
+
+        return tempPw.toString();
     }
 }
