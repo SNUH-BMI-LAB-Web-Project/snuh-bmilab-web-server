@@ -36,7 +36,7 @@ public class FileController implements FileApi {
 
         return ResponseEntity.ok(fileService.generatePresignedUrl(
                 domainType,
-                URLEncoder.encode(fileName, StandardCharsets.UTF_8),
+                URLDecoder.decode(fileName, StandardCharsets.UTF_8),
                 URLDecoder.decode(contentType, StandardCharsets.UTF_8)
         ));
     }
