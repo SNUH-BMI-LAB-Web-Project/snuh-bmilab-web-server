@@ -308,21 +308,25 @@ public class ProjectService {
 
     private ProjectStatus calculateProjectStatus(LocalDate startDate, LocalDate endDate) {
         LocalDate today = LocalDate.now();
+        log.info("today: {}, startDate: {}, endDate: {}", today, startDate, endDate);
 
         if (endDate != null && today.isAfter(endDate)) {
+            log.info("today is after endDate, return ProjectStatus.COMPLETED.");
             return ProjectStatus.COMPLETED;
         }
 
         if (startDate != null) {
             if (today.isBefore(startDate)) {
+                log.info("today is before startDate, return ProjectStatus.PENDING.");
                 return ProjectStatus.PENDING;
             }
 
             if (today.isEqual(startDate) || today.isAfter(startDate)) {
+                log.info("today is equal to or after startDate, return ProjectStatus.IN_PROGRESS.");
                 return ProjectStatus.IN_PROGRESS;
             }
-        }
 
+        }
         return ProjectStatus.WAITING;
     }
 
