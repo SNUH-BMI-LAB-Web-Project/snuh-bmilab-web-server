@@ -2,10 +2,10 @@ package com.bmilab.backend.domain.project.entity;
 
 import com.bmilab.backend.domain.project.enums.ProjectParticipantType;
 import com.bmilab.backend.domain.user.entity.User;
-import com.bmilab.backend.global.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.ManyToOne;
@@ -20,6 +20,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "project_participants")
@@ -27,6 +28,7 @@ import org.springframework.data.annotation.CreatedDate;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class ProjectParticipant {
     @EmbeddedId
     private ProjectParticipantId id;
