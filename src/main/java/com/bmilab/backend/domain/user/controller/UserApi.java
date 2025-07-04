@@ -1,5 +1,6 @@
 package com.bmilab.backend.domain.user.controller;
 
+import com.bmilab.backend.domain.user.dto.request.FindPasswordEmailRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserPasswordRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserRequest;
 import com.bmilab.backend.domain.user.dto.request.UserEducationRequest;
@@ -27,6 +28,24 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "User", description = "사용자 조회 API")
 public interface UserApi {
+    @Operation(summary = "이메일로 비밀번호 재설정", description = "이메일로 사용자를 찾아 비밀번호 재설정 메일을 전송하는 PATCH API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "비밀번호 재설정 메일 전송 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "사용자 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> sendFindPasswordEmail(
+            @RequestBody FindPasswordEmailRequest request
+    );
+
     @Operation(summary = "전체 사용자 정보 조회", description = "전체 사용자 정보를 조회하는 GET API")
     @ApiResponses(
             value = {
