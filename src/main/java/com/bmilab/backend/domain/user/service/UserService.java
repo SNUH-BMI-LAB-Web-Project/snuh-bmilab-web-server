@@ -101,22 +101,27 @@ public class UserService {
 
         UserDetailQueryResult result = userRepository.findUserDetailsById(userId)
                 .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+        User user = result.user();
+        String newEmail = request.email();
+
+        if (!user.getEmail().equals(newEmail)) {
+            validateEmailDuplicate(newEmail);
+        }
 
         result.userInfo().updateComment(request.comment());
         result.userLeave().updateAnnualLeaveCount(request.annualLeaveCount());
 
-        result.user()
-                .update(
-                        request.name(),
-                        request.email(),
-                        request.organization(),
-                        request.department(),
-                        request.affiliation()
-                );
+        user.update(
+                request.name(),
+                newEmail,
+                request.organization(),
+                request.department(),
+                request.affiliation()
+        );
 
         result.userInfo().update(request.seatNumber(), request.phoneNumber());
 
-        updateCategories(result.user(), request.newCategoryIds(), request.deletedCategoryIds());
+        updateCategories(user, request.newCategoryIds(), request.deletedCategoryIds());
     }
 
     @Transactional
@@ -256,5 +261,11 @@ public class UserService {
         String email = user.getEmail();
 
         emailSender.sendAsync(email, user.getName(), request.password());
+    }
+
+    public void validateEmailDuplicate(String email) {
+        if (userRepository.existsByEmail(email)) {
+            throw new ApiException(UserErrorCode.DUPLICATE_EMAIL);
+        }
     }
 }

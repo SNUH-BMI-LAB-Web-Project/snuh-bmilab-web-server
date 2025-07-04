@@ -13,7 +13,9 @@ public enum UserErrorCode implements ErrorCode {
     SIGNUP_REQUEST_NOT_FOUND("회원가입 요청 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     SIGNUP_REQUEST_ALREADY_DONE("이미 처리된 회원가입 요청입니다.", HttpStatus.BAD_REQUEST),
     SAME_AS_CURRENT_PASSWORD("새 비밀번호가 현재 비밀번호와 같습니다.", HttpStatus.BAD_REQUEST),
-    INVALID_PROFILE_IMAGE_FILE_TYPE("프로필 이미지의 파일 형식이 잘못되었습니다.", HttpStatus.BAD_REQUEST);
+    INVALID_PROFILE_IMAGE_FILE_TYPE("프로필 이미지의 파일 형식이 잘못되었습니다.", HttpStatus.BAD_REQUEST),
+    DUPLICATE_EMAIL("이미 가입된 이메일입니다.", HttpStatus.CONFLICT),
+    ;
 
     private final String message;
     private final HttpStatus httpStatus;

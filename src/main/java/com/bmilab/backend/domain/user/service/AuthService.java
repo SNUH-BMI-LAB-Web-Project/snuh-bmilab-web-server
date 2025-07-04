@@ -44,6 +44,8 @@ public class AuthService {
 
     @Transactional
     public void registerNewUser(RegisterUserRequest request) {
+        userService.validateEmailDuplicate(request.email());
+
         User user = User.builder()
                 .name(request.name())
                 .email(request.email())
