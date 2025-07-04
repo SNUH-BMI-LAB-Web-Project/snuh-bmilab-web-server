@@ -110,7 +110,11 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
         BooleanExpression leaderFilter = condition.leaderId() != null ? JPAExpressions.selectOne()
                 .from(participant)
                 .join(participant.user, user)
-                .where(participant.user.id.eq(condition.leaderId()))
+                .where(
+                        participant.project.eq(project),
+                        participant.type.eq(ProjectParticipantType.LEADER),
+                        participant.user.id.eq(condition.leaderId())
+                )
                 .exists() : null;
 
         BooleanExpression statusFilter = condition.status() != null ? project.status.eq(condition.status()) : null;
