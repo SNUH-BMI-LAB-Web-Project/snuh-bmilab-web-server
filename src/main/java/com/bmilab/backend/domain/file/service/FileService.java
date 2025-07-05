@@ -83,4 +83,8 @@ public class FileService {
 
         fileInformationRepository.deleteAll(files);
     }
+
+    public String getFileKey(FileInformation fileInformation) {
+        return s3Service.getS3Key(fileInformation.getUploadUrl());
+    }
 }
