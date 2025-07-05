@@ -11,6 +11,7 @@ import com.bmilab.backend.global.exception.GlobalErrorCode;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -88,7 +89,7 @@ public class S3Service {
     }
 
     public String getS3Key(String uploadedUrl) {
-        return uploadedUrl.replace(baseUrl, "");
+        return URLDecoder.decode(uploadedUrl.replace(baseUrl, ""), StandardCharsets.UTF_8);
     }
 
     public StreamingResponseBody downloadS3FilesByZip(List<String> fileKeys) {
