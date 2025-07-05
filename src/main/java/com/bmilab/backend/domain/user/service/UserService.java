@@ -119,6 +119,7 @@ public class UserService {
                 request.department(),
                 request.affiliation()
         );
+        user.updateRole(request.role());
 
         result.userInfo().update(request.seatNumber(), request.phoneNumber());
 
