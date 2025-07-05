@@ -6,7 +6,7 @@ public record ExternalProfessorSummary(
         String department
 ) {
     public static ExternalProfessorSummary from(String exProfessorString) {
-        if (exProfessorString == null) {
+        if (exProfessorString == null || exProfessorString.equals("//")) {
             return new ExternalProfessorSummary(null, null, null);
         }
 
