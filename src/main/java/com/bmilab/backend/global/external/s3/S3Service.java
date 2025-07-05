@@ -5,19 +5,25 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.exception.GlobalErrorCode;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Date;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -80,4 +86,31 @@ public class S3Service {
     public String getUploadedFileUrl(String key) {
         return baseUrl + key;
     }
+
+    public String getS3Key(String uploadedUrl) {
+        return uploadedUrl.replace(baseUrl, "");
+    }
+
+    public StreamingResponseBody downloadS3FilesByZip(List<String> fileKeys) {
+        return outputStream -> {
+            try (ZipOutputStream zipOut = new ZipOutputStream(outputStream)) {
+                for (String key : fileKeys) {
+                    S3Object s3Object = amazonS3.getObject(bucket, key);
+                    try (InputStream s3In = s3Object.getObjectContent()) {
+                        zipOut.putNextEntry(new ZipEntry(key));
+
+                        byte[] buffer = new byte[4096];
+                        int bytesRead;
+                        while ((bytesRead = s3In.read(buffer)) != -1) {
+                            zipOut.write(buffer, 0, bytesRead);
+                        }
+
+                        zipOut.closeEntry();
+                    }
+                }
+                zipOut.finish();
+            }
+        };
+    }
+
 }

@@ -60,6 +60,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 @Slf4j
 @Service
@@ -440,7 +441,7 @@ public class ProjectService {
     }
 
     public void validateProjectAccessPermission(Project project, User user, ProjectAccessPermission permission,
-                                                 boolean needPrivate) {
+                                                boolean needPrivate) {
         boolean shouldValidate = !needPrivate || project.isPrivate();
 
         if (shouldValidate && getAccessPermission(project, user).isNotGranted(permission)) {
@@ -492,5 +493,33 @@ public class ProjectService {
         List<ExternalProfessor> externalProfessors = externalProfessorRepository.findAllByNameContaining(name);
 
         return ExternalProfessorFindAllResponse.of(externalProfessors);
+    }
+
+    public StreamingResponseBody downloadIrbFilesByZip(Long projectId) {
+        List<ProjectFile> irbFiles = projectFileRepository.findAllIrbFilesByProjectId(projectId);
+
+        if (irbFiles.isEmpty()) {
+            throw new ApiException(ProjectErrorCode.IRB_FILES_IS_EMPTY);
+        }
+
+        List<String> fileKeys = irbFiles.stream()
+                .map(irbFile -> fileService.getFileKey(irbFile.getFileInformation()))
+                .toList();
+
+        return s3Service.downloadS3FilesByZip(fileKeys);
+    }
+
+    public StreamingResponseBody downloadDrbFilesByZip(Long projectId) {
+        List<ProjectFile> drbFiles = projectFileRepository.findAllDrbFilesByProjectId(projectId);
+
+        if (drbFiles.isEmpty()) {
+            throw new ApiException(ProjectErrorCode.DRB_FILES_IS_EMPTY);
+        }
+
+        List<String> fileKeys = drbFiles.stream()
+                .map(drbFile -> fileService.getFileKey(drbFile.getFileInformation()))
+                .toList();
+
+        return s3Service.downloadS3FilesByZip(fileKeys);
     }
 }

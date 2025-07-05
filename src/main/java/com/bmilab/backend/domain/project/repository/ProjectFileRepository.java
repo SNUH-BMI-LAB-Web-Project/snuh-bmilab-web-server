@@ -18,4 +18,20 @@ public interface ProjectFileRepository extends JpaRepository<ProjectFile, UUID> 
           + "AND pf.fileInformation.entityId = :projectId"
     )
     List<ProjectFile> findAllByProjectId(@Param("projectId") Long projectId);
+
+    @Query(
+            "SELECT pf FROM ProjectFile pf "
+                    + "WHERE pf.fileInformation.domainType = com.bmilab.backend.domain.file.enums.FileDomainType.PROJECT "
+                    + "AND pf.fileInformation.entityId = :projectId "
+                    + "AND pf.type = com.bmilab.backend.domain.project.enums.ProjectFileType.IRB"
+    )
+    List<ProjectFile> findAllIrbFilesByProjectId(@Param("projectId") Long projectId);
+
+    @Query(
+            "SELECT pf FROM ProjectFile pf "
+                    + "WHERE pf.fileInformation.domainType = com.bmilab.backend.domain.file.enums.FileDomainType.PROJECT "
+                    + "AND pf.fileInformation.entityId = :projectId "
+                    + "AND pf.type = com.bmilab.backend.domain.project.enums.ProjectFileType.DRB"
+    )
+    List<ProjectFile> findAllDrbFilesByProjectId(@Param("projectId") Long projectId);
 }

@@ -18,7 +18,9 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.UUID;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 @RestController
 @RequestMapping("/projects")
@@ -181,5 +184,23 @@ public class ProjectController implements ProjectApi {
     public ResponseEntity<UserProjectFindAllResponse> getMyProjects(@AuthenticationPrincipal UserAuthInfo userAuthInfo) {
 
         return ResponseEntity.ok(projectService.getUserProjects(userAuthInfo.getUserId()));
+    }
+
+    @GetMapping("/{projectId}/files/irb")
+    public ResponseEntity<StreamingResponseBody> downloadIrbFilesByZip(@PathVariable Long projectId) {
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"irb_files_" + projectId + ".zip\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(projectService.downloadIrbFilesByZip(projectId));
+    }
+
+    @GetMapping("/{projectId}/files/drb")
+    public ResponseEntity<StreamingResponseBody> downloadDrbFilesByZip(@PathVariable Long projectId) {
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"drb_files_" + projectId + ".zip\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(projectService.downloadDrbFilesByZip(projectId));
     }
 }
