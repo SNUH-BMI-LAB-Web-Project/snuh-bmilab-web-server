@@ -6,7 +6,7 @@ import com.bmilab.backend.domain.projectcategory.entity.ProjectCategory;
 import com.bmilab.backend.domain.projectcategory.entity.QProjectCategory;
 import com.bmilab.backend.domain.user.dto.query.UserDetailQueryResult;
 import com.bmilab.backend.domain.user.dto.query.UserInfoQueryResult;
-import com.bmilab.backend.domain.user.dto.query.UserSearchCondition;
+import com.bmilab.backend.domain.user.dto.query.UserCondition;
 import com.bmilab.backend.domain.user.entity.QUser;
 import com.bmilab.backend.domain.user.entity.QUserInfo;
 import com.bmilab.backend.domain.user.entity.QUserProjectCategory;
@@ -58,30 +58,58 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
     }
 
     @Override
-    public Page<UserInfoQueryResult> findAllUserInfosPagination(Pageable pageable) {
+    public Page<UserInfoQueryResult> searchUserInfos(UserCondition condition, Pageable pageable) {
         QUser user = QUser.user;
         QUserInfo userInfo = QUserInfo.userInfo;
         QUserProjectCategory userProjectCategory = QUserProjectCategory.userProjectCategory;
         QProjectCategory category = QProjectCategory.projectCategory;
 
+        BooleanBuilder conditionBuilder = new BooleanBuilder();
+        String filterBy = Optional.ofNullable(condition.getFilterBy()).map(String::trim).map(String::toLowerCase).orElse(null);
+        String filterValue = Optional.ofNullable(condition.getFilterValue()).map(String::trim).orElse(null);
+
+        if (filterBy != null && !filterBy.isBlank() &&
+                filterValue != null && !filterValue.isBlank()) {
+            switch (filterBy) {
+                case "name" -> conditionBuilder.and(user.name.containsIgnoreCase(filterValue));
+                case "email" -> conditionBuilder.and(user.email.containsIgnoreCase(filterValue));
+                case "department" -> conditionBuilder.and(user.department.containsIgnoreCase(filterValue));
+                case "organization" -> conditionBuilder.and(user.organization.containsIgnoreCase(filterValue));
+                case "affiliation" -> conditionBuilder.and(user.affiliation.eq(UserAffiliation.valueOf(filterValue.toUpperCase())));
+                case "projectname" -> conditionBuilder.and(category.name.containsIgnoreCase(filterValue));
+                case "seatnumber" -> conditionBuilder.and(userInfo.seatNumber.containsIgnoreCase(filterValue));
+                case "phonenumber" -> conditionBuilder.and(userInfo.phoneNumber.containsIgnoreCase(filterValue));
+            }
+        }
+
+        OrderSpecifier<?> orderSpecifier = "desc".equalsIgnoreCase(condition.getDirection())
+                ? user.name.desc()
+                : user.name.asc();
+
         List<Long> userIds = queryFactory
                 .select(user.id)
                 .from(user)
+                .leftJoin(userInfo).on(userInfo.user.eq(user))
+                .leftJoin(userProjectCategory).on(userProjectCategory.user.eq(user))
+                .leftJoin(category).on(userProjectCategory.category.eq(category))
+                .where(conditionBuilder)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
+                .orderBy(orderSpecifier)
                 .fetch();
 
         if (userIds.isEmpty()) {
-            PageableExecutionUtils.getPage(Collections.emptyList(), pageable, () -> 0L);
+            return PageableExecutionUtils.getPage(Collections.emptyList(), pageable, () -> 0L);
         }
 
         List<Tuple> rows = queryFactory
                 .select(user, userInfo, category)
                 .from(user)
-                .innerJoin(userInfo).on(userInfo.user.eq(user))
+                .leftJoin(userInfo).on(userInfo.user.eq(user))
                 .leftJoin(userProjectCategory).on(userProjectCategory.user.eq(user))
                 .leftJoin(category).on(userProjectCategory.category.eq(category))
                 .where(user.id.in(userIds))
+                .orderBy(orderSpecifier)
                 .fetch();
 
         Map<Long, UserInfoQueryResult> resultMap = new LinkedHashMap<>();
@@ -96,10 +124,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
             if (existing == null) {
                 List<ProjectCategory> categories = new ArrayList<>();
-                if (c != null) {
-                    categories.add(c);
-                }
-
+                if (c != null) categories.add(c);
                 resultMap.put(userId, new UserInfoQueryResult(u, ui, categories));
             } else {
                 if (c != null && !existing.getCategories().contains(c)) {
@@ -111,55 +136,15 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         List<UserInfoQueryResult> results = new ArrayList<>(resultMap.values());
 
         Long total = queryFactory
-                .select(user.count())
+                .select(user.countDistinct())
                 .from(user)
+                .leftJoin(userInfo).on(userInfo.user.eq(user))
+                .leftJoin(userProjectCategory).on(userProjectCategory.user.eq(user))
+                .leftJoin(category).on(userProjectCategory.category.eq(category))
+                .where(conditionBuilder)
                 .fetchOne();
 
         return PageableExecutionUtils.getPage(results, pageable, () -> total != null ? total : 0L);
-    }
-
-
-    @Override
-    public List<User> searchUsersByCondition(UserSearchCondition condition) {
-
-        QUser user = QUser.user;
-        QUserInfo userInfo = QUserInfo.userInfo;
-        QUserProjectCategory userProjectCategory = QUserProjectCategory.userProjectCategory;
-        QProjectCategory category = QProjectCategory.projectCategory;
-
-        BooleanBuilder conditionBuilder = new BooleanBuilder();
-
-        String filterBy = condition.filterBy();
-        String filterValue = condition.filterValue();
-
-
-        if (filterBy != null && filterValue != null) {
-            switch (filterBy) {
-                case "name" -> conditionBuilder.and(user.name.containsIgnoreCase(filterValue));
-                case "email" -> conditionBuilder.and(user.email.containsIgnoreCase(filterValue));
-                case "department" -> conditionBuilder.and(user.department.containsIgnoreCase(filterValue));
-                case "organization" -> conditionBuilder.and(user.organization.containsIgnoreCase(filterValue));
-                case "affiliation" -> conditionBuilder.and(user.affiliation.eq(UserAffiliation.valueOf(filterValue.toUpperCase())));
-                case "projectName" -> conditionBuilder.and(category.name.containsIgnoreCase(filterValue));
-                case "seatNumber" -> conditionBuilder.and(userInfo.seatNumber.containsIgnoreCase(filterValue));
-                case "phoneNumber" -> conditionBuilder.and(userInfo.phoneNumber.containsIgnoreCase(filterValue));
-            }
-        }
-
-        OrderSpecifier<String> orderSpecifier = "desc".equalsIgnoreCase(condition.sort())
-                ? user.name.desc()
-                : user.name.asc();
-
-        return queryFactory
-                .select(user)
-                .from(user)
-                .leftJoin(userInfo).on(userInfo.user.id.eq(user.id))
-                .leftJoin(userProjectCategory).on(userProjectCategory.user.id.eq(user.id))
-                .leftJoin(userProjectCategory.category, category)
-                .where(conditionBuilder)
-                .orderBy(orderSpecifier)
-                .distinct()
-                .fetch();
     }
 
 }

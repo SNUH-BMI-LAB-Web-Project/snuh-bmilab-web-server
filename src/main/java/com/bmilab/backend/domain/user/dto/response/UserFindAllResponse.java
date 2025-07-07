@@ -1,25 +1,41 @@
 package com.bmilab.backend.domain.user.dto.response;
 
 import com.bmilab.backend.domain.projectcategory.dto.response.ProjectCategorySummary;
+import com.bmilab.backend.domain.user.dto.query.UserCondition;
 import com.bmilab.backend.domain.user.dto.query.UserInfoQueryResult;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.entity.UserInfo;
 import com.bmilab.backend.domain.user.enums.UserAffiliation;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.List;
 import lombok.Builder;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
+
 public record UserFindAllResponse(
         List<UserItem> users,
+
+        @Schema(description = "검색 필터 필드", example = "name")
+        String filterBy,
+
+        @Schema(description = "검색 필터 값", example = "홍길동")
+        String filterValue,
+
+        @Schema(description = "필터 내 정렬 기준", example = "이름 오름차순")
+        String sort,
+
+        @Schema(description = "전체 페이지 수", example = "5")
         int totalPage
 ) {
-    public static UserFindAllResponse of(Page<UserInfoQueryResult> queryResults) {
+    public static UserFindAllResponse of(UserCondition condition, Page<UserInfoQueryResult> queryResults) {
         return new UserFindAllResponse(
                 queryResults.getContent()
                         .stream()
                         .map(UserItem::from)
                         .toList(),
+                condition.getFilterBy(),
+                condition.getFilterValue(),
+                condition.getDirection(),
                 queryResults.getTotalPages()
         );
     }
@@ -77,9 +93,9 @@ public record UserFindAllResponse(
                                     .map(ProjectCategorySummary::from)
                                     .toList()
                     )
-                    .seatNumber(userInfo.getSeatNumber())
-                    .phoneNumber(userInfo.getPhoneNumber())
-                    .education(userInfo.getEducation())
+                    .seatNumber(userInfo != null ? userInfo.getSeatNumber() : null)
+                    .phoneNumber(userInfo != null ? userInfo.getPhoneNumber() : null)
+                    .education(userInfo != null ? userInfo.getEducation() : null)
                     .build();
         }
     }

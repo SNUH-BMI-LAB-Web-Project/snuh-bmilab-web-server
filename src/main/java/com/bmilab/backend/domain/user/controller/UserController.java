@@ -1,10 +1,10 @@
 package com.bmilab.backend.domain.user.controller;
 
+import com.bmilab.backend.domain.user.dto.query.UserCondition;
 import com.bmilab.backend.domain.user.dto.request.FindPasswordEmailRequest;
-import com.bmilab.backend.domain.user.dto.request.UserEducationRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserPasswordRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserRequest;
-import com.bmilab.backend.domain.user.dto.query.UserSearchCondition;
+import com.bmilab.backend.domain.user.dto.request.UserEducationRequest;
 import com.bmilab.backend.domain.user.dto.response.SearchUserResponse;
 import com.bmilab.backend.domain.user.dto.response.UserDetail;
 import com.bmilab.backend.domain.user.dto.response.UserFindAllResponse;
@@ -46,19 +46,16 @@ public class UserController implements UserApi {
 
     @GetMapping
     public ResponseEntity<UserFindAllResponse> getAllUsers(
-            @RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
-            @RequestParam(required = false, defaultValue = "10") int size,
-            @RequestParam(required = false, defaultValue = "createdAt", value = "criteria") String criteria
+            @ParameterObject @ModelAttribute UserCondition condition
     ) {
-
-        return ResponseEntity.ok(userService.getAllUsers(pageNo, size, criteria));
+        return ResponseEntity.ok(userService.getAllUsers(condition));
     }
 
     @GetMapping("/search")
     public ResponseEntity<SearchUserResponse> searchUsers(
-            @ParameterObject @ModelAttribute UserSearchCondition request
+            @RequestParam(required = false) String keyword
     ) {
-        return ResponseEntity.ok(userService.searchUsers(request));
+        return ResponseEntity.ok(userService.searchUsers(keyword));
     }
 
     @GetMapping("/me")

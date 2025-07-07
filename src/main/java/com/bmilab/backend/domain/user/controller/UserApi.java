@@ -1,10 +1,10 @@
 package com.bmilab.backend.domain.user.controller;
 
+import com.bmilab.backend.domain.user.dto.query.UserCondition;
 import com.bmilab.backend.domain.user.dto.request.FindPasswordEmailRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserPasswordRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserRequest;
 import com.bmilab.backend.domain.user.dto.request.UserEducationRequest;
-import com.bmilab.backend.domain.user.dto.query.UserSearchCondition;
 import com.bmilab.backend.domain.user.dto.response.SearchUserResponse;
 import com.bmilab.backend.domain.user.dto.response.UserDetail;
 import com.bmilab.backend.domain.user.dto.response.UserFindAllResponse;
@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -56,9 +57,8 @@ public interface UserApi {
             }
     )
     ResponseEntity<UserFindAllResponse> getAllUsers(
-            @RequestParam(required = false, defaultValue = "0", value = "page") int pageNo,
-            @RequestParam(required = false, defaultValue = "10") int size,
-            @RequestParam(required = false, defaultValue = "createdAt", value = "criteria") String criteria);
+            @ParameterObject @ModelAttribute UserCondition condition
+    );
 
     @Operation(summary = "현재 사용자 정보 상세 조회", description = "현재 로그인한 사용자 정보를 상세 조회하는 GET API")
     @ApiResponses(
@@ -126,7 +126,7 @@ public interface UserApi {
             }
     )
     ResponseEntity<SearchUserResponse> searchUsers(
-            @ModelAttribute UserSearchCondition request
+            @RequestParam(required = false) String keyword
     );
 
     @Operation(summary = "사용자 학력 추가", description = "사용자의 학력을 추가하기 위한 PATCH API")
