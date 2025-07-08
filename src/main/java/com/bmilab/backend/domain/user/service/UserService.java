@@ -9,7 +9,7 @@ import com.bmilab.backend.domain.user.dto.request.UserEducationRequest;
 import com.bmilab.backend.domain.user.dto.request.AdminUpdateUserRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserPasswordRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserRequest;
-import com.bmilab.backend.domain.user.dto.query.UserSearchCondition;
+import com.bmilab.backend.domain.user.dto.query.UserCondition;
 import com.bmilab.backend.domain.user.dto.response.SearchUserResponse;
 import com.bmilab.backend.domain.user.dto.response.UserDetail;
 import com.bmilab.backend.domain.user.dto.response.UserFindAllResponse;
@@ -27,6 +27,7 @@ import com.bmilab.backend.global.email.EmailSender;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.external.s3.S3Service;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,6 +42,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -65,13 +67,18 @@ public class UserService {
         return userRepository.findAllById(userIds);
     }
 
-    public UserFindAllResponse getAllUsers(int pageNo, int size, String criteria) {
+    public UserFindAllResponse getAllUsers(UserCondition condition) {
+        log.info("filterBy={}, filterValue={}", condition.getFilterBy(), condition.getFilterValue());
 
-        PageRequest pageRequest = PageRequest.of(pageNo, size, Sort.by(Direction.DESC, criteria));
+        PageRequest pageRequest = PageRequest.of(
+                condition.getPageNo(),
+                condition.getSize(),
+                Sort.by(Direction.DESC, condition.getCriteria())
+        );
 
-        Page<UserInfoQueryResult> results = userRepository.findAllUserInfosPagination(pageRequest);
+        Page<UserInfoQueryResult> results = userRepository.searchUserInfos(condition, pageRequest);
 
-        return UserFindAllResponse.of(results);
+        return UserFindAllResponse.of(condition, results);
     }
 
     public UserDetail getUserDetailById(Long userId) {
@@ -112,13 +119,7 @@ public class UserService {
         result.userInfo().updateComment(request.comment());
         result.userLeave().updateAnnualLeaveCount(request.annualLeaveCount());
 
-        user.update(
-                request.name(),
-                newEmail,
-                request.organization(),
-                request.department(),
-                request.affiliation()
-        );
+        user.update(request.name(), newEmail, request.organization(), request.department(), request.affiliation());
         user.updateRole(request.role());
 
         result.userInfo().update(request.seatNumber(), request.phoneNumber());
@@ -171,9 +172,7 @@ public class UserService {
     private void updateCategories(User user, List<Long> newCategoryIds, List<Long> deletedCategoryIds) {
 
         saveUserCategories(user, newCategoryIds);
-        deletedCategoryIds.forEach((deletedCategoryId) -> {
-            userProjectCategoryRepository.deleteByUserIdAndCategoryId(user.getId(), deletedCategoryId);
-        });
+        deletedCategoryIds.forEach((deletedCategoryId) -> userProjectCategoryRepository.deleteByUserIdAndCategoryId(user.getId(), deletedCategoryId));
     }
 
     public void saveUserCategories(User user, List<Long> newCategoryIds) {
@@ -187,6 +186,7 @@ public class UserService {
     }
 
     public void saveUserInfo(User user, String seatNumber, String phoneNumber, LocalDate joinedAt) {
+
         UserInfo userInfo = UserInfo.builder()
                 .user(user)
                 .seatNumber(seatNumber)
@@ -229,10 +229,11 @@ public class UserService {
         userRepository.deleteById(userId);
     }
 
-    public SearchUserResponse searchUsers(UserSearchCondition condition) {
-        List<User> users = userRepository.searchUsersByCondition(condition);
+    public SearchUserResponse searchUsers(String keyword) {
 
-        return SearchUserResponse.of(users, condition);
+        List<User> users = userRepository.searchUsersByKeyword(keyword);
+
+        return SearchUserResponse.of(users);
     }
 
     @Transactional
@@ -259,6 +260,7 @@ public class UserService {
     }
 
     public void sendAccountEmail(Long userId, UserAccountEmailRequest request) {
+
         User user = findUserById(userId);
         String email = user.getEmail();
 
@@ -267,10 +269,10 @@ public class UserService {
 
     @Transactional
     public void sendFindPasswordEmail(FindPasswordEmailRequest request) {
+
         String email = request.email();
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
 
         String newPassword = generateRandomPassword();
 
@@ -280,14 +282,18 @@ public class UserService {
     }
 
     public void validateEmailDuplicate(String email) {
+
         if (userRepository.existsByEmail(email)) {
             throw new ApiException(UserErrorCode.DUPLICATE_EMAIL);
         }
     }
 
     private String generateRandomPassword() {
-        char[] charSet = new char[]{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F',
-                'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
+
+        char[] charSet = new char[] {
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
+                'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
+        };
 
         StringBuilder tempPw = new StringBuilder();
 
