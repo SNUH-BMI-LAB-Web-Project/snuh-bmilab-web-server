@@ -10,6 +10,7 @@ import com.bmilab.backend.domain.user.dto.response.UserDetail;
 import com.bmilab.backend.domain.user.dto.response.UserFindAllResponse;
 import com.bmilab.backend.domain.user.service.UserService;
 import com.bmilab.backend.global.security.UserAuthInfo;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.MediaType;
@@ -37,7 +38,7 @@ public class UserController implements UserApi {
 
     @PatchMapping("/password")
     public ResponseEntity<Void> sendFindPasswordEmail(
-            @RequestBody FindPasswordEmailRequest request
+            @RequestBody @Valid FindPasswordEmailRequest request
     ) {
 
         userService.sendFindPasswordEmail(request);
@@ -70,7 +71,7 @@ public class UserController implements UserApi {
     public ResponseEntity<Void> updateCurrentUser(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestPart(required = false) MultipartFile profileImage,
-            @RequestPart UpdateUserRequest request
+            @RequestPart @Valid UpdateUserRequest request
     ) {
 
         userService.updateCurrentUser(userAuthInfo.getUserId(), profileImage, request);
@@ -80,7 +81,7 @@ public class UserController implements UserApi {
     @PatchMapping("/me/password")
     public ResponseEntity<Void> updatePassword(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
-            @RequestBody UpdateUserPasswordRequest request
+            @RequestBody @Valid UpdateUserPasswordRequest request
     ) {
 
         userService.updatePassword(userAuthInfo.getUserId(), request);
@@ -90,7 +91,7 @@ public class UserController implements UserApi {
     @PatchMapping("/me/educations")
     public ResponseEntity<Void> addEducations(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
-            @RequestBody UserEducationRequest request
+            @RequestBody @Valid UserEducationRequest request
     ) {
 
         userService.addEducations(userAuthInfo.getUserId(), request);

@@ -4,7 +4,7 @@ import com.bmilab.backend.domain.leave.dto.request.ApplyLeaveRequest;
 import com.bmilab.backend.domain.leave.dto.response.LeaveFindAllResponse;
 import com.bmilab.backend.domain.leave.service.LeaveService;
 import com.bmilab.backend.global.security.UserAuthInfo;
-import java.time.LocalDateTime;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/leaves")
@@ -39,7 +41,7 @@ public class LeaveController implements LeaveApi {
     @PostMapping
     public ResponseEntity<Void> applyLeave(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
-            @RequestBody ApplyLeaveRequest request
+            @RequestBody @Valid ApplyLeaveRequest request
     ) {
         leaveService.applyLeave(userAuthInfo.getUserId(), request);
         return ResponseEntity.ok().build();
