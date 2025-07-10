@@ -4,6 +4,7 @@ import com.bmilab.backend.domain.report.dto.request.ReportRequest;
 import com.bmilab.backend.domain.report.dto.response.ReportFindAllResponse;
 import com.bmilab.backend.domain.report.service.ReportService;
 import com.bmilab.backend.global.security.UserAuthInfo;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -29,7 +30,7 @@ public class ReportController implements ReportApi {
     @PostMapping
     public ResponseEntity<Void> createReport(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
-            @RequestBody ReportRequest request
+            @RequestBody @Valid ReportRequest request
     ) {
 
         reportService.createReport(userAuthInfo.getUserId(), request);
@@ -40,7 +41,7 @@ public class ReportController implements ReportApi {
     public ResponseEntity<Void> updateReport(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @PathVariable Long reportId,
-            @RequestBody ReportRequest request
+            @RequestBody @Valid ReportRequest request
     ) {
 
         reportService.updateReport(userAuthInfo.getUserId(), reportId, request);
