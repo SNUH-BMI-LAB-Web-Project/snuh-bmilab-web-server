@@ -87,7 +87,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 : user.name.asc();
 
         List<Long> userIds = queryFactory
-                .select(user.id)
+                .selectDistinct(user.id)
                 .from(user)
                 .innerJoin(userInfo).on(userInfo.user.eq(user))
                 .leftJoin(userProjectCategory).on(userProjectCategory.user.eq(user))
@@ -103,8 +103,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         }
 
         List<Tuple> rows = queryFactory
-                .select(user, userInfo, category)
-                .distinct()
+                .selectDistinct(user, userInfo, category)
                 .from(user)
                 .innerJoin(userInfo).on(userInfo.user.eq(user))
                 .leftJoin(userProjectCategory).on(userProjectCategory.user.eq(user))
