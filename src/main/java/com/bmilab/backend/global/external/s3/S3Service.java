@@ -59,14 +59,14 @@ public class S3Service {
     }
 
     public void deleteFile(String fileUrl) {
-        String imageKey = fileUrl.replace(baseUrl, "");
+        String fileKey = getS3Key(fileUrl);
 
-        if (!amazonS3.doesObjectExist(bucket, imageKey)) {
+        if (!amazonS3.doesObjectExist(bucket, fileKey)) {
             throw new ApiException(GlobalErrorCode.FILE_NOT_FOUND);
         }
 
         try {
-            amazonS3.deleteObject(bucket, imageKey);
+            amazonS3.deleteObject(bucket, fileKey);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
