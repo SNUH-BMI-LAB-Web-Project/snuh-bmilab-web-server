@@ -472,7 +472,7 @@ public class ProjectService {
         ExternalProfessor externalProfessor = externalProfessorRepository.findById(professorId)
                 .orElseThrow(() -> new ApiException(ProjectErrorCode.EXTERNAL_PROFESSOR_NOT_FOUND));
 
-        externalProfessor.update(request.name(), request.organization(), request.department());
+        externalProfessor.update(request.name(), request.organization(), request.department(), request.position());
     }
 
     public ExternalProfessorFindAllResponse getAllExternalProfessors() {
