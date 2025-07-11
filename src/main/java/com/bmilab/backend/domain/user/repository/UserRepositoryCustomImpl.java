@@ -17,8 +17,10 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -31,6 +33,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+@Slf4j
 @RequiredArgsConstructor
 public class UserRepositoryCustomImpl implements UserRepositoryCustom {
     private final JPAQueryFactory queryFactory;
@@ -67,18 +70,41 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         BooleanBuilder conditionBuilder = new BooleanBuilder();
         String filterBy = Optional.ofNullable(condition.getFilterBy()).map(String::trim).map(String::toLowerCase).orElse(null);
         String filterValue = Optional.ofNullable(condition.getFilterValue()).map(String::trim).orElse(null);
+        UserAffiliation affiliation = UserAffiliation.fromString(filterValue);
+
+        BooleanExpression nameContains = (filterValue == null || filterValue.isBlank()) ? null : user.name.containsIgnoreCase(filterValue);
+        BooleanExpression emailContains = (filterValue == null || filterValue.isBlank()) ? null : user.email.containsIgnoreCase(filterValue);
+        BooleanExpression departmentContains = (filterValue == null || filterValue.isBlank()) ? null : user.department.containsIgnoreCase(filterValue);
+        BooleanExpression organizationContains = (filterValue == null || filterValue.isBlank()) ? null : user.organization.containsIgnoreCase(filterValue);
+        BooleanExpression affiliationEquals = (filterValue == null || filterValue.isBlank() || affiliation == null) ? null : user.affiliation.eq(affiliation);
+        BooleanExpression categoryContains = (filterValue == null || filterValue.isBlank()) ? null : category.name.containsIgnoreCase(filterValue);
+        BooleanExpression seatNumberContains = (filterValue == null || filterValue.isBlank()) ? null : userInfo.seatNumber.containsIgnoreCase(filterValue);
+        BooleanExpression phoneNumberContains = (filterValue == null || filterValue.isBlank()) ? null : userInfo.phoneNumber.containsIgnoreCase(filterValue);
 
         if (filterBy != null && !filterBy.isBlank() &&
                 filterValue != null && !filterValue.isBlank()) {
-            switch (filterBy) {
-                case "name" -> conditionBuilder.and(user.name.containsIgnoreCase(filterValue));
-                case "email" -> conditionBuilder.and(user.email.containsIgnoreCase(filterValue));
-                case "department" -> conditionBuilder.and(user.department.containsIgnoreCase(filterValue));
-                case "organization" -> conditionBuilder.and(user.organization.containsIgnoreCase(filterValue));
-                case "affiliation" -> conditionBuilder.and(user.affiliation.eq(UserAffiliation.valueOf(filterValue.toUpperCase())));
-                case "projectname" -> conditionBuilder.and(category.isNull().or(category.name.containsIgnoreCase(filterValue)));
-                case "seatnumber" -> conditionBuilder.and(userInfo.seatNumber.containsIgnoreCase(filterValue));
-                case "phonenumber" -> conditionBuilder.and(userInfo.phoneNumber.containsIgnoreCase(filterValue));
+            if (filterBy.equalsIgnoreCase("all")) {
+                conditionBuilder.andAnyOf(
+                        nameContains,
+                        emailContains,
+                        departmentContains,
+                        organizationContains,
+                        affiliationEquals,
+                        categoryContains,
+                        seatNumberContains,
+                        phoneNumberContains
+                );
+            } else {
+                switch (filterBy) {
+                    case "name" -> conditionBuilder.and(nameContains);
+                    case "email" -> conditionBuilder.and(emailContains);
+                    case "department" -> conditionBuilder.and(departmentContains);
+                    case "organization" -> conditionBuilder.and(organizationContains);
+                    case "affiliation" -> conditionBuilder.and(affiliationEquals);
+                    case "projectname" -> conditionBuilder.and(categoryContains);
+                    case "seatnumber" -> conditionBuilder.and(seatNumberContains);
+                    case "phonenumber" -> conditionBuilder.and(phoneNumberContains);
+                }
             }
         }
 
