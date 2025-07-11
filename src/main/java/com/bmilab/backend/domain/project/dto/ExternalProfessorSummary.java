@@ -10,7 +10,7 @@ public record ExternalProfessorSummary(
             return new ExternalProfessorSummary(null, null, null);
         }
 
-        String[] split = exProfessorString.split("/");
+        String[] split = exProfessorString.split("/", -1);
 
         if (split.length != 3) {
             throw new IllegalArgumentException("Invalid ex-professor string: " + exProfessorString);
