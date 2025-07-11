@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RegExp {
 
-    public static final String NAME_EXPRESSION = "^[가-힣]{2,5}$";
+    public static final String NAME_EXPRESSION = "^[가-힣]{2,}$";
     public static final String NAME_MESSAGE = "올바른 이름이 아닙니다.";
 
     public static final String EMAIL_EXPRESSION = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
