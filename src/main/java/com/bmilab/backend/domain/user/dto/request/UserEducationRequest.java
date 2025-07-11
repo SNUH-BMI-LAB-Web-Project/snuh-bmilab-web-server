@@ -1,8 +1,10 @@
 package com.bmilab.backend.domain.user.dto.request;
 
+import com.bmilab.backend.domain.user.enums.EducationType;
 import com.bmilab.backend.domain.user.enums.EnrollmentStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -19,6 +21,10 @@ public record UserEducationRequest(
         @NotNull(message = "학적 상태는 필수입니다.")
         EnrollmentStatus status,
 
+        @Schema(description = "학력 구분 (고등학교, 학사, 석사, 박사, 석박통합)", example = "BACHELOR")
+        @NotNull(message = "학력 구분은 필수입니다.")
+        EducationType type,
+
         @Schema(type = "string", description = "시작 연월", example = "2020-03")
         @JsonFormat(pattern = "yyyy-MM")
         @DateTimeFormat(pattern = "yyyy-MM")
@@ -28,7 +34,7 @@ public record UserEducationRequest(
         @Schema(type = "string", description = "종료 연월", example = "2024-02")
         @JsonFormat(pattern = "yyyy-MM")
         @DateTimeFormat(pattern = "yyyy-MM")
-        @NotNull(message = "종료 연월은 필수입니다.")
+        @Nullable
         YearMonth endYearMonth
 ) {
 }

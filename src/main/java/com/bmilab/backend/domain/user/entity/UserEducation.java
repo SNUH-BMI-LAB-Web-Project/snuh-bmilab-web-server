@@ -1,5 +1,6 @@
 package com.bmilab.backend.domain.user.entity;
 
+import com.bmilab.backend.domain.user.enums.EducationType;
 import com.bmilab.backend.domain.user.enums.EnrollmentStatus;
 import com.bmilab.backend.global.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
@@ -45,6 +46,10 @@ public class UserEducation extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "enrollment_status", nullable = false)
     private EnrollmentStatus status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    private EducationType type;
 
     @Column(name = "start_ym", nullable = false, length = 7)
     private YearMonth startYearMonth;

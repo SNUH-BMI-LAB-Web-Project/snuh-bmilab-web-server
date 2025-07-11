@@ -19,14 +19,16 @@ public record ExternalProfessorFindAllResponse(
             Long professorId,
             String name,
             String organization,
-            String department
+            String department,
+            String position
     ) {
         public static ExternalProfessorItem from(ExternalProfessor externalProfessor) {
             return new ExternalProfessorItem(
                     externalProfessor.getId(),
                     externalProfessor.getName(),
                     externalProfessor.getOrganization(),
-                    externalProfessor.getDepartment()
+                    externalProfessor.getDepartment(),
+                    externalProfessor.getPosition()
             );
         }
     }

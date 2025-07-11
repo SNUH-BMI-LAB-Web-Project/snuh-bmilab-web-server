@@ -16,4 +16,13 @@ public enum UserPosition {
     ADMINISTRATIVE_STAFF("행정");
 
     private final String description;
+
+    public static UserPosition fromString(String position) {
+        for (UserPosition value : values()) {
+            if (value.name().equalsIgnoreCase(position)) {
+                return value;
+            }
+        }
+        return null;
+    }
 }

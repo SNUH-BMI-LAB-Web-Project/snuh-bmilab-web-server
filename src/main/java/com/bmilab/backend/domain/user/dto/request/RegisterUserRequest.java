@@ -51,7 +51,7 @@ public record RegisterUserRequest(
         List<UserSubAffiliationRequest> subAffiliations,
 
         @Schema(description = "권한")
-        @NotBlank(message = "권한은 필수입니다.")
+        @NotNull(message = "권한은 필수입니다.")
         Role role,
 
         @Schema(description = "총 연차 개수", example = "15.0")
