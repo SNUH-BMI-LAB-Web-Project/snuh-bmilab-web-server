@@ -23,6 +23,11 @@ public record ExternalProfessorRequest(
         @Schema(description = "부서", example = "소프트웨어학부")
         @Nullable
         @Size(max = 20, message = "부서명은 20자 이하로 입력해주세요.")
-        String department
+        String department,
+
+        @Schema(description = "직책", example = "교수")
+        @Nullable
+        @Size(max = 20, message = "직책명은 20자 이하로 입력해주세요.")
+        String position
 ) {
 }

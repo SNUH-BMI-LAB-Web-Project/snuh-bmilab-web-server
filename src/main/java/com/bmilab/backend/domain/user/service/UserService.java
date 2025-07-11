@@ -221,6 +221,7 @@ public class UserService {
                         .startYearMonth(it.startYearMonth())
                         .endYearMonth(it.endYearMonth())
                         .status(it.status())
+                        .type(it.type())
                         .build())
                 .forEach(userEducationRepository::save);
     }
@@ -261,6 +262,7 @@ public class UserService {
                 .startYearMonth(request.startYearMonth())
                 .endYearMonth(request.endYearMonth())
                 .status(request.status())
+                .type(request.type())
                 .build();
 
         userEducationRepository.save(userEducation);

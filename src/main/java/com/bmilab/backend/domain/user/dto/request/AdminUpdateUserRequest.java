@@ -44,7 +44,7 @@ public record AdminUpdateUserRequest(
         List<UserSubAffiliationRequest> subAffiliations,
 
         @Schema(description = "권한")
-        @NotBlank(message = "권한은 필수입니다.")
+        @NotNull(message = "권한은 필수입니다.")
         Role role,
 
         @Schema(description = "추가된 연구 분야 ID 목록", example = "[1, 2, 3]")
