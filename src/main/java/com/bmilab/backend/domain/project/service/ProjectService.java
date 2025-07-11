@@ -462,6 +462,7 @@ public class ProjectService {
                 .name(request.name())
                 .organization(request.organization())
                 .department(request.department())
+                .position(request.position())
                 .build();
 
         externalProfessorRepository.save(externalProfessor);
