@@ -20,6 +20,7 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -32,6 +33,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+@Slf4j
 @RequiredArgsConstructor
 public class UserRepositoryCustomImpl implements UserRepositoryCustom {
     private final JPAQueryFactory queryFactory;
@@ -75,7 +77,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         BooleanExpression departmentContains = (filterValue == null || filterValue.isBlank()) ? null : user.department.containsIgnoreCase(filterValue);
         BooleanExpression organizationContains = (filterValue == null || filterValue.isBlank()) ? null : user.organization.containsIgnoreCase(filterValue);
         BooleanExpression affiliationEquals = (filterValue == null || filterValue.isBlank() || affiliation == null) ? null : user.affiliation.eq(affiliation);
-        BooleanExpression categoryContains = (filterValue == null || filterValue.isBlank()) ? null : category.isNull().or(category.name.containsIgnoreCase(filterValue));
+        BooleanExpression categoryContains = (filterValue == null || filterValue.isBlank()) ? null : category.name.containsIgnoreCase(filterValue);
         BooleanExpression seatNumberContains = (filterValue == null || filterValue.isBlank()) ? null : userInfo.seatNumber.containsIgnoreCase(filterValue);
         BooleanExpression phoneNumberContains = (filterValue == null || filterValue.isBlank()) ? null : userInfo.phoneNumber.containsIgnoreCase(filterValue);
 
@@ -92,6 +94,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 case "phonenumber" -> conditionBuilder.and(phoneNumberContains);
             }
         } else if (filterBy != null && filterBy.equals("all") && filterValue != null && !filterValue.isBlank()) {
+            log.info("all 진입");
             conditionBuilder.orAllOf(
                     nameContains,
                     emailContains,
@@ -121,6 +124,8 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 .orderBy(orderSpecifier)
                 .fetch();
 
+        log.info("userIds: {}", userIds);
+
         if (userIds.isEmpty()) {
             return PageableExecutionUtils.getPage(Collections.emptyList(), pageable, () -> 0L);
         }
@@ -134,6 +139,8 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 .where(user.id.in(userIds))
                 .orderBy(orderSpecifier)
                 .fetch();
+
+        log.info("rows: {}", rows);
 
         Map<Long, UserInfoQueryResult> resultMap = new LinkedHashMap<>();
 
@@ -166,6 +173,8 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 .leftJoin(category).on(userProjectCategory.category.eq(category))
                 .where(conditionBuilder)
                 .fetchOne();
+
+        log.info("total: {}", total);
 
         return PageableExecutionUtils.getPage(results, pageable, () -> total != null ? total : 0L);
     }
