@@ -87,12 +87,13 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 : user.name.asc();
 
         List<Long> userIds = queryFactory
-                .selectDistinct(user.id)
+                .select(user.id)
                 .from(user)
                 .innerJoin(userInfo).on(userInfo.user.eq(user))
                 .leftJoin(userProjectCategory).on(userProjectCategory.user.eq(user))
                 .leftJoin(category).on(userProjectCategory.category.eq(category))
                 .where(conditionBuilder)
+                .groupBy(user.id, user.name)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .orderBy(orderSpecifier)
@@ -103,7 +104,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         }
 
         List<Tuple> rows = queryFactory
-                .selectDistinct(user, userInfo, category)
+                .select(user, userInfo, category)
                 .from(user)
                 .innerJoin(userInfo).on(userInfo.user.eq(user))
                 .leftJoin(userProjectCategory).on(userProjectCategory.user.eq(user))
@@ -136,7 +137,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         List<UserInfoQueryResult> results = new ArrayList<>(resultMap.values());
 
         Long total = queryFactory
-                .select(user.id.countDistinct())
+                .select(user.count())
                 .innerJoin(userInfo).on(userInfo.user.eq(user))
                 .leftJoin(userProjectCategory).on(userProjectCategory.user.eq(user))
                 .leftJoin(category).on(userProjectCategory.category.eq(category))
