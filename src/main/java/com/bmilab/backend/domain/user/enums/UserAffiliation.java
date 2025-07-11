@@ -16,4 +16,13 @@ public enum UserAffiliation {
     ADMINISTRATIVE_STAFF("행정");
 
     private final String description;
+
+    public static UserAffiliation fromString(String affiliation) {
+        for (UserAffiliation value : values()) {
+            if (value.name().equalsIgnoreCase(affiliation)) {
+                return value;
+            }
+        }
+        return null;
+    }
 }

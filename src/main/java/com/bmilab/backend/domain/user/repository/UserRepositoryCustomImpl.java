@@ -73,7 +73,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         BooleanExpression emailContains = (filterValue == null || filterValue.isBlank()) ? null : user.email.containsIgnoreCase(filterValue);
         BooleanExpression departmentContains = (filterValue == null || filterValue.isBlank()) ? null : user.department.containsIgnoreCase(filterValue);
         BooleanExpression organizationContains = (filterValue == null || filterValue.isBlank()) ? null : user.organization.containsIgnoreCase(filterValue);
-        BooleanExpression affiliationEquals = (filterValue == null || filterValue.isBlank()) ? null : user.affiliation.eq(UserAffiliation.valueOf(filterValue.toUpperCase()));
+        BooleanExpression affiliationEquals = (filterValue == null || filterValue.isBlank()) ? null : user.affiliation.eq(UserAffiliation.fromString(filterValue.trim().toUpperCase()));
         BooleanExpression categoryContains = (filterValue == null || filterValue.isBlank()) ? null : category.isNull().or(category.name.containsIgnoreCase(filterValue));
         BooleanExpression seatNumberContains = (filterValue == null || filterValue.isBlank()) ? null : userInfo.seatNumber.containsIgnoreCase(filterValue);
         BooleanExpression phoneNumberContains = (filterValue == null || filterValue.isBlank()) ? null : userInfo.phoneNumber.containsIgnoreCase(filterValue);
