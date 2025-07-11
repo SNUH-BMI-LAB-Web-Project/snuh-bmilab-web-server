@@ -138,6 +138,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
         Long total = queryFactory
                 .select(user.count())
+                .from(user)
                 .leftJoin(userInfo).on(userInfo.user.eq(user))
                 .leftJoin(userProjectCategory).on(userProjectCategory.user.eq(user))
                 .leftJoin(category).on(userProjectCategory.category.eq(category))
