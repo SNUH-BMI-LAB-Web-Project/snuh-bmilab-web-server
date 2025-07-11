@@ -89,7 +89,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         List<Long> userIds = queryFactory
                 .select(user.id)
                 .from(user)
-                .innerJoin(userInfo).on(userInfo.user.eq(user))
+                .leftJoin(userInfo).on(userInfo.user.eq(user))
                 .leftJoin(userProjectCategory).on(userProjectCategory.user.eq(user))
                 .leftJoin(category).on(userProjectCategory.category.eq(category))
                 .where(conditionBuilder)
@@ -106,7 +106,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         List<Tuple> rows = queryFactory
                 .select(user, userInfo, category)
                 .from(user)
-                .innerJoin(userInfo).on(userInfo.user.eq(user))
+                .leftJoin(userInfo).on(userInfo.user.eq(user))
                 .leftJoin(userProjectCategory).on(userProjectCategory.user.eq(user))
                 .leftJoin(category).on(userProjectCategory.category.eq(category))
                 .where(user.id.in(userIds))
@@ -138,7 +138,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
         Long total = queryFactory
                 .select(user.count())
-                .innerJoin(userInfo).on(userInfo.user.eq(user))
+                .leftJoin(userInfo).on(userInfo.user.eq(user))
                 .leftJoin(userProjectCategory).on(userProjectCategory.user.eq(user))
                 .leftJoin(category).on(userProjectCategory.category.eq(category))
                 .where(conditionBuilder)
