@@ -137,8 +137,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         List<UserInfoQueryResult> results = new ArrayList<>(resultMap.values());
 
         Long total = queryFactory
-                .select(user.count())
-                .distinct()
+                .select(user.countDistinct())
                 .leftJoin(userInfo).on(userInfo.user.eq(user))
                 .leftJoin(userProjectCategory).on(userProjectCategory.user.eq(user))
                 .leftJoin(category).on(userProjectCategory.category.eq(category))
