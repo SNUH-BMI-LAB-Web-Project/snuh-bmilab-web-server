@@ -76,7 +76,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 case "department" -> conditionBuilder.and(user.department.containsIgnoreCase(filterValue));
                 case "organization" -> conditionBuilder.and(user.organization.containsIgnoreCase(filterValue));
                 case "affiliation" -> conditionBuilder.and(user.affiliation.eq(UserAffiliation.valueOf(filterValue.toUpperCase())));
-                case "projectname" -> conditionBuilder.and(category.name.containsIgnoreCase(filterValue));
+                case "projectname" -> conditionBuilder.and(category.isNull().or(category.name.containsIgnoreCase(filterValue)));
                 case "seatnumber" -> conditionBuilder.and(userInfo.seatNumber.containsIgnoreCase(filterValue));
                 case "phonenumber" -> conditionBuilder.and(userInfo.phoneNumber.containsIgnoreCase(filterValue));
             }
@@ -137,7 +137,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         List<UserInfoQueryResult> results = new ArrayList<>(resultMap.values());
 
         Long total = queryFactory
-                .select(user.count())
+                .select(user.countDistinct())
                 .from(user)
                 .leftJoin(userInfo).on(userInfo.user.eq(user))
                 .leftJoin(userProjectCategory).on(userProjectCategory.user.eq(user))
