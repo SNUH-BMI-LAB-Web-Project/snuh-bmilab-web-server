@@ -89,7 +89,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         List<Long> userIds = queryFactory
                 .select(user.id)
                 .from(user)
-                .leftJoin(userInfo.user, user)
+                .innerJoin(userInfo).on(userInfo.user.eq(user))
                 .leftJoin(userProjectCategory).on(userProjectCategory.user.eq(user))
                 .leftJoin(category).on(userProjectCategory.category.eq(category))
                 .where(conditionBuilder)
@@ -106,7 +106,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 .select(user, userInfo, category)
                 .distinct()
                 .from(user)
-                .leftJoin(userInfo.user, user)
+                .innerJoin(userInfo).on(userInfo.user.eq(user))
                 .leftJoin(userProjectCategory).on(userProjectCategory.user.eq(user))
                 .leftJoin(category).on(userProjectCategory.category.eq(category))
                 .where(user.id.in(userIds))
@@ -138,7 +138,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
         Long total = queryFactory
                 .select(user.id.countDistinct())
-                .leftJoin(userInfo.user, user)
+                .innerJoin(userInfo).on(userInfo.user.eq(user))
                 .leftJoin(userProjectCategory).on(userProjectCategory.user.eq(user))
                 .leftJoin(category).on(userProjectCategory.category.eq(category))
                 .where(conditionBuilder)
