@@ -69,14 +69,14 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         String filterBy = Optional.ofNullable(condition.getFilterBy()).map(String::trim).map(String::toLowerCase).orElse(null);
         String filterValue = Optional.ofNullable(condition.getFilterValue()).map(String::trim).orElse(null);
 
-        BooleanExpression nameContains = (filterValue == null) ? null : user.name.containsIgnoreCase(filterValue);
-        BooleanExpression emailContains = (filterValue == null) ? null : user.email.containsIgnoreCase(filterValue);
-        BooleanExpression departmentContains = (filterValue == null) ? null : user.department.containsIgnoreCase(filterValue);
-        BooleanExpression organizationContains = (filterValue == null) ? null : user.organization.containsIgnoreCase(filterValue);
-        BooleanExpression affiliationEquals = (filterValue == null) ? null : user.affiliation.eq(UserAffiliation.valueOf(filterValue.toUpperCase()));
-        BooleanExpression categoryContains = (filterValue == null) ? null : category.isNull().or(category.name.containsIgnoreCase(filterValue));
-        BooleanExpression seatNumberContains = (filterValue == null) ? null : userInfo.seatNumber.containsIgnoreCase(filterValue);
-        BooleanExpression phoneNumberContains = (filterValue == null) ? null : userInfo.phoneNumber.containsIgnoreCase(filterValue);
+        BooleanExpression nameContains = (filterValue == null || filterValue.isBlank()) ? null : user.name.containsIgnoreCase(filterValue);
+        BooleanExpression emailContains = (filterValue == null || filterValue.isBlank()) ? null : user.email.containsIgnoreCase(filterValue);
+        BooleanExpression departmentContains = (filterValue == null || filterValue.isBlank()) ? null : user.department.containsIgnoreCase(filterValue);
+        BooleanExpression organizationContains = (filterValue == null || filterValue.isBlank()) ? null : user.organization.containsIgnoreCase(filterValue);
+        BooleanExpression affiliationEquals = (filterValue == null || filterValue.isBlank()) ? null : user.affiliation.eq(UserAffiliation.valueOf(filterValue.toUpperCase()));
+        BooleanExpression categoryContains = (filterValue == null || filterValue.isBlank()) ? null : category.isNull().or(category.name.containsIgnoreCase(filterValue));
+        BooleanExpression seatNumberContains = (filterValue == null || filterValue.isBlank()) ? null : userInfo.seatNumber.containsIgnoreCase(filterValue);
+        BooleanExpression phoneNumberContains = (filterValue == null || filterValue.isBlank()) ? null : userInfo.phoneNumber.containsIgnoreCase(filterValue);
 
         if (filterBy != null && !filterBy.isBlank() &&
                 filterValue != null && !filterValue.isBlank()) {
