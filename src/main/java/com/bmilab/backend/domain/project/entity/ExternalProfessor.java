@@ -34,9 +34,12 @@ public class ExternalProfessor extends BaseTimeEntity {
     @Column(nullable = false)
     private String department;
 
-    public void update(String name, String organization, String department) {
+    private String position;
+
+    public void update(String name, String organization, String department, String position) {
         this.name = name;
         this.organization = organization;
         this.department = department;
+        this.position = position;
     }
 }
