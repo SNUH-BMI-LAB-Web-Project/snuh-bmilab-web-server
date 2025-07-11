@@ -91,7 +91,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 case "seatnumber" -> conditionBuilder.and(seatNumberContains);
                 case "phonenumber" -> conditionBuilder.and(phoneNumberContains);
             }
-        } else if (filterBy == null && filterValue != null && !filterValue.isBlank()) {
+        } else if (filterBy != null && filterBy.equals("all") && filterValue != null && !filterValue.isBlank()) {
             conditionBuilder.orAllOf(
                     nameContains,
                     emailContains,
