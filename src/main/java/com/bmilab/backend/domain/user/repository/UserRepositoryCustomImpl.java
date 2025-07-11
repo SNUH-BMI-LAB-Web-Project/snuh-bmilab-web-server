@@ -12,7 +12,7 @@ import com.bmilab.backend.domain.user.entity.QUserInfo;
 import com.bmilab.backend.domain.user.entity.QUserProjectCategory;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.entity.UserInfo;
-import com.bmilab.backend.domain.user.enums.UserAffiliation;
+import com.bmilab.backend.domain.user.enums.UserPosition;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
@@ -73,9 +73,9 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
             switch (filterBy) {
                 case "name" -> conditionBuilder.and(user.name.containsIgnoreCase(filterValue));
                 case "email" -> conditionBuilder.and(user.email.containsIgnoreCase(filterValue));
-                case "department" -> conditionBuilder.and(user.department.containsIgnoreCase(filterValue));
                 case "organization" -> conditionBuilder.and(user.organization.containsIgnoreCase(filterValue));
-                case "affiliation" -> conditionBuilder.and(user.affiliation.eq(UserAffiliation.valueOf(filterValue.toUpperCase())));
+                case "department" -> conditionBuilder.and(user.department.containsIgnoreCase(filterValue));
+                case "position" -> conditionBuilder.and(user.position.eq(UserPosition.valueOf(filterValue.toUpperCase())));
                 case "projectname" -> conditionBuilder.and(category.name.containsIgnoreCase(filterValue));
                 case "seatnumber" -> conditionBuilder.and(userInfo.seatNumber.containsIgnoreCase(filterValue));
                 case "phonenumber" -> conditionBuilder.and(userInfo.phoneNumber.containsIgnoreCase(filterValue));

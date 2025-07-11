@@ -7,8 +7,9 @@ import com.bmilab.backend.domain.user.dto.query.UserDetailQueryResult;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.entity.UserEducation;
 import com.bmilab.backend.domain.user.entity.UserInfo;
+import com.bmilab.backend.domain.user.entity.UserSubAffiliation;
 import com.bmilab.backend.domain.user.enums.Role;
-import com.bmilab.backend.domain.user.enums.UserAffiliation;
+import com.bmilab.backend.domain.user.enums.UserPosition;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.List;
@@ -31,8 +32,11 @@ public record UserDetail(
         @Schema(description = "부서", example = "개발팀")
         String department,
 
-        @Schema(description = "소속 (있으면)", example = "MASTERS_STUDENT")
-        UserAffiliation affiliation,
+        @Schema(description = "구분 (있으면)", example = "MASTERS_STUDENT")
+        UserPosition position,
+
+        @Schema(description = "서브 소속 목록")
+        List<UserSubAffiliationSummary> subAffiliation,
 
         @Schema(description = "사용자 역할", example = "USER")
         Role role,
@@ -63,11 +67,13 @@ public record UserDetail(
 
         @Schema(description = "입사일", example = "2023-03-01")
         LocalDate joinedAt
+
 ) {
     public static UserDetail from(
             UserDetailQueryResult queryResult,
             List<UserEducation> educations,
             List<ProjectCategory> categories,
+            List<UserSubAffiliation> subAffiliations,
             boolean includeComment
     ) {
         User user = queryResult.user();
@@ -81,7 +87,8 @@ public record UserDetail(
                 .name(user.getName())
                 .organization(user.getOrganization())
                 .department(user.getDepartment())
-                .affiliation(user.getAffiliation())
+                .position(user.getPosition())
+                .subAffiliation(subAffiliations.stream().map(UserSubAffiliationSummary::from).toList())
                 .role(user.getRole())
                 .profileImageUrl(user.getProfileImageUrl())
                 .comment((includeComment) ? userInfo.getComment() : null)

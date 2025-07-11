@@ -17,12 +17,14 @@ import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.entity.UserEducation;
 import com.bmilab.backend.domain.user.entity.UserInfo;
 import com.bmilab.backend.domain.user.entity.UserProjectCategory;
+import com.bmilab.backend.domain.user.entity.UserSubAffiliation;
 import com.bmilab.backend.domain.user.event.UserEducationUpdateEvent;
 import com.bmilab.backend.domain.user.exception.UserErrorCode;
 import com.bmilab.backend.domain.user.repository.UserEducationRepository;
 import com.bmilab.backend.domain.user.repository.UserInfoRepository;
 import com.bmilab.backend.domain.user.repository.UserProjectCategoryRepository;
 import com.bmilab.backend.domain.user.repository.UserRepository;
+import com.bmilab.backend.domain.user.repository.UserSubAffiliationRepository;
 import com.bmilab.backend.global.email.EmailSender;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.external.s3.S3Service;
@@ -56,6 +58,7 @@ public class UserService {
     private final UserEducationRepository userEducationRepository;
     private final UserProjectCategoryRepository userProjectCategoryRepository;
     private final UserInfoRepository userInfoRepository;
+    private final UserSubAffiliationRepository userSubAffiliationRepository;
 
     public User findUserById(Long userId) {
 
@@ -68,6 +71,7 @@ public class UserService {
     }
 
     public UserFindAllResponse getAllUsers(UserCondition condition) {
+
         log.info("filterBy={}, filterValue={}", condition.getFilterBy(), condition.getFilterValue());
 
         PageRequest pageRequest = PageRequest.of(
@@ -95,13 +99,15 @@ public class UserService {
 
         UserDetailQueryResult result = userRepository.findUserDetailsById(userId)
                 .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
-        List<UserEducation> educations = userEducationRepository.findAllByUser(result.user());
-        List<ProjectCategory> categories = userProjectCategoryRepository.findAllByUser(result.user())
+        User user = result.user();
+        List<UserEducation> educations = userEducationRepository.findAllByUser(user);
+        List<ProjectCategory> categories = userProjectCategoryRepository.findAllByUser(user)
                 .stream()
                 .map(UserProjectCategory::getCategory)
                 .toList();
+        List<UserSubAffiliation> subAffiliations = userSubAffiliationRepository.findAllByUser(user);
 
-        return UserDetail.from(result, educations, categories, includeComment);
+        return UserDetail.from(result, educations, categories, subAffiliations, includeComment);
     }
 
     @Transactional
@@ -119,7 +125,7 @@ public class UserService {
         result.userInfo().updateComment(request.comment());
         result.userLeave().updateAnnualLeaveCount(request.annualLeaveCount());
 
-        user.update(request.name(), newEmail, request.organization(), request.department(), request.affiliation());
+        user.update(request.name(), newEmail, request.organization(), request.department(), request.position());
         user.updateRole(request.role());
 
         result.userInfo().update(request.seatNumber(), request.phoneNumber());
@@ -161,7 +167,8 @@ public class UserService {
                         request.email(),
                         request.organization(),
                         request.department(),
-                        request.affiliation()
+                        request.position()
+
                 );
 
         result.userInfo().update(request.seatNumber(), request.phoneNumber());
@@ -172,7 +179,10 @@ public class UserService {
     private void updateCategories(User user, List<Long> newCategoryIds, List<Long> deletedCategoryIds) {
 
         saveUserCategories(user, newCategoryIds);
-        deletedCategoryIds.forEach((deletedCategoryId) -> userProjectCategoryRepository.deleteByUserIdAndCategoryId(user.getId(), deletedCategoryId));
+        deletedCategoryIds.forEach((deletedCategoryId) -> userProjectCategoryRepository.deleteByUserIdAndCategoryId(
+                user.getId(),
+                deletedCategoryId
+        ));
     }
 
     public void saveUserCategories(User user, List<Long> newCategoryIds) {
@@ -185,7 +195,12 @@ public class UserService {
                 .forEach(userProjectCategoryRepository::save);
     }
 
-    public void saveUserInfo(User user, String seatNumber, String phoneNumber, LocalDate joinedAt) {
+    public void saveUserInfo(
+            User user,
+            String seatNumber,
+            String phoneNumber,
+            LocalDate joinedAt
+    ) {
 
         UserInfo userInfo = UserInfo.builder()
                 .user(user)

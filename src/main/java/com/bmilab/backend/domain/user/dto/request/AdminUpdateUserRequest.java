@@ -1,7 +1,7 @@
 package com.bmilab.backend.domain.user.dto.request;
 
 import com.bmilab.backend.domain.user.enums.Role;
-import com.bmilab.backend.domain.user.enums.UserAffiliation;
+import com.bmilab.backend.domain.user.enums.UserPosition;
 import com.bmilab.backend.global.validation.RegExp;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
@@ -35,10 +35,13 @@ public record AdminUpdateUserRequest(
         @Size(max = 20, message = "부서명은 20자 이하로 입력해주세요.")
         String department,
 
-        @Schema(description = "소속 (있으면)", example = "MASTERS_STUDENT")
+        @Schema(description = "구분 (있으면)", example = "MASTERS_STUDENT")
         @Nullable
-        @Size(max = 20, message = "소속은 50자 이하로 입력해주세요.")
-        UserAffiliation affiliation,
+        UserPosition position,
+
+        @Schema(description = "서브 소속 (있으면)")
+        @Nullable
+        List<UserSubAffiliationRequest> subAffiliations,
 
         @Schema(description = "권한")
         @NotBlank(message = "권한은 필수입니다.")

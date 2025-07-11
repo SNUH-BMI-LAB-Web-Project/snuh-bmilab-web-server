@@ -1,7 +1,7 @@
 package com.bmilab.backend.domain.user.dto.response;
 
 import com.bmilab.backend.domain.user.entity.User;
-import com.bmilab.backend.domain.user.enums.UserAffiliation;
+import com.bmilab.backend.domain.user.enums.UserPosition;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
@@ -22,8 +22,8 @@ public record UserSummary(
         @Schema(description = "부서", example = "개발팀")
         String department,
 
-        @Schema(description = "소속 (있으면)", example = "MASTERS_STUDENT")
-        UserAffiliation affiliation,
+        @Schema(description = "직책 (있으면)", example = "MASTERS_STUDENT")
+        UserPosition position,
 
         @Schema(description = "프로필 이미지 URL", example = "https://cdn.example.com/profiles/user1.png")
         String profileImageUrl
@@ -36,7 +36,7 @@ public record UserSummary(
                 .name(user.getName())
                 .organization(user.getOrganization())
                 .department(user.getDepartment())
-                .affiliation(user.getAffiliation())
+                .position(user.getPosition())
                 .profileImageUrl(user.getProfileImageUrl())
                 .build();
     }

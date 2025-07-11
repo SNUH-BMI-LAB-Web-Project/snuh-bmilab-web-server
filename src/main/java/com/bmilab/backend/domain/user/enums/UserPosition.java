@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum UserAffiliation {
+public enum UserPosition {
     PROFESSOR("교수"),
     CO_PRINCIPAL_INVESTIGATOR("공동연구책임자"),
     POSTDOCTORAL_RESEARCHER("박사후 연구원"),
