@@ -125,8 +125,6 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 .orderBy(orderSpecifier)
                 .fetch();
 
-        log.info("userIds: {}", userIds);
-
         if (userIds.isEmpty()) {
             return PageableExecutionUtils.getPage(Collections.emptyList(), pageable, () -> 0L);
         }
@@ -140,8 +138,6 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 .where(user.id.in(userIds))
                 .orderBy(orderSpecifier)
                 .fetch();
-
-        log.info("rows: {}", rows);
 
         Map<Long, UserInfoQueryResult> resultMap = new LinkedHashMap<>();
 
@@ -174,8 +170,6 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 .leftJoin(category).on(userProjectCategory.category.eq(category))
                 .where(conditionBuilder)
                 .fetchOne();
-
-        log.info("total: {}", total);
 
         return PageableExecutionUtils.getPage(results, pageable, () -> total != null ? total : 0L);
     }
