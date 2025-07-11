@@ -104,6 +104,7 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
         List<Tuple> rows = queryFactory
                 .select(user, userInfo, category)
+                .distinct()
                 .from(user)
                 .leftJoin(userInfo).on(userInfo.user.eq(user))
                 .leftJoin(userProjectCategory).on(userProjectCategory.user.eq(user))
@@ -136,8 +137,8 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         List<UserInfoQueryResult> results = new ArrayList<>(resultMap.values());
 
         Long total = queryFactory
-                .select(user.countDistinct())
-                .from(user)
+                .select(user.count())
+                .distinct()
                 .leftJoin(userInfo).on(userInfo.user.eq(user))
                 .leftJoin(userProjectCategory).on(userProjectCategory.user.eq(user))
                 .leftJoin(category).on(userProjectCategory.category.eq(category))
