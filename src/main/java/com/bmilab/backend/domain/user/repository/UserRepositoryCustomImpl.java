@@ -83,28 +83,29 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
         if (filterBy != null && !filterBy.isBlank() &&
                 filterValue != null && !filterValue.isBlank()) {
-            switch (filterBy) {
-                case "name" -> conditionBuilder.and(nameContains);
-                case "email" -> conditionBuilder.and(emailContains);
-                case "department" -> conditionBuilder.and(departmentContains);
-                case "organization" -> conditionBuilder.and(organizationContains);
-                case "affiliation" -> conditionBuilder.and(affiliationEquals);
-                case "projectname" -> conditionBuilder.and(categoryContains);
-                case "seatnumber" -> conditionBuilder.and(seatNumberContains);
-                case "phonenumber" -> conditionBuilder.and(phoneNumberContains);
+            if (filterBy.equals("all")) {
+                conditionBuilder.orAllOf(
+                        nameContains,
+                        emailContains,
+                        departmentContains,
+                        organizationContains,
+                        affiliationEquals,
+                        categoryContains,
+                        seatNumberContains,
+                        phoneNumberContains
+                );
+            } else {
+                switch (filterBy) {
+                    case "name" -> conditionBuilder.and(nameContains);
+                    case "email" -> conditionBuilder.and(emailContains);
+                    case "department" -> conditionBuilder.and(departmentContains);
+                    case "organization" -> conditionBuilder.and(organizationContains);
+                    case "affiliation" -> conditionBuilder.and(affiliationEquals);
+                    case "projectname" -> conditionBuilder.and(categoryContains);
+                    case "seatnumber" -> conditionBuilder.and(seatNumberContains);
+                    case "phonenumber" -> conditionBuilder.and(phoneNumberContains);
+                }
             }
-        } else if (filterBy != null && filterBy.equals("all") && filterValue != null && !filterValue.isBlank()) {
-            log.info("all 진입");
-            conditionBuilder.orAllOf(
-                    nameContains,
-                    emailContains,
-                    departmentContains,
-                    organizationContains,
-                    affiliationEquals,
-                    categoryContains,
-                    seatNumberContains,
-                    phoneNumberContains
-            );
         }
 
         OrderSpecifier<?> orderSpecifier = "desc".equalsIgnoreCase(condition.getDirection())
