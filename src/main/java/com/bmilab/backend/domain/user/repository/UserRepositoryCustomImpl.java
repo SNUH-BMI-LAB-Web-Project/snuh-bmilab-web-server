@@ -83,7 +83,8 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
         if (filterBy != null && !filterBy.isBlank() &&
                 filterValue != null && !filterValue.isBlank()) {
-            if (filterBy.equals("all")) {
+            if (filterBy.equalsIgnoreCase("all")) {
+                log.info("all 진입");
                 conditionBuilder.orAllOf(
                         nameContains,
                         emailContains,
