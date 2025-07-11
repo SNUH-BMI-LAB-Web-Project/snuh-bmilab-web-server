@@ -13,6 +13,7 @@ import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.project.service.ProjectService;
 import com.bmilab.backend.domain.report.dto.response.ReportFindAllResponse;
 import com.bmilab.backend.global.security.UserAuthInfo;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -32,10 +33,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.time.LocalDate;
 import java.util.UUID;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 @RestController
 @RequestMapping("/projects")
@@ -47,7 +48,7 @@ public class ProjectController implements ProjectApi {
     @PostMapping
     public ResponseEntity<Void> createNewProject(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
-            @RequestBody ProjectRequest request
+            @RequestBody @Valid ProjectRequest request
     ) {
 
         projectService.createNewProject(userAuthInfo.getUserId(), request);
@@ -78,7 +79,7 @@ public class ProjectController implements ProjectApi {
     public ResponseEntity<Void> updateProject(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @PathVariable Long projectId,
-            @RequestBody ProjectRequest request
+            @RequestBody @Valid ProjectRequest request
     ) {
 
         projectService.updateProject(userAuthInfo.getUserId(), projectId, request);
@@ -89,7 +90,7 @@ public class ProjectController implements ProjectApi {
     public ResponseEntity<Void> completeProject(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @PathVariable Long projectId,
-            @RequestBody ProjectCompleteRequest request
+            @RequestBody @Valid ProjectCompleteRequest request
     ) {
 
         projectService.completeProject(userAuthInfo.getUserId(), projectId, request);

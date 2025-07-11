@@ -7,6 +7,7 @@ import com.bmilab.backend.domain.user.dto.response.UserDetail;
 import com.bmilab.backend.domain.user.service.AuthService;
 import com.bmilab.backend.domain.user.service.UserService;
 import com.bmilab.backend.global.annotation.OnlyAdmin;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +29,7 @@ public class AdminUserController implements AdminUserApi {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<Void> registerNewUser(@RequestBody RegisterUserRequest request) {
+    public ResponseEntity<Void> registerNewUser(@RequestBody @Valid RegisterUserRequest request) {
 
         authService.registerNewUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
@@ -43,7 +44,7 @@ public class AdminUserController implements AdminUserApi {
     @PatchMapping("/{userId}")
     public ResponseEntity<Void> updateUserById(
             @PathVariable Long userId,
-            @RequestBody AdminUpdateUserRequest request
+            @RequestBody @Valid AdminUpdateUserRequest request
     ) {
 
         userService.updateUserById(userId, request);
@@ -60,7 +61,7 @@ public class AdminUserController implements AdminUserApi {
     @PostMapping("/{userId}/account-email")
     public ResponseEntity<Void> sendAccountEmail(
             @PathVariable Long userId,
-            @RequestBody UserAccountEmailRequest request
+            @RequestBody @Valid UserAccountEmailRequest request
     ) {
 
         userService.sendAccountEmail(userId, request);

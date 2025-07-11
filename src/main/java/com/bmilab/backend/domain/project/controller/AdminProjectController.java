@@ -4,6 +4,7 @@ import com.bmilab.backend.domain.project.dto.request.ExternalProfessorRequest;
 import com.bmilab.backend.domain.project.dto.response.ExternalProfessorFindAllResponse;
 import com.bmilab.backend.domain.project.service.ProjectService;
 import com.bmilab.backend.global.annotation.OnlyAdmin;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,7 +25,7 @@ public class AdminProjectController implements AdminProjectApi{
     private final ProjectService projectService;
 
     @PostMapping("/external-professors")
-    public ResponseEntity<Void> createExternalProfessor(@RequestBody ExternalProfessorRequest request) {
+    public ResponseEntity<Void> createExternalProfessor(@RequestBody @Valid ExternalProfessorRequest request) {
         projectService.createExternalProfessor(request);
 
         return ResponseEntity.ok().build();
@@ -33,7 +34,7 @@ public class AdminProjectController implements AdminProjectApi{
     @PutMapping("/external-professors/{professorId}")
     public ResponseEntity<Void> updateExternalProfessor(
             @PathVariable Long professorId,
-            @RequestBody ExternalProfessorRequest request
+            @RequestBody @Valid ExternalProfessorRequest request
     ) {
         projectService.updateExternalProfessor(professorId, request);
 
