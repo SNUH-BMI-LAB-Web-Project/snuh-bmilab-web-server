@@ -17,6 +17,7 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -68,18 +69,38 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
         String filterBy = Optional.ofNullable(condition.getFilterBy()).map(String::trim).map(String::toLowerCase).orElse(null);
         String filterValue = Optional.ofNullable(condition.getFilterValue()).map(String::trim).orElse(null);
 
+        BooleanExpression nameContains = (filterValue == null) ? null : user.name.containsIgnoreCase(filterValue);
+        BooleanExpression emailContains = (filterValue == null) ? null : user.email.containsIgnoreCase(filterValue);
+        BooleanExpression departmentContains = (filterValue == null) ? null : user.department.containsIgnoreCase(filterValue);
+        BooleanExpression organizationContains = (filterValue == null) ? null : user.organization.containsIgnoreCase(filterValue);
+        BooleanExpression affiliationEquals = (filterValue == null) ? null : user.affiliation.eq(UserAffiliation.valueOf(filterValue.toUpperCase()));
+        BooleanExpression categoryContains = (filterValue == null) ? null : category.isNull().or(category.name.containsIgnoreCase(filterValue));
+        BooleanExpression seatNumberContains = (filterValue == null) ? null : userInfo.seatNumber.containsIgnoreCase(filterValue);
+        BooleanExpression phoneNumberContains = (filterValue == null) ? null : userInfo.phoneNumber.containsIgnoreCase(filterValue);
+
         if (filterBy != null && !filterBy.isBlank() &&
                 filterValue != null && !filterValue.isBlank()) {
             switch (filterBy) {
-                case "name" -> conditionBuilder.and(user.name.containsIgnoreCase(filterValue));
-                case "email" -> conditionBuilder.and(user.email.containsIgnoreCase(filterValue));
-                case "department" -> conditionBuilder.and(user.department.containsIgnoreCase(filterValue));
-                case "organization" -> conditionBuilder.and(user.organization.containsIgnoreCase(filterValue));
-                case "affiliation" -> conditionBuilder.and(user.affiliation.eq(UserAffiliation.valueOf(filterValue.toUpperCase())));
-                case "projectname" -> conditionBuilder.and(category.isNull().or(category.name.containsIgnoreCase(filterValue)));
-                case "seatnumber" -> conditionBuilder.and(userInfo.seatNumber.containsIgnoreCase(filterValue));
-                case "phonenumber" -> conditionBuilder.and(userInfo.phoneNumber.containsIgnoreCase(filterValue));
+                case "name" -> conditionBuilder.and(nameContains);
+                case "email" -> conditionBuilder.and(emailContains);
+                case "department" -> conditionBuilder.and(departmentContains);
+                case "organization" -> conditionBuilder.and(organizationContains);
+                case "affiliation" -> conditionBuilder.and(affiliationEquals);
+                case "projectname" -> conditionBuilder.and(categoryContains);
+                case "seatnumber" -> conditionBuilder.and(seatNumberContains);
+                case "phonenumber" -> conditionBuilder.and(phoneNumberContains);
             }
+        } else if (filterBy == null && filterValue != null && !filterValue.isBlank()) {
+            conditionBuilder.orAllOf(
+                    nameContains,
+                    emailContains,
+                    departmentContains,
+                    organizationContains,
+                    affiliationEquals,
+                    categoryContains,
+                    seatNumberContains,
+                    phoneNumberContains
+            );
         }
 
         OrderSpecifier<?> orderSpecifier = "desc".equalsIgnoreCase(condition.getDirection())
