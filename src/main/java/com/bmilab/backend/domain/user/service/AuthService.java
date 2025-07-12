@@ -53,7 +53,7 @@ public class AuthService {
                 .role(request.role())
                 .organization(request.organization())
                 .department(request.department())
-                .affiliation(request.affiliation())
+                .position(request.position())
                 .role(Role.USER)
                 .build();
 

@@ -1,6 +1,6 @@
 package com.bmilab.backend.domain.user.entity;
 
-import com.bmilab.backend.domain.user.enums.UserAffiliation;
+import com.bmilab.backend.domain.user.enums.UserPosition;
 import com.bmilab.backend.global.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -38,21 +38,20 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private String name;
 
+    private String organization;
+
+    private String department;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "position")
+    private UserPosition position;
+
     @Column(name = "profile_image_url", columnDefinition = "TEXT")
     private String profileImageUrl;
 
-    @Column(nullable = false)
-    private String department;
-
-    @Column(nullable = false)
-    private String organization;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "affiliation")
-    private UserAffiliation affiliation;
-
     @Enumerated(EnumType.STRING)
     private Role role;
+
 
     public void updatePassword(String newPassword) {
         this.password = newPassword;
@@ -62,12 +61,12 @@ public class User extends BaseTimeEntity {
         this.profileImageUrl = newProfileImageUrl;
     }
 
-    public void update(String name, String email, String organization, String department, UserAffiliation affiliation) {
+    public void update(String name, String email, String organization, String department, UserPosition position) {
         this.name = name;
         this.email = email;
         this.department = department;
         this.organization = organization;
-        this.affiliation = affiliation;
+        this.position = position;
     }
 
     public void updateRole(Role role) {

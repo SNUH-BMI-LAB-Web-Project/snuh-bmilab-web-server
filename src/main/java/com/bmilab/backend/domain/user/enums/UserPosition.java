@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public enum UserAffiliation {
+public enum UserPosition {
     PROFESSOR("교수"),
     CO_PRINCIPAL_INVESTIGATOR("공동연구책임자"),
     POSTDOCTORAL_RESEARCHER("박사후 연구원"),
@@ -17,9 +17,9 @@ public enum UserAffiliation {
 
     private final String description;
 
-    public static UserAffiliation fromString(String affiliation) {
-        for (UserAffiliation value : values()) {
-            if (value.name().equalsIgnoreCase(affiliation)) {
+    public static UserPosition fromString(String position) {
+        for (UserPosition value : values()) {
+            if (value.name().equalsIgnoreCase(position)) {
                 return value;
             }
         }
