@@ -4,31 +4,47 @@ import java.time.Instant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ErrorResponse> handleCustomException(ApiException exception) {
         ErrorCode errorCode = exception.getErrorCode();
-        ErrorResponse errorResponseDTO = ErrorResponse.from(errorCode, Instant.now());
+        ErrorResponse errorResponse = ErrorResponse.from(errorCode, Instant.now());
         HttpStatus httpStatus = errorCode.getHttpStatus();
 
         log.error("에러 발생: ({}) {}", errorCode.name(), errorCode.getMessage());
 
-        return new ResponseEntity<>(errorResponseDTO, httpStatus);
+        return ResponseEntity
+                .status(httpStatus)
+                .body(errorResponse);
+    }
+
+    @ExceptionHandler(BindException.class)
+    public ResponseEntity<ErrorResponse> handleBindException(BindException exception) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        ErrorResponse errorResponse = ErrorResponse.from(exception, status, Instant.now());
+
+        return ResponseEntity
+                .status(status)
+                .body(errorResponse);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception exception) {
         ErrorCode errorCode = GlobalErrorCode.INTERNAL_SERVER_ERROR;
-        ErrorResponse errorResponseDTO = ErrorResponse.from(exception, Instant.now());
+        ErrorResponse errorResponse = ErrorResponse.from(exception, Instant.now());
         HttpStatus httpStatus = errorCode.getHttpStatus();
 
         exception.printStackTrace();
 
-        return new ResponseEntity<>(errorResponseDTO, httpStatus);
+        return ResponseEntity
+                .status(httpStatus)
+                .body(errorResponse);
     }
 }
