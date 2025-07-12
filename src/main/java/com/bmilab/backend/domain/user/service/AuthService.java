@@ -37,7 +37,7 @@ public class AuthService {
             throw new ApiException(UserErrorCode.PASSWORD_MISMATCH);
         }
 
-        String accessToken = tokenProvider.generateToken(user, Duration.ofDays(30));
+        String accessToken = tokenProvider.generateToken(user, Duration.ofHours(1L));
 
         return LoginResponse.of(accessToken, user);
     }
