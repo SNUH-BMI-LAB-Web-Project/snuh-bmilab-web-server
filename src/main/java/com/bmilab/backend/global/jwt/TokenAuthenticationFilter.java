@@ -1,10 +1,15 @@
 package com.bmilab.backend.global.jwt;
 
+import com.bmilab.backend.global.exception.ErrorCode;
+import com.bmilab.backend.global.exception.ErrorResponse;
+import com.bmilab.backend.global.exception.GlobalErrorCode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -15,18 +20,25 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     private final TokenProvider tokenProvider;
+    private final ObjectMapper objectMapper;
     private final static String HEADER_AUTHORIZATION = "Authorization";
     private final static String BEARER_AUTH = "Bearer ";
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
         String authorizationHeader = request.getHeader(HEADER_AUTHORIZATION);
         String accessToken = getAccessToken(authorizationHeader);
 
-        if (tokenProvider.validToken(accessToken)) {
-            Authentication authentication = tokenProvider.getAuthentication(accessToken);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        if (response.isCommitted()) return;
+
+        if (!tokenProvider.validToken(accessToken)) {
+            sendUnauthorizedResponse(response);
+            return;
         }
+
+        Authentication authentication = tokenProvider.getAuthentication(accessToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         filterChain.doFilter(request, response);
     }
@@ -37,6 +49,14 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         }
 
         return null;
+    }
+
+    private void sendUnauthorizedResponse(HttpServletResponse response) throws IOException {
+        ErrorCode errorCode = GlobalErrorCode.INVALID_ACCESS_TOKEN;
+        response.addHeader("Content-Type", "application/json; charset=UTF-8");
+        response.setStatus(errorCode.getHttpStatus().value());
+        response.getWriter().write(objectMapper.writeValueAsString(ErrorResponse.from(errorCode, Instant.now())));
+        response.getWriter().flush();
     }
 
     @Override
