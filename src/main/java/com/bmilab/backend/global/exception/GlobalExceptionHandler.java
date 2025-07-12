@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -27,12 +28,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BindException.class)
     public ResponseEntity<ErrorResponse> handleBindException(BindException exception) {
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        ErrorResponse errorResponse = ErrorResponse.from(exception, status, Instant.now());
+        return handleValidationException(exception);
+    }
 
-        return ResponseEntity
-                .status(status)
-                .body(errorResponse);
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
+        return handleValidationException(exception);
     }
 
     @ExceptionHandler(Exception.class)
@@ -45,6 +46,14 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(httpStatus)
+                .body(errorResponse);
+    }
+
+    private ResponseEntity<ErrorResponse> handleValidationException(Exception exception) {
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        ErrorResponse errorResponse = ErrorResponse.from(exception, status, Instant.now());
+        return ResponseEntity
+                .status(status)
                 .body(errorResponse);
     }
 }
