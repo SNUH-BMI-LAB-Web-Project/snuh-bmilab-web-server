@@ -2,6 +2,7 @@ package com.bmilab.backend.global.config;
 
 import com.bmilab.backend.global.jwt.TokenAuthenticationFilter;
 import com.bmilab.backend.global.jwt.TokenProvider;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +28,7 @@ public class SecurityConfig {
     private String[] allowedOrigins;
 
     private final TokenProvider tokenProvider;
+    private final ObjectMapper objectMapper;
 
     private static final String[] SWAGGER_API_PATH = {
             //swagger
@@ -38,7 +40,7 @@ public class SecurityConfig {
 
     @Bean
     public TokenAuthenticationFilter tokenAuthenticationFilter() {
-        return new TokenAuthenticationFilter(tokenProvider);
+        return new TokenAuthenticationFilter(tokenProvider, objectMapper);
     }
 
     @Bean
