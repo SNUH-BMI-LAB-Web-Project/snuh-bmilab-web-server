@@ -8,9 +8,11 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Arrays;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,10 +29,13 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+
         String authorizationHeader = request.getHeader(HEADER_AUTHORIZATION);
         String accessToken = getAccessToken(authorizationHeader);
 
-        if (response.isCommitted()) return;
+        if (response.isCommitted()) {
+            return;
+        }
 
         if (!tokenProvider.validToken(accessToken)) {
             sendUnauthorizedResponse(response);
@@ -44,6 +49,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String getAccessToken(String authorizationHeader) {
+
         if (authorizationHeader != null && authorizationHeader.startsWith(BEARER_AUTH)) {
             return authorizationHeader.substring(BEARER_AUTH.length());
         }
@@ -52,7 +58,9 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private void sendUnauthorizedResponse(HttpServletResponse response) throws IOException {
+
         ErrorCode errorCode = GlobalErrorCode.INVALID_ACCESS_TOKEN;
+
         response.addHeader("Content-Type", "application/json; charset=UTF-8");
         response.setStatus(errorCode.getHttpStatus().value());
         response.getWriter().write(objectMapper.writeValueAsString(ErrorResponse.from(errorCode, Instant.now())));
@@ -61,7 +69,8 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        String[] excludes = {"/auth/"};
+
+        String[] excludes = { "/auth/", "/swagger-ui", "/api-docs" };
         String path = request.getRequestURI();
 
         return Arrays.stream(excludes).anyMatch(path::startsWith);
