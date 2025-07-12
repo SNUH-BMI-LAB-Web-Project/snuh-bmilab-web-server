@@ -36,7 +36,7 @@ public record UserDetail(
         UserPosition position,
 
         @Schema(description = "서브 소속 목록")
-        List<UserSubAffiliationSummary> subAffiliation,
+        List<UserSubAffiliationSummary> subAffiliations,
 
         @Schema(description = "사용자 역할", example = "USER")
         Role role,
@@ -88,7 +88,7 @@ public record UserDetail(
                 .organization(user.getOrganization())
                 .department(user.getDepartment())
                 .position(user.getPosition())
-                .subAffiliation(subAffiliations.stream().map(UserSubAffiliationSummary::from).toList())
+                .subAffiliations(subAffiliations.stream().map(UserSubAffiliationSummary::from).toList())
                 .role(user.getRole())
                 .profileImageUrl(user.getProfileImageUrl())
                 .comment((includeComment) ? userInfo.getComment() : null)
