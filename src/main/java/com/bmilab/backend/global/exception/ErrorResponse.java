@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.http.HttpStatus;
 
 @Getter
 @Setter
@@ -41,6 +42,16 @@ public class ErrorResponse {
                 .code(errorCode.name())
                 .message(e.getClass().getSimpleName() + ": " + e.getMessage())
                 .status(errorCode.getHttpStatus().value())
+                .timestamp(timestamp)
+                .build();
+    }
+
+    public static ErrorResponse from(Exception e, HttpStatus status, Instant timestamp) {
+        return ErrorResponse
+                .builder()
+                .code(status.name())
+                .message(e.getMessage() != null ? e.getMessage() : "An unexpected error occurred")
+                .status(status.value())
                 .timestamp(timestamp)
                 .build();
     }
