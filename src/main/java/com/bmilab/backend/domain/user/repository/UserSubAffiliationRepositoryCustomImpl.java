@@ -27,23 +27,18 @@ public class UserSubAffiliationRepositoryCustomImpl implements UserSubAffiliatio
                 .and(usa.organization.eq(key.department()))
                 .and(usa.department.eq(key.position()))));
 
-        return queryFactory.select(usa)
-                .from(usa)
-                .where(
-                        usa.user.eq(user),
-                        conditionBuilder
-                ).fetch();
+        return queryFactory.select(usa).from(usa).where(usa.user.eq(user), conditionBuilder).fetch();
     }
 
     public List<UserSubAffiliationRequest> findNonExistsAsRequest(User user, Iterable<UserSubAffiliationRequest> keys) {
 
         QUserSubAffiliation usa = QUserSubAffiliation.userSubAffiliation;
 
-        BooleanBuilder conditionBuilder = new BooleanBuilder();
+        BooleanBuilder excludeConditions = new BooleanBuilder();
 
-        keys.forEach((key) -> conditionBuilder.and(usa.organization.ne(key.organization())
-                .or(usa.organization.ne(key.department()))
-                .or(usa.department.ne(key.position()))));
+        keys.forEach((key) -> excludeConditions.or(usa.organization.eq(key.organization())
+                .and(usa.department.eq(key.department()))
+                .and(usa.position.eq(key.position()))));
 
         return queryFactory.select(Projections.constructor(
                         UserSubAffiliationRequest.class,
@@ -52,10 +47,7 @@ public class UserSubAffiliationRepositoryCustomImpl implements UserSubAffiliatio
                         usa.position
                 ))
                 .from(usa)
-                .where(
-                        usa.user.eq(user),
-                        conditionBuilder
-                )
+                .where(usa.user.eq(user), excludeConditions.not())
                 .fetch();
     }
 }
