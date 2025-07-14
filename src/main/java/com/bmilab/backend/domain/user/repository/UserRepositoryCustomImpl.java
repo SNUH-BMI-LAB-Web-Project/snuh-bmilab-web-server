@@ -74,13 +74,12 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
 
         BooleanExpression nameContains = (filterValue == null || filterValue.isBlank()) ? null : user.name.containsIgnoreCase(filterValue);
         BooleanExpression emailContains = (filterValue == null || filterValue.isBlank()) ? null : user.email.containsIgnoreCase(filterValue);
-        BooleanExpression departmentContains = (filterValue == null || filterValue.isBlank()) ? null : user.department.containsIgnoreCase(filterValue);
         BooleanExpression organizationContains = (filterValue == null || filterValue.isBlank()) ? null : user.organization.containsIgnoreCase(filterValue);
-        BooleanExpression positionEquals = (filterValue == null || filterValue.isBlank() || position == null) ?
-                null : user.position.eq(position);
+        BooleanExpression departmentContains = (filterValue == null || filterValue.isBlank()) ? null : user.department.containsIgnoreCase(filterValue);
+        BooleanExpression positionEquals = (filterValue == null || filterValue.isBlank() || position == null) ? null : user.position.eq(position);
         BooleanExpression categoryContains = (filterValue == null || filterValue.isBlank()) ? null : category.name.containsIgnoreCase(filterValue);
-        BooleanExpression seatNumberContains = (filterValue == null || filterValue.isBlank()) ? null : userInfo.seatNumber.containsIgnoreCase(filterValue);
         BooleanExpression phoneNumberContains = (filterValue == null || filterValue.isBlank()) ? null : userInfo.phoneNumber.containsIgnoreCase(filterValue);
+        BooleanExpression seatNumberContains = (filterValue == null || filterValue.isBlank()) ? null : userInfo.seatNumber.containsIgnoreCase(filterValue);
 
         if (filterBy != null && !filterBy.isBlank() &&
                 filterValue != null && !filterValue.isBlank()) {
@@ -88,12 +87,12 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                 conditionBuilder.andAnyOf(
                         nameContains,
                         emailContains,
-                        departmentContains,
                         organizationContains,
+                        departmentContains,
                         positionEquals,
                         categoryContains,
-                        seatNumberContains,
-                        phoneNumberContains
+                        phoneNumberContains,
+                        seatNumberContains
                 );
             } else {
                 switch (filterBy) {
@@ -101,10 +100,10 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                     case "email" -> conditionBuilder.and(emailContains);
                     case "organization" -> conditionBuilder.and(organizationContains);
                     case "department" -> conditionBuilder.and(departmentContains);
-                    case "position" -> conditionBuilder.and(positionEquals);
-                    case "projectname" -> conditionBuilder.and(categoryContains);
-                    case "seatnumber" -> conditionBuilder.and(seatNumberContains);
+                    case "position" -> conditionBuilder.and(user.position.isNotNull().and(positionEquals));
+                    case "projectname" -> conditionBuilder.and(category.name.isNotNull().and(categoryContains));
                     case "phonenumber" -> conditionBuilder.and(phoneNumberContains);
+                    case "seatnumber" -> conditionBuilder.and(seatNumberContains);
                 }
             }
         }
