@@ -5,7 +5,6 @@ import com.bmilab.backend.domain.user.entity.QUserSubAffiliation;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.entity.UserSubAffiliation;
 import com.querydsl.core.BooleanBuilder;
-import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
@@ -28,26 +27,5 @@ public class UserSubAffiliationRepositoryCustomImpl implements UserSubAffiliatio
                 .and(usa.department.eq(key.position()))));
 
         return queryFactory.select(usa).from(usa).where(usa.user.eq(user), conditionBuilder).fetch();
-    }
-
-    public List<UserSubAffiliationRequest> findNonExistsAsRequest(User user, Iterable<UserSubAffiliationRequest> keys) {
-
-        QUserSubAffiliation usa = QUserSubAffiliation.userSubAffiliation;
-
-        BooleanBuilder excludeConditions = new BooleanBuilder();
-
-        keys.forEach((key) -> excludeConditions.or(usa.organization.eq(key.organization())
-                .and(usa.department.eq(key.department()))
-                .and(usa.position.eq(key.position()))));
-
-        return queryFactory.select(Projections.constructor(
-                        UserSubAffiliationRequest.class,
-                        usa.organization,
-                        usa.department,
-                        usa.position
-                ))
-                .from(usa)
-                .where(usa.user.eq(user), excludeConditions.not())
-                .fetch();
     }
 }

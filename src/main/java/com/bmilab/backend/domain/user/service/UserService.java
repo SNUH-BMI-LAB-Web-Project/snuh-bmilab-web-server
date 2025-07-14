@@ -196,8 +196,16 @@ public class UserService {
         List<UserSubAffiliation> exists =
                 userSubAffiliationRepository.findExistsAsEntity(user, userSubAffiliationRequests);
         log.info("exists={}", exists.stream().map(UserSubAffiliation::getId).toList());
-        List<UserSubAffiliationRequest> nonExistsAsRequest = userSubAffiliationRepository.findNonExistsAsRequest(user,
-                userSubAffiliationRequests);
+        List<UserSubAffiliationRequest> nonExistsAsRequest = userSubAffiliationRequests.stream()
+                .filter(it ->
+                        exists.stream()
+                                .noneMatch(exist ->
+                                        it.organization().equals(exist.getOrganization()) &&
+                                                it.department().equals(exist.getDepartment()) &&
+                                                it.position().equals(exist.getPosition())
+                                )
+                )
+                .toList();
         log.info("nonExists={}", nonExistsAsRequest.stream().map(UserSubAffiliationRequest::toString).toList());
 
         //새로 추가된 소속 등록하기
