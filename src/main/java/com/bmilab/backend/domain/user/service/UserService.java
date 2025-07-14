@@ -10,6 +10,7 @@ import com.bmilab.backend.domain.user.dto.request.AdminUpdateUserRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserPasswordRequest;
 import com.bmilab.backend.domain.user.dto.request.UpdateUserRequest;
 import com.bmilab.backend.domain.user.dto.query.UserCondition;
+import com.bmilab.backend.domain.user.dto.request.UserSubAffiliationRequest;
 import com.bmilab.backend.domain.user.dto.response.SearchUserResponse;
 import com.bmilab.backend.domain.user.dto.response.UserDetail;
 import com.bmilab.backend.domain.user.dto.response.UserFindAllResponse;
@@ -131,6 +132,7 @@ public class UserService {
         result.userInfo().update(request.seatNumber(), request.phoneNumber());
 
         updateCategories(user, request.newCategoryIds(), request.deletedCategoryIds());
+        updateSubAffiliations(user, request.subAffiliations());
     }
 
     @Transactional
@@ -155,13 +157,14 @@ public class UserService {
         UserDetailQueryResult result = userRepository.findUserDetailsById(userId)
                 .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
 
+        User user = result.user();
         if (profileImage != null) {
             String profileImageUrl = uploadProfileImage(userId, profileImage);
 
-            result.user().updateProfileImageUrl(profileImageUrl);
+            user.updateProfileImageUrl(profileImageUrl);
         }
 
-        result.user()
+        user
                 .update(
                         request.name(),
                         request.email(),
@@ -173,7 +176,8 @@ public class UserService {
 
         result.userInfo().update(request.seatNumber(), request.phoneNumber());
 
-        updateCategories(result.user(), request.newCategoryIds(), request.deletedCategoryIds());
+        updateCategories(user, request.newCategoryIds(), request.deletedCategoryIds());
+        updateSubAffiliations(user, request.subAffiliations());
     }
 
     private void updateCategories(User user, List<Long> newCategoryIds, List<Long> deletedCategoryIds) {
@@ -183,6 +187,29 @@ public class UserService {
                 user.getId(),
                 deletedCategoryId
         ));
+    }
+
+    private void updateSubAffiliations(User user, List<UserSubAffiliationRequest> userSubAffiliationRequests) {
+        List<UserSubAffiliation> original = userSubAffiliationRepository.findAllByUser(user);
+        List<UserSubAffiliation> exists =
+                userSubAffiliationRepository.findExistsAsEntity(user, userSubAffiliationRequests);
+        List<UserSubAffiliationRequest> nonExistsAsRequest = userSubAffiliationRepository.findNonExistsAsRequest(user,
+                userSubAffiliationRequests);
+
+        //새로 추가된 소속 등록하기
+        nonExistsAsRequest.stream()
+                .map(it -> UserSubAffiliation.builder()
+                        .user(user)
+                        .organization(it.organization())
+                        .department(it.department())
+                        .position(it.position())
+                        .build())
+                .forEach(userSubAffiliationRepository::save);
+
+        //없어진 서브 소속 지우기
+        original.stream()
+                .filter(it -> exists.stream().noneMatch(exist -> exist.getId().equals(it.getId())))
+                .forEach(userSubAffiliationRepository::delete);
     }
 
     public void saveUserCategories(User user, List<Long> newCategoryIds) {
@@ -320,5 +347,17 @@ public class UserService {
         }
 
         return tempPw.toString();
+    }
+
+    @Transactional
+    public void saveUserSubAffiliations(User user, List<UserSubAffiliationRequest> userSubAffiliationRequests) {
+        userSubAffiliationRequests.stream()
+                .map(it -> UserSubAffiliation.builder()
+                        .user(user)
+                        .organization(it.organization())
+                        .department(it.department())
+                        .position(it.position())
+                        .build())
+                .forEach(userSubAffiliationRepository::save);
     }
 }

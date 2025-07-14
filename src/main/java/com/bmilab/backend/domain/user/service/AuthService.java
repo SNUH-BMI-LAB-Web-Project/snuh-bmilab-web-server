@@ -70,6 +70,7 @@ public class AuthService {
         userService.saveUserInfo(user, request.seatNumber(), request.phoneNumber(), request.joinedAt());
         userService.saveUserEducations(user, request.educations());
         userService.saveUserCategories(user, request.categoryIds());
+        userService.saveUserSubAffiliations(user, request.subAffiliations());
     }
 
     public LoginResponse issueTestToken() {

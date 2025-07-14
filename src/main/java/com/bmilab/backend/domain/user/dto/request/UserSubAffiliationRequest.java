@@ -12,12 +12,12 @@ public record UserSubAffiliationRequest(
         String organization,
 
         @Schema(description = "부서", example = "소프트웨어학부")
-        @Nullable
+        @NotBlank
         @Size(max = 20)
         String department,
 
         @Schema(description = "구분", example = "학부생")
-        @Nullable
+        @NotBlank
         @Size(max = 20)
         String position
 ) {

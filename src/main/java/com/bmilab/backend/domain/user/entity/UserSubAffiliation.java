@@ -40,4 +40,5 @@ public class UserSubAffiliation extends BaseTimeEntity {
     private String department;
 
     private String position;
+
 }
