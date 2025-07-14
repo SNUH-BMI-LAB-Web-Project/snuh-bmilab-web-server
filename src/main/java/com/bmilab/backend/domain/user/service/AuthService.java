@@ -73,12 +73,4 @@ public class AuthService {
         userService.saveUserSubAffiliations(user, request.subAffiliations());
     }
 
-    public LoginResponse issueTestToken() {
-        User user = userRepository.findByEmail("test@gmail.com")
-                .orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
-
-        String accessToken = tokenProvider.generateToken(user, Duration.ofDays(30));
-
-        return LoginResponse.of(accessToken, user);
-    }
 }
