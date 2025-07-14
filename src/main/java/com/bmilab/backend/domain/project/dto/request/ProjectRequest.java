@@ -42,11 +42,11 @@ public record ProjectRequest(
 
         @Schema(description = "PI")
         @Nullable
-        List<ExternalProfessorSummary> piList,
+        List<ExternalProfessorRequest> piList,
 
         @Schema(description = "실무 교수")
         @Nullable
-        List<ExternalProfessorSummary> practicalProfessors,
+        List<ExternalProfessorRequest> practicalProfessors,
 
         @Schema(description = "IRB 번호 (있으면)", example = "IRB-DSEB-...")
         @Nullable
