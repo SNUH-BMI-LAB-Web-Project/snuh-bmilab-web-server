@@ -190,11 +190,15 @@ public class UserService {
     }
 
     private void updateSubAffiliations(User user, List<UserSubAffiliationRequest> userSubAffiliationRequests) {
+        log.info("userSubAffiliationRequests={}", userSubAffiliationRequests);
         List<UserSubAffiliation> original = userSubAffiliationRepository.findAllByUser(user);
+        log.info("original={}", original.stream().map(UserSubAffiliation::getId).toList());
         List<UserSubAffiliation> exists =
                 userSubAffiliationRepository.findExistsAsEntity(user, userSubAffiliationRequests);
+        log.info("exists={}", exists.stream().map(UserSubAffiliation::getId).toList());
         List<UserSubAffiliationRequest> nonExistsAsRequest = userSubAffiliationRepository.findNonExistsAsRequest(user,
                 userSubAffiliationRequests);
+        log.info("nonExists={}", nonExistsAsRequest.stream().map(UserSubAffiliationRequest::toString).toList());
 
         //새로 추가된 소속 등록하기
         nonExistsAsRequest.stream()
