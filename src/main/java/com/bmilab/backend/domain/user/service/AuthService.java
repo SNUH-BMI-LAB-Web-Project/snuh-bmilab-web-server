@@ -54,7 +54,6 @@ public class AuthService {
                 .organization(request.organization())
                 .department(request.department())
                 .position(request.position())
-                .role(Role.USER)
                 .build();
 
         userRepository.save(user);

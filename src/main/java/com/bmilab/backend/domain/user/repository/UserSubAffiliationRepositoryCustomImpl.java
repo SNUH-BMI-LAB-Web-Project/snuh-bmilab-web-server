@@ -16,11 +16,16 @@ public class UserSubAffiliationRepositoryCustomImpl implements UserSubAffiliatio
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public List<UserSubAffiliation> findExistsAsEntity(User user, Iterable<UserSubAffiliationRequest> keys) {
+    public List<UserSubAffiliation> findExistsAsEntity(User user, List<UserSubAffiliationRequest> keys) {
 
         QUserSubAffiliation usa = QUserSubAffiliation.userSubAffiliation;
 
         BooleanBuilder conditionBuilder = new BooleanBuilder();
+
+        if (keys.isEmpty()) {
+            return List.of();
+        }
+
 
         keys.forEach((key) -> conditionBuilder.or(usa.organization.eq(key.organization())
                 .and(usa.organization.eq(key.department()))

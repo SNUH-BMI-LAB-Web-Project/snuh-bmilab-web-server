@@ -263,6 +263,8 @@ public class UserService {
                         .type(it.type())
                         .build())
                 .forEach(userEducationRepository::save);
+
+        eventPublisher.publishEvent(new UserEducationUpdateEvent(user.getId()));
     }
 
     private String uploadProfileImage(Long userId, MultipartFile file) {
