@@ -183,7 +183,8 @@ public class ProjectService {
 
     public ProjectFindAllResponse getAllProjects(
             Long userId,
-            String search, ProjectFilterCondition condition,
+            String search,
+            ProjectFilterCondition condition,
             Pageable pageable
     ) {
 
