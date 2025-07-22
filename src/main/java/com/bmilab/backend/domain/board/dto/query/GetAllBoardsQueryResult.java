@@ -1,7 +1,9 @@
 package com.bmilab.backend.domain.board.dto.query;
 
 import com.bmilab.backend.domain.board.dto.response.BoardCategorySummary;
+import com.bmilab.backend.domain.board.entity.BoardCategory;
 import com.bmilab.backend.domain.user.dto.response.UserSummary;
+import com.bmilab.backend.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -10,11 +12,12 @@ import lombok.Getter;
 public class GetAllBoardsQueryResult {
     private Long boardId;
 
-    private UserSummary author;
+    private User author;
 
-    private BoardCategorySummary boardCategory;
+    private BoardCategory boardCategory;
 
     private String title;
 
     private Integer viewCount;
 }
+

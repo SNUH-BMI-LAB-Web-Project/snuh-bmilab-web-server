@@ -32,8 +32,8 @@ public record BoardFindAllResponse(
         public static BoardSummary from(GetAllBoardsQueryResult queryResults) {
             return BoardSummary.builder()
                     .boardId(queryResults.getBoardId())
-                    .author(queryResults.getAuthor())
-                    .boardCategory(queryResults.getBoardCategory())
+                    .author(UserSummary.from(queryResults.getAuthor()))
+                    .boardCategory(BoardCategorySummary.from(queryResults.getBoardCategory()))
                     .title(queryResults.getTitle())
                     .viewCount(queryResults.getViewCount())
                     .build();

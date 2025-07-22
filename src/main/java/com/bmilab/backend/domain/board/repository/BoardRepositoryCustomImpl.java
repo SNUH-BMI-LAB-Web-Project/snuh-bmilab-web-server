@@ -43,17 +43,8 @@ public class BoardRepositoryCustomImpl implements BoardRepositoryCustom {
         List<GetAllBoardsQueryResult> results = queryFactory.select(Projections.constructor(
                         GetAllBoardsQueryResult.class,
                         board.id,
-                        Projections.constructor(
-                                UserSummary.class,
-                                user.id,
-                                user.email,
-                                user.name,
-                                user.organization,
-                                user.department,
-                                user.position,
-                                user.profileImageUrl
-                        ),
-                        Projections.constructor(BoardCategorySummary.class, boardCategory.id, boardCategory.name),
+                        user,
+                        boardCategory,
                         board.title,
                         board.viewCount
                 ))
