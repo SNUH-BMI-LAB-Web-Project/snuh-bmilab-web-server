@@ -1,7 +1,7 @@
 package com.bmilab.backend.domain.board.service;
 
 import com.bmilab.backend.domain.board.entity.BoardCategory;
-import com.bmilab.backend.domain.board.exception.BoardCategoryErrorCode;
+import com.bmilab.backend.domain.board.exception.BoardErrorCode;
 import com.bmilab.backend.domain.board.repository.BoardCategoryRepository;
 import com.bmilab.backend.global.exception.ApiException;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +17,6 @@ public class BoardCategoryService {
 
     public BoardCategory getBoardCategoryById(Long categoryId) {
         return boardCategoryRepository.findById(categoryId)
-                .orElseThrow(() -> new ApiException(BoardCategoryErrorCode.CATEGORY_NOT_FOUND));
+                .orElseThrow(() -> new ApiException(BoardErrorCode.CATEGORY_NOT_FOUND));
     }
 }
