@@ -1,10 +1,8 @@
 package com.bmilab.backend.domain.board.repository;
 
 import com.bmilab.backend.domain.board.dto.query.GetAllBoardsQueryResult;
-import com.bmilab.backend.domain.board.dto.response.BoardCategorySummary;
 import com.bmilab.backend.domain.board.entity.QBoard;
 import com.bmilab.backend.domain.board.entity.QBoardCategory;
-import com.bmilab.backend.domain.user.dto.response.UserSummary;
 import com.bmilab.backend.domain.user.entity.QUser;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;

@@ -6,9 +6,7 @@ import com.bmilab.backend.domain.board.dto.response.BoardDetail;
 import com.bmilab.backend.domain.board.dto.response.BoardFindAllResponse;
 import com.bmilab.backend.domain.board.entity.Board;
 import com.bmilab.backend.domain.board.entity.BoardCategory;
-import com.bmilab.backend.domain.board.entity.BoardFile;
 import com.bmilab.backend.domain.board.exception.BoardErrorCode;
-import com.bmilab.backend.domain.board.repository.BoardFileRepository;
 import com.bmilab.backend.domain.board.repository.BoardRepository;
 import com.bmilab.backend.domain.file.entity.FileInformation;
 import com.bmilab.backend.domain.file.enums.FileDomainType;
@@ -29,7 +27,6 @@ import com.bmilab.backend.domain.board.dto.response.BoardFindAllResponse.BoardSu
 import java.util.List;
 import java.util.UUID;
 
-
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -40,7 +37,6 @@ public class BoardService {
     private final BoardCategoryService boardCategoryService;
     private final FileService fileService;
     private final FileInformationRepository fileInformationRepository;
-    private final BoardFileRepository boardFileRepository;
     private final S3Service s3Service;
 
     public Board findBoardById(Long boardId){
@@ -62,6 +58,10 @@ public class BoardService {
                 .build();
 
         boardRepository.save(board);
+
+        List<FileInformation> files = fileInformationRepository.findAllById(request.fileIds());
+
+        files.forEach(file -> file.updateDomain(FileDomainType.BOARD, board.getId()));
     }
 
     @Transactional
@@ -70,7 +70,7 @@ public class BoardService {
 
         Board board = findBoardById(boardId);
 
-        validateUserIsReportAuthor(user, board);
+        validateUserIsBoardAuthor(user, board);
 
         BoardCategory category = boardCategoryService.getBoardCategoryById(request.boardCategoryId());
 
@@ -79,6 +79,10 @@ public class BoardService {
                 request.title(),
                 request.content()
         );
+
+        List<FileInformation> files = fileInformationRepository.findAllById(request.fileIds());
+
+        files.forEach(file -> file.updateDomain(FileDomainType.BOARD, board.getId()));
     }
 
     @Transactional
@@ -87,7 +91,7 @@ public class BoardService {
 
         Board board = findBoardById(boardId);
 
-        validateUserIsReportAuthor(user, board);
+        validateUserIsBoardAuthor(user, board);
 
         fileService.deleteAllFileByDomainTypeAndEntityId(FileDomainType.BOARD, board.getId());
 
@@ -100,17 +104,14 @@ public class BoardService {
 
         Board board = findBoardById(boardId);
 
-        validateUserIsReportAuthor(user, board);
+        validateUserIsBoardAuthor(user, board);
 
         FileInformation file = fileInformationRepository.findById(fileId)
                 .orElseThrow(() -> new ApiException(FileErrorCode.FILE_NOT_FOUND));
 
-        BoardFile boardFile =  boardFileRepository.findByFileInformation(file)
-                .orElseThrow(() -> new ApiException(BoardErrorCode.BOARD_FILE_NOT_FOUND));
-
         s3Service.deleteFile(file.getUploadUrl());
 
-        boardFileRepository.delete(boardFile);
+        fileInformationRepository.deleteById(fileId);
     }
 
 
@@ -145,14 +146,14 @@ public class BoardService {
 
         Board board = findBoardById(boardId);
 
-        validateUserIsReportAuthor(user, board);
+        validateUserIsBoardAuthor(user, board);
 
-        List<BoardFile> boardFiles = boardFileRepository.findAllByBoardId(boardId);
+        List<FileInformation> files = fileInformationRepository.findAllByDomainTypeAndEntityId(FileDomainType.BOARD, board.getId());
 
-        return BoardDetail.from(board, boardFiles);
+        return BoardDetail.from(board, files);
     }
 
-    private void validateUserIsReportAuthor(User user, Board board) {
+    private void validateUserIsBoardAuthor(User user, Board board) {
         if(!board.isAuthor(user)){
             throw new ApiException(BoardErrorCode.BOARD_ACCESS_DENIED);
         }

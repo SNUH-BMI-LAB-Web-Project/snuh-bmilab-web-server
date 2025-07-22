@@ -3,7 +3,6 @@ package com.bmilab.backend.domain.board.controller;
 import com.bmilab.backend.domain.board.dto.request.BoardRequest;
 import com.bmilab.backend.domain.board.dto.response.BoardDetail;
 import com.bmilab.backend.domain.board.dto.response.BoardFindAllResponse;
-import com.bmilab.backend.domain.board.entity.BoardCategory;
 import com.bmilab.backend.domain.board.service.BoardService;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import jakarta.validation.Valid;

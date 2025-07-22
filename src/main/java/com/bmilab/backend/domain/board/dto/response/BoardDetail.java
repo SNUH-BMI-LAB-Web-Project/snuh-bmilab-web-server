@@ -1,14 +1,14 @@
 package com.bmilab.backend.domain.board.dto.response;
 
 import com.bmilab.backend.domain.board.entity.Board;
-import com.bmilab.backend.domain.board.entity.BoardFile;
+import com.bmilab.backend.domain.file.dto.response.FileSummary;
+import com.bmilab.backend.domain.file.entity.FileInformation;
 import com.bmilab.backend.domain.user.dto.response.UserSummary;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Builder
 public record BoardDetail(
@@ -31,7 +31,7 @@ public record BoardDetail(
         Integer viewCount,
 
         @Schema(description = "첨부된 파일 정보 목록")
-        List<BoardFileSummary> files,
+        List<FileSummary> files,
 
         @Schema(description = "게시글 생성 시각", example = "2025-07-19T10:30:00")
         LocalDateTime createdAt,
@@ -39,7 +39,7 @@ public record BoardDetail(
         @Schema(description = "게시글 수정 시각", example = "2025-07-19T10:30:00")
         LocalDateTime updatedAt
 ) {
-        public static BoardDetail from(Board board, List<BoardFile> boardFiles) {
+        public static BoardDetail from(Board board, List<FileInformation> files) {
                 return BoardDetail
                         .builder()
                         .boardId(board.getId())
@@ -48,9 +48,9 @@ public record BoardDetail(
                         .title(board.getTitle())
                         .content(board.getContent())
                         .viewCount(board.getViewCount())
-                        .files(boardFiles.stream()
-                                .map(BoardFileSummary::from)
-                                .collect(Collectors.toList()))
+                        .files(files.stream().map(FileSummary::from).toList())
+                        .createdAt(board.getCreatedAt())
+                        .updatedAt(board.getUpdatedAt())
                         .build();
 
         }

@@ -1,8 +1,6 @@
 package com.bmilab.backend.domain.board.dto.query;
 
-import com.bmilab.backend.domain.board.dto.response.BoardCategorySummary;
 import com.bmilab.backend.domain.board.entity.BoardCategory;
-import com.bmilab.backend.domain.user.dto.response.UserSummary;
 import com.bmilab.backend.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
