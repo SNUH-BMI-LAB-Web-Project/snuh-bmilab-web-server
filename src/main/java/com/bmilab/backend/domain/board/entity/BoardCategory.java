@@ -26,4 +26,8 @@ public class BoardCategory {
 
     @Column(nullable = false)
     private String name;
+
+    public void update(String name){
+        this.name = name;
+    }
 }
