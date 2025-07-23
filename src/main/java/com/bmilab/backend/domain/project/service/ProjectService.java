@@ -436,8 +436,10 @@ public class ProjectService {
         return SearchProjectResponse.of(projectRepository.searchProject(userId, all, keyword));
     }
 
-    private String convertToExProfessorString(ExternalProfessorSummary exProfessor) {
-        return exProfessor.name() + "/" + exProfessor.organization() + "/" + exProfessor.department();
+    private String convertToExProfessorString(ExternalProfessorRequest exProfessor) {
+
+        String position = (exProfessor.position() == null) ? "" : exProfessor.position();
+        return exProfessor.name() + "/" + exProfessor.organization() + "/" + exProfessor.department() + "/" + position;
     }
 
     public void validateProjectAccessPermission(Project project, User user, ProjectAccessPermission permission,

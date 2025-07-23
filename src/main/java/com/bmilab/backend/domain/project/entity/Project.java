@@ -61,10 +61,10 @@ public class Project extends BaseTimeEntity {
     @Column(nullable = false)
     private ProjectStatus status;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String pi;
 
-    @Column(name = "practical_professor")
+    @Column(name = "practical_professor", columnDefinition = "TEXT")
     private String practicalProfessor;
 
     @Column(name = "irb_id")

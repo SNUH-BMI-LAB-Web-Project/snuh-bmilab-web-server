@@ -19,7 +19,6 @@ public record ProjectRequest(
 
         @Schema(description = "연구 설명", example = "Gemini 기반 AI 텍스트 작성 툴 백엔드 구현")
         @NotNull(message = "연구 설명은 필수입니다.")
-        @Size(max = 500, message = "연구 설명은 500자 이하로 입력해주세요.")
         String content,
 
         @Schema(description = "연구 책임자의 사용자 ID 리스트", example = "[1, 2]")
@@ -42,11 +41,11 @@ public record ProjectRequest(
 
         @Schema(description = "PI")
         @Nullable
-        List<ExternalProfessorSummary> piList,
+        List<ExternalProfessorRequest> piList,
 
         @Schema(description = "실무 교수")
         @Nullable
-        List<ExternalProfessorSummary> practicalProfessors,
+        List<ExternalProfessorRequest> practicalProfessors,
 
         @Schema(description = "IRB 번호 (있으면)", example = "IRB-DSEB-...")
         @Nullable

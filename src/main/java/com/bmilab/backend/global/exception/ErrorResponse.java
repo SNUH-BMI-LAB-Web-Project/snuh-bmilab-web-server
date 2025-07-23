@@ -50,7 +50,7 @@ public class ErrorResponse {
         return ErrorResponse
                 .builder()
                 .code(status.name())
-                .message(e.getMessage() != null ? e.getMessage() : "An unexpected error occurred")
+                .message(e.getMessage())
                 .status(status.value())
                 .timestamp(timestamp)
                 .build();
