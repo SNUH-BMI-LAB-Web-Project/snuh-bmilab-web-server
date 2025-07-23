@@ -76,9 +76,6 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                 .fetch();
     }
 
-//    @Override
-//    public List<GetAllProjectsQueryResult> sortedPinnedProjects() {}
-
     //TODO: 연구 전체 조회 쿼리 리팩터링하기
     @Override
     public Page<GetAllProjectsQueryResult> findAllByFiltering(
@@ -131,8 +128,6 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                         .where(participant.user.id.eq(userId), participant.project.eq(project))
                         .exists()) : null;
 
-        BooleanExpression isNotPinned = project.isPinned.eq(false);
-
         List<GetAllProjectsQueryResult> results = queryFactory.select(Projections.constructor(
                         GetAllProjectsQueryResult.class,
                         project.id,
@@ -160,8 +155,7 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                                 practicalProfessorContains),
                         statusFilter,
                         categoryFilter,
-                        leaderFilter,
-                        isNotPinned
+                        leaderFilter
                 )
                 .orderBy(getCustomSortOrderSpecifier(pageable, project))
                 .offset(pageable.getOffset())
@@ -174,8 +168,7 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                                 practicalProfessorContains),
                         statusFilter,
                         categoryFilter,
-                        leaderFilter,
-                        isNotPinned)
+                        leaderFilter)
                 .fetchOne()).orElse(0L);
 
         List<Long> projectIds = results.stream()

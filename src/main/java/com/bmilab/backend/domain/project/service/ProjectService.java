@@ -51,6 +51,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -59,7 +60,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 @Slf4j
 @Service
@@ -186,12 +186,8 @@ public class ProjectService {
             ProjectFilterCondition condition,
             Pageable pageable
     ) {
-//        List<ProjectSummary> pinnedProjects = projectRepository.sortedPinnedProjects()
-//                .stream()
-//                .map(ProjectSummary::from)
-//                .collect(Collectors.toList());
 
-        Page<GetAllProjectsQueryResult> regularProjects = projectRepository.findAllByFiltering(
+        Page<GetAllProjectsQueryResult> projects = projectRepository.findAllByFiltering(
                 userId,
                 search,
                 condition,
@@ -201,13 +197,13 @@ public class ProjectService {
         return ProjectFindAllResponse
                 .builder()
 //                .pinnedProjects(pinnedProjects)
-                .regularProjects(
-                        regularProjects.getContent()
+                .projects(
+                        projects.getContent()
                                 .stream()
                                 .map(ProjectSummary::from)
                                 .toList()
                 )
-                .totalPage(regularProjects.getTotalPages())
+                .totalPage(projects.getTotalPages())
                 .build();
     }
 
@@ -255,8 +251,7 @@ public class ProjectService {
                 practicalProfessors.isEmpty() ? null : practicalProfessors,
                 category,
                 status,
-                request.isPrivate(),
-                request.isPinned()
+                request.isPrivate()
         );
 
         List<Long> updatedParticipantIds = request.participantIds();

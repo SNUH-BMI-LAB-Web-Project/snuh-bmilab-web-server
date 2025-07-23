@@ -14,8 +14,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
-import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,6 +21,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "projects")
@@ -77,9 +78,6 @@ public class Project extends BaseTimeEntity {
     @Column(name = "is_private", columnDefinition = "TINYINT(1)")
     private boolean isPrivate = false;
 
-    @Column(nullable = false)
-    private boolean isPinned = false;
-
     public boolean canBeEditedBy(User user) {
         return author.getId().equals(user.getId()) || user.getRole() == Role.ADMIN;
     }
@@ -93,8 +91,7 @@ public class Project extends BaseTimeEntity {
             List<String> practicalProfessorList,
             ProjectCategory category,
             ProjectStatus status,
-            boolean isPrivate,
-            boolean isPinned
+            boolean isPrivate
     ) {
         this.title = title;
         this.content = content;
@@ -106,7 +103,6 @@ public class Project extends BaseTimeEntity {
         this.category = category;
         this.status = status;
         this.isPrivate = isPrivate;
-        this.isPinned = isPinned;
     }
 
     public void complete(LocalDate endDate) {

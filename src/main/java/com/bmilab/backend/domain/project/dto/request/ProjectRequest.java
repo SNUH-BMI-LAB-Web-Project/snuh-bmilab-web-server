@@ -75,10 +75,6 @@ public record ProjectRequest(
 
         @Schema(description = "연구 비공개 여부")
         @NotNull(message = "연구 비공개 여부는 필수입니다.")
-        boolean isPrivate,
-
-        @Schema(description = "연구 고정 여부")
-        @NotNull(message = "연구 고정 여부는 필수입니다.")
-        boolean isPinned
+        boolean isPrivate
 ) {
 }
