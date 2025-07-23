@@ -8,14 +8,13 @@ import com.bmilab.backend.domain.user.dto.response.UserSummary;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import lombok.Builder;
 
 @Builder
 public record ProjectFindAllResponse(
-        List<ProjectSummary> projects,
+        List<ProjectSummary> pinnedProjects,
+        List<ProjectSummary> regularProjects,
         int totalPage
 ) {
     @Builder

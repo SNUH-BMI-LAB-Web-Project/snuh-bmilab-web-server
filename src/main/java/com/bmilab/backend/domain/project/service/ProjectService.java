@@ -5,7 +5,6 @@ import com.bmilab.backend.domain.file.enums.FileDomainType;
 import com.bmilab.backend.domain.file.exception.FileErrorCode;
 import com.bmilab.backend.domain.file.repository.FileInformationRepository;
 import com.bmilab.backend.domain.file.service.FileService;
-import com.bmilab.backend.domain.project.dto.ExternalProfessorSummary;
 import com.bmilab.backend.domain.project.dto.condition.ProjectFilterCondition;
 import com.bmilab.backend.domain.project.dto.query.GetAllProjectsQueryResult;
 import com.bmilab.backend.domain.project.dto.query.GetAllTimelinesQueryResult;
@@ -187,8 +186,12 @@ public class ProjectService {
             ProjectFilterCondition condition,
             Pageable pageable
     ) {
+//        List<ProjectSummary> pinnedProjects = projectRepository.sortedPinnedProjects()
+//                .stream()
+//                .map(ProjectSummary::from)
+//                .collect(Collectors.toList());
 
-        Page<GetAllProjectsQueryResult> queryResults = projectRepository.findAllByFiltering(
+        Page<GetAllProjectsQueryResult> regularProjects = projectRepository.findAllByFiltering(
                 userId,
                 search,
                 condition,
@@ -197,13 +200,14 @@ public class ProjectService {
 
         return ProjectFindAllResponse
                 .builder()
-                .projects(
-                        queryResults.getContent()
+//                .pinnedProjects(pinnedProjects)
+                .regularProjects(
+                        regularProjects.getContent()
                                 .stream()
                                 .map(ProjectSummary::from)
                                 .toList()
                 )
-                .totalPage(queryResults.getTotalPages())
+                .totalPage(regularProjects.getTotalPages())
                 .build();
     }
 
@@ -251,7 +255,8 @@ public class ProjectService {
                 practicalProfessors.isEmpty() ? null : practicalProfessors,
                 category,
                 status,
-                request.isPrivate()
+                request.isPrivate(),
+                request.isPinned()
         );
 
         List<Long> updatedParticipantIds = request.participantIds();

@@ -77,6 +77,9 @@ public class Project extends BaseTimeEntity {
     @Column(name = "is_private", columnDefinition = "TINYINT(1)")
     private boolean isPrivate = false;
 
+    @Column(nullable = false)
+    private boolean isPinned = false;
+
     public boolean canBeEditedBy(User user) {
         return author.getId().equals(user.getId()) || user.getRole() == Role.ADMIN;
     }
@@ -90,7 +93,8 @@ public class Project extends BaseTimeEntity {
             List<String> practicalProfessorList,
             ProjectCategory category,
             ProjectStatus status,
-            boolean isPrivate
+            boolean isPrivate,
+            boolean isPinned
     ) {
         this.title = title;
         this.content = content;
@@ -102,6 +106,7 @@ public class Project extends BaseTimeEntity {
         this.category = category;
         this.status = status;
         this.isPrivate = isPrivate;
+        this.isPinned = isPinned;
     }
 
     public void complete(LocalDate endDate) {
