@@ -54,7 +54,7 @@ public class CommentService {
 
     private void validateUserIsCommentAuthor(User user, Comment comment) {
         if (!comment.isAuthor(user)) {
-            throw new ApiException(CommentErrorCode.COMMENT_NOT_FOUND);
+            throw new ApiException(CommentErrorCode.COMMENT_ACCESS_DENIED);
         }
     }
 
