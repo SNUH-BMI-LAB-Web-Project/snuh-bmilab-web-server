@@ -1,11 +1,9 @@
 package com.bmilab.backend.domain.project.dto.request;
 
-import com.bmilab.backend.domain.project.dto.ExternalProfessorSummary;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;

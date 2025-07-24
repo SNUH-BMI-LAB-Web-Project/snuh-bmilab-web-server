@@ -211,10 +211,11 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                     Expressions.numberTemplate(
                             Integer.class,
                             "case when {0} is null then 0 else 1 end",
-                            project.endDate
+                            project.startDate
                     ).asc(),
+                    project.startDate.desc(),
                     project.endDate.desc(),
-                    project.startDate.desc()
+
             };
         }
         for (Sort.Order order : sort) {

@@ -6,12 +6,11 @@ import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.projectcategory.dto.response.ProjectCategorySummary;
 import com.bmilab.backend.domain.user.dto.response.UserSummary;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
+
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import lombok.Builder;
 
 @Builder
 public record ProjectFindAllResponse(
