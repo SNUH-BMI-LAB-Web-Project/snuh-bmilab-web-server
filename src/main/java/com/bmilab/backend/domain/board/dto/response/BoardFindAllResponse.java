@@ -1,6 +1,7 @@
 package com.bmilab.backend.domain.board.dto.response;
 
 import com.bmilab.backend.domain.board.dto.query.GetAllBoardsQueryResult;
+import com.bmilab.backend.domain.board.entity.Board;
 import com.bmilab.backend.domain.user.dto.response.UserSummary;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -9,7 +10,8 @@ import java.util.List;
 
 @Builder
 public record BoardFindAllResponse(
-        List<BoardSummary> boards,
+        List<BoardSummary> pinnedBoards,
+        List<BoardSummary> regularBoards,
         int totalPage
 ) {
     @Builder
@@ -36,6 +38,16 @@ public record BoardFindAllResponse(
                     .boardCategory(BoardCategorySummary.from(queryResults.getBoardCategory()))
                     .title(queryResults.getTitle())
                     .viewCount(queryResults.getViewCount())
+                    .build();
+        }
+
+        public static BoardSummary from(Board board) {
+            return BoardSummary.builder()
+                    .boardId(board.getId())
+                    .author(UserSummary.from(board.getAuthor()))
+                    .boardCategory(BoardCategorySummary.from(board.getCategory()))
+                    .title(board.getTitle())
+                    .viewCount(board.getViewCount())
                     .build();
         }
     }

@@ -1,6 +1,7 @@
 package com.bmilab.backend.domain.board.entity;
 
 import com.bmilab.backend.domain.user.entity.User;
+import com.bmilab.backend.domain.user.enums.Role;
 import com.bmilab.backend.global.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -47,8 +48,11 @@ public class Board extends BaseTimeEntity {
     @Column(nullable = false)
     private int viewCount = 0;
 
-    public boolean isAuthor(User user) {
-        return this.author.getId().equals(user.getId());
+    @Column(nullable = false)
+    private boolean isPinned = false;
+
+    public boolean canBeEditedBy(User user) {
+        return this.author.getId().equals(user.getId()) || user.getRole() == Role.ADMIN;
     }
 
     public void update(BoardCategory category, String title, String content) {
