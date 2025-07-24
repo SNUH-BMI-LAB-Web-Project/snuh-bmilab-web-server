@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "boards")
@@ -48,6 +49,7 @@ public class Board extends BaseTimeEntity {
     @Column(nullable = false)
     private int viewCount = 0;
 
+    @Setter
     @Column(nullable = false)
     private boolean isPinned = false;
 
@@ -60,4 +62,5 @@ public class Board extends BaseTimeEntity {
         this.title = title;
         this.content = content;
     }
+
 }
