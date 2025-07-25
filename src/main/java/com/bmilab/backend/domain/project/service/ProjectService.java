@@ -5,7 +5,6 @@ import com.bmilab.backend.domain.file.enums.FileDomainType;
 import com.bmilab.backend.domain.file.exception.FileErrorCode;
 import com.bmilab.backend.domain.file.repository.FileInformationRepository;
 import com.bmilab.backend.domain.file.service.FileService;
-import com.bmilab.backend.domain.project.dto.ExternalProfessorSummary;
 import com.bmilab.backend.domain.project.dto.condition.ProjectFilterCondition;
 import com.bmilab.backend.domain.project.dto.query.GetAllProjectsQueryResult;
 import com.bmilab.backend.domain.project.dto.query.GetAllTimelinesQueryResult;
@@ -52,6 +51,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -60,7 +60,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 @Slf4j
 @Service
@@ -183,11 +182,12 @@ public class ProjectService {
 
     public ProjectFindAllResponse getAllProjects(
             Long userId,
-            String search, ProjectFilterCondition condition,
+            String search,
+            ProjectFilterCondition condition,
             Pageable pageable
     ) {
 
-        Page<GetAllProjectsQueryResult> queryResults = projectRepository.findAllByFiltering(
+        Page<GetAllProjectsQueryResult> projects = projectRepository.findAllByFiltering(
                 userId,
                 search,
                 condition,
@@ -196,13 +196,14 @@ public class ProjectService {
 
         return ProjectFindAllResponse
                 .builder()
+//                .pinnedProjects(pinnedProjects)
                 .projects(
-                        queryResults.getContent()
+                        projects.getContent()
                                 .stream()
                                 .map(ProjectSummary::from)
                                 .toList()
                 )
-                .totalPage(queryResults.getTotalPages())
+                .totalPage(projects.getTotalPages())
                 .build();
     }
 

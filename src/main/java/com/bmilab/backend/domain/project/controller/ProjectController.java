@@ -126,7 +126,7 @@ public class ProjectController implements ProjectApi {
             @RequestParam(required = false) ProjectStatus status,
             @RequestParam(required = false) String pi,
             @RequestParam(required = false) String practicalProfessor,
-            @PageableDefault(size = 10, sort = "endDate", direction = Sort.Direction.DESC) @ParameterObject Pageable pageable
+            @PageableDefault(size = 10, sort = "startDate", direction = Sort.Direction.DESC) @ParameterObject Pageable pageable
     ) {
 
         return ResponseEntity.ok(projectService.getAllProjects(

@@ -15,6 +15,7 @@ public interface ProjectRepositoryCustom {
     List<SearchProjectQueryResult> searchProject(Long userId, boolean all, String keyword);
 
     List<Project> findAllByUser(User user);
+
     //TODO: 연구 전체 조회 쿼리 리팩터링하기
     Page<GetAllProjectsQueryResult> findAllByFiltering(
             Long userId,
