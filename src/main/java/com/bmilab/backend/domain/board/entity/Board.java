@@ -46,11 +46,11 @@ public class Board extends BaseTimeEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(nullable = false)
+    @Column(name = "view_count")
     private int viewCount = 0;
 
     @Setter
-    @Column(nullable = false)
+    @Column(name = "is_pinned", columnDefinition = "TINYINT(1)")
     private boolean isPinned = false;
 
     public boolean canBeEditedBy(User user) {
