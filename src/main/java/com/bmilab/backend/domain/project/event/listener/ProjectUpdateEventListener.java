@@ -35,9 +35,11 @@ public class ProjectUpdateEventListener {
 
         List<ExternalProfessorSummary> exists = externalProfessorRepository.findExists(externalProfessors);
 
-        externalProfessors.removeAll(exists);
+        List<ExternalProfessorSummary> nonExists = externalProfessors.stream()
+                .filter(dto -> exists.stream().noneMatch(dto::equals))
+                .toList();
 
-        externalProfessors.stream()
+        nonExists.stream()
                 .map(dto ->
                         ExternalProfessor.builder()
                                 .name(dto.name())
