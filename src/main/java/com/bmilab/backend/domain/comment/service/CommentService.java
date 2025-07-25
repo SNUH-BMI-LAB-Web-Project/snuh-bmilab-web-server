@@ -69,12 +69,19 @@ public class CommentService {
     }
 
     @Transactional
-    public void deleteComment(Long userId, Long commentId) {
+    public void deleteCommentByUser(Long userId, Long commentId) {
 
         User user = userService.findUserById(userId);
         Comment comment = findCommentById(commentId);
 
         validateUserIsCommentAuthor(user, comment);
+
+        commentRepository.delete(comment);
+    }
+
+    @Transactional
+    public void deleteComment(Long commentId) {
+        Comment comment = findCommentById(commentId);
 
         commentRepository.delete(comment);
     }

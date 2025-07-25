@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/comments")
 @RequiredArgsConstructor
-public class CommentController {
+public class CommentController implements CommentApi {
     private final CommentService commentService;
 
     @PostMapping
@@ -59,7 +59,7 @@ public class CommentController {
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @PathVariable Long commentId
     ) {
-        commentService.deleteComment(userAuthInfo.getUserId(), commentId);
+        commentService.deleteCommentByUser(userAuthInfo.getUserId(), commentId);
         return ResponseEntity.ok().build();
     }
 }
