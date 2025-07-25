@@ -29,6 +29,7 @@ import com.bmilab.backend.domain.user.repository.UserSubAffiliationRepository;
 import com.bmilab.backend.global.email.EmailSender;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.external.s3.S3Service;
+import com.bmilab.backend.global.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -332,7 +333,7 @@ public class UserService {
 
         User user = userRepository.findByEmail(email).orElseThrow(() -> new ApiException(UserErrorCode.USER_NOT_FOUND));
 
-        String newPassword = generateRandomPassword();
+        String newPassword = StringUtils.generateRandomPassword();
 
         user.updatePassword(passwordEncoder.encode(newPassword));
 
@@ -344,23 +345,6 @@ public class UserService {
         if (userRepository.existsByEmail(email)) {
             throw new ApiException(UserErrorCode.DUPLICATE_EMAIL);
         }
-    }
-
-    private String generateRandomPassword() {
-
-        char[] charSet = new char[] {
-                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
-                'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
-        };
-
-        StringBuilder tempPw = new StringBuilder();
-
-        for (int i = 0; i < 10; i++) {
-            int idx = (int) (charSet.length * Math.random());
-            tempPw.append(charSet[idx]);
-        }
-
-        return tempPw.toString();
     }
 
     @Transactional
