@@ -2,6 +2,7 @@ package com.bmilab.backend.domain.board.service;
 
 import com.bmilab.backend.domain.board.dto.query.GetAllBoardsQueryResult;
 import com.bmilab.backend.domain.board.dto.request.BoardRequest;
+import com.bmilab.backend.domain.board.dto.request.BoardPinRequest;
 import com.bmilab.backend.domain.board.dto.response.BoardDetail;
 import com.bmilab.backend.domain.board.dto.response.BoardFindAllResponse;
 import com.bmilab.backend.domain.board.dto.response.BoardFindAllResponse.BoardSummary;
@@ -15,6 +16,7 @@ import com.bmilab.backend.domain.file.exception.FileErrorCode;
 import com.bmilab.backend.domain.file.repository.FileInformationRepository;
 import com.bmilab.backend.domain.file.service.FileService;
 import com.bmilab.backend.domain.user.entity.User;
+import com.bmilab.backend.domain.user.enums.Role;
 import com.bmilab.backend.domain.user.service.UserService;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.external.s3.S3Service;
@@ -161,9 +163,29 @@ public class BoardService {
         return BoardDetail.from(board, files);
     }
 
+    @Transactional
+    public void updateBoardPinStatus(Long userId, Long boardId, BoardPinRequest request) {
+
+        User user = userService.findUserById(userId);
+
+        Board board = findBoardById(boardId);
+
+        validateBoardPinPermission(user);
+
+        board.setPinned(request.isPinned());
+
+        boardRepository.save(board);
+    }
+
     private void validateBoardAccessPermission(User user, Board board) {
         if(!board.canBeEditedBy(user)){
             throw new ApiException(BoardErrorCode.BOARD_ACCESS_DENIED);
+        }
+    }
+
+    private void validateBoardPinPermission(User user) {
+        if (!(user.getRole() == Role.ADMIN)){
+            throw new ApiException(BoardErrorCode.BOARD_PIN_ACCESS_DENIED);
         }
     }
 }

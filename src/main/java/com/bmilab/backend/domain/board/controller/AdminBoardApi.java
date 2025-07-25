@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Tag(name = "(Admin) Board", description = "(관리자용) 게시판 API")
 public interface AdminBoardApi {
 
-    @Operation(summary = "게시글 고정 상태 수정", description = "기존 게시글 고정상태를 수정하기 위한 PUT API")
+    @Operation(summary = "게시글 고정 상태 수정", description = "기존 게시글 고정상태를 수정하기 위한 PATCH API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "게시글 고정 상태 수정 성공"),
     })
