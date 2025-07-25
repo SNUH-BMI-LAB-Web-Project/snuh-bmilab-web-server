@@ -30,6 +30,7 @@ public class LeaveSchedulerService {
     private static final String API_URL = "https://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo";
     private final UserLeaveRepository userLeaveRepository;
 
+    //TODO: 입사일 기준 근무일 계산으로 다시 바꾸기
     @Scheduled(cron = "0 0 0 1 * *", zone = "Asia/Seoul")
     @Transactional
     public void updateUserAnnualLeaves() {
