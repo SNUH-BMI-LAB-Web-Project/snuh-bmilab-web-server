@@ -1,13 +1,13 @@
 package com.bmilab.backend.domain.board.controller;
 
-import com.bmilab.backend.domain.board.dto.request.PinStatusRequest;
-import com.bmilab.backend.domain.board.service.AdminBoardService;
+import com.bmilab.backend.domain.board.dto.request.BoardPinRequest;
+import com.bmilab.backend.domain.board.service.BoardService;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -17,15 +17,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AdminBoardController implements AdminBoardApi {
 
-    private final AdminBoardService adminBoardService;
+    private final BoardService boardService;
 
-    @PutMapping("/{boardId}")
+    @PatchMapping("/{boardId}/pin")
     public ResponseEntity<Void> updateBoardPinStatus(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @PathVariable Long boardId,
-            @RequestBody PinStatusRequest request
+            @RequestBody BoardPinRequest request
     ){
-        adminBoardService.updateBoardStatus(userAuthInfo.getUserId(), boardId, request);
+        boardService.updateBoardPinStatus(userAuthInfo.getUserId(), boardId, request);
 
         return ResponseEntity.ok().build();
     }
