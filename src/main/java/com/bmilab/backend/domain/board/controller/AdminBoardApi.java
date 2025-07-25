@@ -1,6 +1,6 @@
 package com.bmilab.backend.domain.board.controller;
 
-import com.bmilab.backend.domain.board.dto.request.PinStatusRequest;
+import com.bmilab.backend.domain.board.dto.request.BoardPinRequest;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -21,6 +21,6 @@ public interface AdminBoardApi {
     ResponseEntity<Void> updateBoardPinStatus(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @PathVariable Long boardId,
-            @RequestBody PinStatusRequest request
+            @RequestBody BoardPinRequest request
     );
 }
