@@ -18,6 +18,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "boards")
@@ -52,6 +56,14 @@ public class Board extends BaseTimeEntity {
     @Setter
     @Column(name = "is_pinned", columnDefinition = "TINYINT(1)")
     private boolean isPinned = false;
+
+    @CreatedDate
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
     public boolean canBeEditedBy(User user) {
         return this.author.getId().equals(user.getId()) || user.getRole() == Role.ADMIN;

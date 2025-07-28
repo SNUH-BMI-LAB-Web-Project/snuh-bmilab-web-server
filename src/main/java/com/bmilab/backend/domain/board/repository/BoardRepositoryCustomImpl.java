@@ -44,7 +44,8 @@ public class BoardRepositoryCustomImpl implements BoardRepositoryCustom {
                         user,
                         boardCategory,
                         board.title,
-                        board.viewCount
+                        board.viewCount,
+                        board.createdAt
                 ))
                 .from(board)
                 .leftJoin(board.author, user)
