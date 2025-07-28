@@ -65,9 +65,10 @@ public class BoardRepositoryCustomImpl implements BoardRepositoryCustom {
 
     private OrderSpecifier<?>[] getBoardSortOrderSpecifier(Pageable pageable, QBoard board) {
         Sort sort = pageable.getSort();
+        OrderSpecifier<?> pinnedFirst = board.isPinned.desc();
 
         if (sort.isUnsorted()) {
-            return new OrderSpecifier[]{board.createdAt.desc()};
+            return new OrderSpecifier[]{pinnedFirst, board.createdAt.desc()};
         }
 
         for (Sort.Order order : sort) {
@@ -76,11 +77,12 @@ public class BoardRepositoryCustomImpl implements BoardRepositoryCustom {
 
             if ("createdAt".equals(property)) {
                 return new OrderSpecifier[]{
+                        pinnedFirst,
                         isDesc ? board.createdAt.desc() : board.createdAt.asc()
                 };
             }
         }
 
-        return new OrderSpecifier[]{board.createdAt.desc()};
+        return new OrderSpecifier[]{pinnedFirst,board.createdAt.desc()};
     }
 }
