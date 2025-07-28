@@ -1,8 +1,8 @@
 package com.bmilab.backend.domain.board.service;
 
 import com.bmilab.backend.domain.board.dto.query.GetAllBoardsQueryResult;
-import com.bmilab.backend.domain.board.dto.request.BoardRequest;
 import com.bmilab.backend.domain.board.dto.request.BoardPinRequest;
+import com.bmilab.backend.domain.board.dto.request.BoardRequest;
 import com.bmilab.backend.domain.board.dto.response.BoardDetail;
 import com.bmilab.backend.domain.board.dto.response.BoardFindAllResponse;
 import com.bmilab.backend.domain.board.dto.response.BoardFindAllResponse.BoardSummary;
@@ -28,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -124,8 +123,6 @@ public class BoardService {
         String category,
         Pageable pageable
     ) {
-        List<Board> pinnedBoards = boardRepository.findAllByIsPinnedTrueOrderByCreatedAtDesc();
-
         Page<GetAllBoardsQueryResult> regularBoardsResult = boardRepository.findAllByFiltering(
                 userId,
                 search,
@@ -135,13 +132,7 @@ public class BoardService {
 
         return BoardFindAllResponse
                 .builder()
-                .pinnedBoards(
-                        pinnedBoards.stream()
-                                .map(BoardSummary::from)
-                                .collect(Collectors.toList())
-
-                )
-                .regularBoards(
+                .boards(
                         regularBoardsResult.getContent()
                                 .stream()
                                 .map(BoardSummary::from)

@@ -33,11 +33,13 @@ public class BoardCategoryService {
     @Transactional
     public void createBoardCategory(BoardCategoryReqeust request) {
         String categoryName = request.name();
+        String categoryColor = request.color();
 
         validateBoardCategory(categoryName);
 
         BoardCategory boardCategory = BoardCategory.builder()
                 .name(categoryName)
+                .color(categoryColor)
                 .build();
 
         boardCategoryRepository.save(boardCategory);
@@ -48,7 +50,7 @@ public class BoardCategoryService {
         BoardCategory boardCategory = boardCategoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ApiException(BoardErrorCode.CATEGORY_NOT_FOUND));
 
-        boardCategory.update(request.name());
+        boardCategory.update(request.name(), request.color());
     }
 
     @Transactional

@@ -19,6 +19,9 @@ public class RegExp {
     public static final String PHONE_NUMBER_EXPRESSION = "^(01[016789])-[0-9]{3,4}-[0-9]{4}$";
     public static final String PHONE_NUMBER_MESSAGE = "올바른 전화번호가 아닙니다.";
 
+    public static final String COLOR_EXPRESSION = "^#[0-9a-fA-F]{6}$";
+    public static final String COLOR_MESSAGE = "올바른 색상 코드가 아닙니다.";
+
     public static final String YYYY_MM_DD_EXPRESSION = "^\\d{4}-\\d{2}-\\d{2}$";
     public static final String YYYY_MM_DD_MESSAGE = "올바른 날짜가 아닙니다";
 

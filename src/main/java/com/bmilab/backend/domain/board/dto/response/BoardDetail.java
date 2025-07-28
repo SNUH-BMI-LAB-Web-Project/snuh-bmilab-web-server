@@ -33,10 +33,10 @@ public record BoardDetail(
         @Schema(description = "첨부된 파일 정보 목록")
         List<FileSummary> files,
 
-        @Schema(description = "게시글 생성 시각", example = "2025-07-19T10:30:00")
+        @Schema(description = "게시글 생성 일시", example = "2025-07-19T10:30:00")
         LocalDateTime createdAt,
 
-        @Schema(description = "게시글 수정 시각", example = "2025-07-19T10:30:00")
+        @Schema(description = "게시글 수정 일시", example = "2025-07-19T10:30:00")
         LocalDateTime updatedAt
 ) {
         public static BoardDetail from(Board board, List<FileInformation> files) {
