@@ -461,6 +461,15 @@ public class ProjectService {
 
     @Transactional
     public void createExternalProfessor(ExternalProfessorRequest request) {
+        if (externalProfessorRepository.existsByNameAndOrganizationAndDepartmentAndPosition(
+                request.name(),
+                request.organization(),
+                request.department(),
+                request.position()
+        )) {
+            throw new ApiException(ProjectErrorCode.EXTERNAL_PROFESSOR_DUPLICATE);
+        }
+
         ExternalProfessor externalProfessor = ExternalProfessor.builder()
                 .name(request.name())
                 .organization(request.organization())

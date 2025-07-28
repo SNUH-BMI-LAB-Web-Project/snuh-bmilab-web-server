@@ -10,4 +10,6 @@ public interface ExternalProfessorRepository extends JpaRepository<ExternalProfe
             + "or :name = '' "
             + "or ex.name like concat('%', :name, '%')")
     List<ExternalProfessor> findAllByNameContaining(String name);
+
+    boolean existsByNameAndOrganizationAndDepartmentAndPosition(String name, String organization, String department, String position);
 }
