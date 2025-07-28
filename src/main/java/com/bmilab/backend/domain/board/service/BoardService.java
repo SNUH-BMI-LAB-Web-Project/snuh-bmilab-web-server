@@ -2,8 +2,10 @@ package com.bmilab.backend.domain.board.service;
 
 import com.bmilab.backend.domain.board.dto.query.GetAllBoardsQueryResult;
 import com.bmilab.backend.domain.board.dto.request.BoardRequest;
+import com.bmilab.backend.domain.board.dto.request.BoardPinRequest;
 import com.bmilab.backend.domain.board.dto.response.BoardDetail;
 import com.bmilab.backend.domain.board.dto.response.BoardFindAllResponse;
+import com.bmilab.backend.domain.board.dto.response.BoardFindAllResponse.BoardSummary;
 import com.bmilab.backend.domain.board.entity.Board;
 import com.bmilab.backend.domain.board.entity.BoardCategory;
 import com.bmilab.backend.domain.board.exception.BoardErrorCode;
@@ -14,6 +16,7 @@ import com.bmilab.backend.domain.file.exception.FileErrorCode;
 import com.bmilab.backend.domain.file.repository.FileInformationRepository;
 import com.bmilab.backend.domain.file.service.FileService;
 import com.bmilab.backend.domain.user.entity.User;
+import com.bmilab.backend.domain.user.enums.Role;
 import com.bmilab.backend.domain.user.service.UserService;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.external.s3.S3Service;
@@ -22,10 +25,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.bmilab.backend.domain.board.dto.response.BoardFindAllResponse.BoardSummary;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -70,7 +73,7 @@ public class BoardService {
 
         Board board = findBoardById(boardId);
 
-        validateUserIsBoardAuthor(user, board);
+        validateBoardAccessPermission(user, board);
 
         BoardCategory category = boardCategoryService.getBoardCategoryById(request.boardCategoryId());
 
@@ -91,7 +94,7 @@ public class BoardService {
 
         Board board = findBoardById(boardId);
 
-        validateUserIsBoardAuthor(user, board);
+        validateBoardAccessPermission(user, board);
 
         fileService.deleteAllFileByDomainTypeAndEntityId(FileDomainType.BOARD, board.getId());
 
@@ -104,7 +107,7 @@ public class BoardService {
 
         Board board = findBoardById(boardId);
 
-        validateUserIsBoardAuthor(user, board);
+        validateBoardAccessPermission(user, board);
 
         FileInformation file = fileInformationRepository.findById(fileId)
                 .orElseThrow(() -> new ApiException(FileErrorCode.FILE_NOT_FOUND));
@@ -121,8 +124,9 @@ public class BoardService {
         String category,
         Pageable pageable
     ) {
+        List<Board> pinnedBoards = boardRepository.findAllByIsPinnedTrueOrderByCreatedAtDesc();
 
-        Page<GetAllBoardsQueryResult> queryResults = boardRepository.findAllByFiltering(
+        Page<GetAllBoardsQueryResult> regularBoardsResult = boardRepository.findAllByFiltering(
                 userId,
                 search,
                 category,
@@ -131,13 +135,19 @@ public class BoardService {
 
         return BoardFindAllResponse
                 .builder()
-                .boards(
-                        queryResults.getContent()
+                .pinnedBoards(
+                        pinnedBoards.stream()
+                                .map(BoardSummary::from)
+                                .collect(Collectors.toList())
+
+                )
+                .regularBoards(
+                        regularBoardsResult.getContent()
                                 .stream()
                                 .map(BoardSummary::from)
                                 .toList()
                 )
-                .totalPage(queryResults.getTotalPages())
+                .totalPage(regularBoardsResult.getTotalPages())
                 .build();
     }
 
@@ -146,16 +156,36 @@ public class BoardService {
 
         Board board = findBoardById(boardId);
 
-        validateUserIsBoardAuthor(user, board);
+        validateBoardAccessPermission(user, board);
 
         List<FileInformation> files = fileInformationRepository.findAllByDomainTypeAndEntityId(FileDomainType.BOARD, board.getId());
 
         return BoardDetail.from(board, files);
     }
 
-    private void validateUserIsBoardAuthor(User user, Board board) {
-        if(!board.isAuthor(user)){
+    @Transactional
+    public void updateBoardPinStatus(Long userId, Long boardId, BoardPinRequest request) {
+
+        User user = userService.findUserById(userId);
+
+        Board board = findBoardById(boardId);
+
+        validateBoardPinPermission(user);
+
+        board.setPinned(request.isPinned());
+
+        boardRepository.save(board);
+    }
+
+    private void validateBoardAccessPermission(User user, Board board) {
+        if(!board.canBeEditedBy(user)){
             throw new ApiException(BoardErrorCode.BOARD_ACCESS_DENIED);
+        }
+    }
+
+    private void validateBoardPinPermission(User user) {
+        if (!(user.getRole() == Role.ADMIN)){
+            throw new ApiException(BoardErrorCode.BOARD_PIN_ACCESS_DENIED);
         }
     }
 }
