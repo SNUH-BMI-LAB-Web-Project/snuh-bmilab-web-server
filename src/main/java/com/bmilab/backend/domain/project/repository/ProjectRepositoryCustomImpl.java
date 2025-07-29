@@ -205,9 +205,11 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
     private OrderSpecifier<?>[] getCustomSortOrderSpecifier(Pageable pageable, QProject project) {
 
         Sort sort = pageable.getSort();
+        OrderSpecifier<?> pinnedFirst = project.isPinned.desc();
 
         if (sort.isUnsorted()) {
             return new OrderSpecifier[]{
+                    pinnedFirst,
                     Expressions.numberTemplate(
                             Integer.class,
                             "case when {0} is null then 0 else 1 end",
@@ -225,10 +227,12 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
             switch (property) {
                 case "startDate":
                     return new OrderSpecifier[]{
+                            pinnedFirst,
                             isDesc ? project.startDate.desc() : project.startDate.asc()
                     };
                 case "endDate":
                     return new OrderSpecifier[]{
+                            pinnedFirst,
                             Expressions.numberTemplate(
                                     Integer.class,
                                     "case when {0} is null then 0 else 1 end",
@@ -238,12 +242,12 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                     };
                 default:
                     return new OrderSpecifier[]{
-                            project.endDate.desc()
+                            pinnedFirst, project.endDate.desc()
                     };
             }
 
         }
 
-        return new OrderSpecifier[]{project.endDate.desc()};
+        return new OrderSpecifier[]{pinnedFirst, project.endDate.desc()};
     }
 }
