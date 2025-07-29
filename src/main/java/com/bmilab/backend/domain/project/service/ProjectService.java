@@ -10,6 +10,7 @@ import com.bmilab.backend.domain.project.dto.query.GetAllProjectsQueryResult;
 import com.bmilab.backend.domain.project.dto.query.GetAllTimelinesQueryResult;
 import com.bmilab.backend.domain.project.dto.request.ExternalProfessorRequest;
 import com.bmilab.backend.domain.project.dto.request.ProjectCompleteRequest;
+import com.bmilab.backend.domain.project.dto.request.ProjectPinRequest;
 import com.bmilab.backend.domain.project.dto.request.ProjectRequest;
 import com.bmilab.backend.domain.project.dto.response.ExternalProfessorFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.ProjectDetail;
@@ -41,6 +42,7 @@ import com.bmilab.backend.domain.report.dto.query.GetAllReportsQueryResult;
 import com.bmilab.backend.domain.report.dto.response.ReportFindAllResponse;
 import com.bmilab.backend.domain.report.repository.ReportRepository;
 import com.bmilab.backend.domain.user.entity.User;
+import com.bmilab.backend.domain.user.enums.Role;
 import com.bmilab.backend.domain.user.service.UserService;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.external.s3.S3Service;
@@ -534,5 +536,24 @@ public class ProjectService {
                 .toList();
 
         return s3Service.downloadS3FilesByZip(fileKeys);
+    }
+
+    @Transactional
+    public void updateProjectPinStatus(Long userId, Long projectId, ProjectPinRequest request){
+        User user = userService.findUserById(userId);
+
+        Project project = findProjectById(projectId);
+
+        validateProjectPinPermission(user);
+
+        project.setPinned(request.isPinned());
+
+        projectRepository.save(project);
+    }
+
+    private void validateProjectPinPermission(User user) {
+        if (!(user.getRole() == Role.ADMIN)){
+            throw new ApiException(ProjectErrorCode.PROJECT_PIN_ACCESS_DENIED);
+        }
     }
 }
