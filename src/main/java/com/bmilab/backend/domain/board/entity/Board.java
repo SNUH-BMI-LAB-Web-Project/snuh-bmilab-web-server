@@ -54,6 +54,7 @@ public class Board extends BaseTimeEntity {
     private int viewCount = 0;
 
     @Setter
+    @Builder.Default
     @Column(name = "is_pinned", columnDefinition = "TINYINT(1)")
     private boolean isPinned = false;
 
