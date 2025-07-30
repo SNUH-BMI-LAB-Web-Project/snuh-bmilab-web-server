@@ -5,11 +5,9 @@ import com.bmilab.backend.domain.project.dto.request.ProjectPinRequest;
 import com.bmilab.backend.domain.project.dto.response.ExternalProfessorFindAllResponse;
 import com.bmilab.backend.domain.project.service.ProjectService;
 import com.bmilab.backend.global.annotation.OnlyAdmin;
-import com.bmilab.backend.global.security.UserAuthInfo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -59,11 +57,10 @@ public class AdminProjectController implements AdminProjectApi{
 
     @PatchMapping("/{projectId}/pin")
     public ResponseEntity<Void> updateProjectPinStatus(
-            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @PathVariable Long projectId,
             @RequestBody @Valid ProjectPinRequest request
     ) {
-        projectService.updateProjectPinStatus(userAuthInfo.getUserId(), projectId, request);
+        projectService.updateProjectPinStatus(projectId, request);
 
         return ResponseEntity.ok().build();
     }

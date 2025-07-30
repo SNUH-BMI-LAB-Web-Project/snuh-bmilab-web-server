@@ -1,13 +1,11 @@
 package com.bmilab.backend.domain.board.controller;
 
 import com.bmilab.backend.domain.board.dto.request.BoardPinRequest;
-import com.bmilab.backend.global.security.UserAuthInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -19,7 +17,6 @@ public interface AdminBoardApi {
             @ApiResponse(responseCode = "200", description = "게시글 고정 상태 수정 성공"),
     })
     ResponseEntity<Void> updateBoardPinStatus(
-            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @PathVariable Long boardId,
             @RequestBody BoardPinRequest request
     );
