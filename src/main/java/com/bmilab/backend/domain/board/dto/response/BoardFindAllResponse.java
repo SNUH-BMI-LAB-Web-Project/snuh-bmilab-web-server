@@ -31,7 +31,10 @@ public record BoardFindAllResponse(
             Integer viewCount,
 
             @Schema(description = "게시글 생성 일시", example = "2025-07-28T10:30:00")
-            LocalDateTime createdAt
+            LocalDateTime createdAt,
+
+            @Schema(description = "게시글 고정 여부")
+            boolean isPinned
     ){
         public static BoardSummary from(GetAllBoardsQueryResult queryResults) {
             return BoardSummary.builder()
@@ -41,6 +44,7 @@ public record BoardFindAllResponse(
                     .title(queryResults.getTitle())
                     .viewCount(queryResults.getViewCount())
                     .createdAt(queryResults.getCreatedAt())
+                    .isPinned(queryResults.isPinned())
                     .build();
         }
     }

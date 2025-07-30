@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Getter
-public class GetAllBoardsQueryResult {
+public class  GetAllBoardsQueryResult {
     private Long boardId;
 
     private User author;
@@ -21,5 +21,7 @@ public class GetAllBoardsQueryResult {
     private Integer viewCount;
 
     private LocalDateTime createdAt;
+
+    private boolean isPinned;
 }
 
