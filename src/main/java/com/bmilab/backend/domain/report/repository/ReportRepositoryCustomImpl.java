@@ -83,6 +83,7 @@ public class ReportRepositoryCustomImpl implements ReportRepositoryCustom {
 
         List<Report> reports = queryFactory.selectFrom(report)
                 .where(ExpressionUtils.allOf(userFilter, projectFilter, dateBetween, keywordFilter))
+                .orderBy(report.date.desc())
                 .fetch();
 
         Map<Long, List<FileInformation>> fileMap = queryFactory.selectFrom(file)
