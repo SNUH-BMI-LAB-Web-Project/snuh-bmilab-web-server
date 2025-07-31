@@ -490,9 +490,10 @@ public class ProjectService {
     }
 
     public ExternalProfessorFindAllResponse getAllExternalProfessors() {
-        List<ExternalProfessor> externalProfessors = externalProfessorRepository.findAll();
+        List<ExternalProfessor> externalProfessors = externalProfessorRepository.findAllByOrderByNameAsc();
 
         return ExternalProfessorFindAllResponse.of(externalProfessors);
+
     }
 
     @Transactional
