@@ -16,10 +16,10 @@ import com.bmilab.backend.domain.file.exception.FileErrorCode;
 import com.bmilab.backend.domain.file.repository.FileInformationRepository;
 import com.bmilab.backend.domain.file.service.FileService;
 import com.bmilab.backend.domain.user.entity.User;
-import com.bmilab.backend.domain.user.enums.Role;
 import com.bmilab.backend.domain.user.service.UserService;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.external.s3.S3Service;
+import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -155,28 +155,29 @@ public class BoardService {
     }
 
     @Transactional
-    public void updateBoardPinStatus(Long userId, Long boardId, BoardPinRequest request) {
-
-        User user = userService.findUserById(userId);
-
+    public void updateBoardPinStatus(Long boardId, BoardPinRequest request) {
         Board board = findBoardById(boardId);
 
-        validateBoardPinPermission(user);
+        if(request.isPinned()){
+            long pinCount = boardRepository.countByIsPinned(true);
+
+            if(pinCount >= 5){
+                throw new ApiException(BoardErrorCode.BOARD_PIN_LIMIT_EXCEEDED);
+            }
+        }
 
         board.setPinned(request.isPinned());
 
-        boardRepository.save(board);
+        try {
+            boardRepository.save(board);
+        } catch (OptimisticLockException e) {
+            throw new ApiException(BoardErrorCode.BOARD_PIN_VERSION_CONFLICT);
+        }
     }
 
     private void validateBoardAccessPermission(User user, Board board) {
         if(!board.canBeEditedBy(user)){
             throw new ApiException(BoardErrorCode.BOARD_ACCESS_DENIED);
-        }
-    }
-
-    private void validateBoardPinPermission(User user) {
-        if (!(user.getRole() == Role.ADMIN)){
-            throw new ApiException(BoardErrorCode.BOARD_PIN_ACCESS_DENIED);
         }
     }
 }
