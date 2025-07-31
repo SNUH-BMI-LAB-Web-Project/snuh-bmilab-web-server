@@ -10,6 +10,7 @@ import com.bmilab.backend.domain.project.dto.query.GetAllProjectsQueryResult;
 import com.bmilab.backend.domain.project.dto.query.GetAllTimelinesQueryResult;
 import com.bmilab.backend.domain.project.dto.request.ExternalProfessorRequest;
 import com.bmilab.backend.domain.project.dto.request.ProjectCompleteRequest;
+import com.bmilab.backend.domain.project.dto.request.ProjectPinRequest;
 import com.bmilab.backend.domain.project.dto.request.ProjectRequest;
 import com.bmilab.backend.domain.project.dto.response.ExternalProfessorFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.ProjectDetail;
@@ -534,5 +535,14 @@ public class ProjectService {
                 .toList();
 
         return s3Service.downloadS3FilesByZip(fileKeys);
+    }
+
+    @Transactional
+    public void updateProjectPinStatus(Long projectId, ProjectPinRequest request){
+        Project project = findProjectById(projectId);
+
+        project.setPinned(request.isPinned());
+
+        projectRepository.save(project);
     }
 }

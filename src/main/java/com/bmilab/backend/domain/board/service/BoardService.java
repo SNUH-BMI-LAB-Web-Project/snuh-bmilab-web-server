@@ -16,7 +16,6 @@ import com.bmilab.backend.domain.file.exception.FileErrorCode;
 import com.bmilab.backend.domain.file.repository.FileInformationRepository;
 import com.bmilab.backend.domain.file.service.FileService;
 import com.bmilab.backend.domain.user.entity.User;
-import com.bmilab.backend.domain.user.enums.Role;
 import com.bmilab.backend.domain.user.service.UserService;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.external.s3.S3Service;
@@ -155,13 +154,9 @@ public class BoardService {
     }
 
     @Transactional
-    public void updateBoardPinStatus(Long userId, Long boardId, BoardPinRequest request) {
-
-        User user = userService.findUserById(userId);
+    public void updateBoardPinStatus(Long boardId, BoardPinRequest request) {
 
         Board board = findBoardById(boardId);
-
-        validateBoardPinPermission(user);
 
         board.setPinned(request.isPinned());
 
@@ -171,12 +166,6 @@ public class BoardService {
     private void validateBoardAccessPermission(User user, Board board) {
         if(!board.canBeEditedBy(user)){
             throw new ApiException(BoardErrorCode.BOARD_ACCESS_DENIED);
-        }
-    }
-
-    private void validateBoardPinPermission(User user) {
-        if (!(user.getRole() == Role.ADMIN)){
-            throw new ApiException(BoardErrorCode.BOARD_PIN_ACCESS_DENIED);
         }
     }
 }
