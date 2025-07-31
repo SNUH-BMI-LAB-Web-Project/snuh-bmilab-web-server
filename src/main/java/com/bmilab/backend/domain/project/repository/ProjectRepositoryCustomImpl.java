@@ -146,7 +146,8 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                         ),
                         project.status,
                         project.isPrivate,
-                        isAccessible
+                        isAccessible,
+                        project.isPinned
                 ))
                 .from(project)
                 .leftJoin(project.category, category)

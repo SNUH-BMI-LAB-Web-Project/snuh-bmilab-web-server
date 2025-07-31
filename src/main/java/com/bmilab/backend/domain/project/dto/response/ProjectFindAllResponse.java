@@ -54,7 +54,10 @@ public record ProjectFindAllResponse(
             boolean isPrivate,
 
             @Schema(description = "연구 접근 가능 여부")
-            boolean isAccessible
+            boolean isAccessible,
+
+            @Schema(description = "연구 고정 여부")
+            boolean isPinned
     ) {
         public static ProjectSummary from(GetAllProjectsQueryResult queryResult) {
             String pi = queryResult.getPi();
@@ -85,6 +88,7 @@ public record ProjectFindAllResponse(
                     .status(queryResult.getStatus())
                     .isPrivate(queryResult.isPrivate())
                     .isAccessible(queryResult.isAccessible())
+                    .isPinned(queryResult.isPinned())
                     .build();
         }
     }
