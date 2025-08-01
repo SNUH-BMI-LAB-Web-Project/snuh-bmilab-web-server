@@ -38,10 +38,14 @@ public class S3Service {
     @Value("${cloud.aws.s3.base-url}")
     private String baseUrl;
 
+    @Value("${spring.profiles.active}")
+    private String activeProfile;
+
     public String uploadFile(MultipartFile file, String newFileName) {
         String originalName = file.getOriginalFilename();
         String ext = originalName.substring(originalName.lastIndexOf("."));
-        String changedName = newFileName + ext;
+        String fileNameByProfile = (activeProfile.equals("dev")) ? "dev/" + newFileName : newFileName;
+        String changedName = fileNameByProfile + ext;
 
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentType(file.getContentType());
