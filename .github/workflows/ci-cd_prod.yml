@@ -47,7 +47,7 @@ jobs:
     needs: build-docker-image
     #push 했을 때만 배포가 진행되도록
     if: github.event_name == 'push'
-    runs-on: self-hosted
+    runs-on: [self-hosted, prod]
     steps:
       - name: docker pull
         run: sudo docker pull ${{ secrets.DOCKER_USERNAME }}/bmi-lab:latest
