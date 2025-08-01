@@ -56,3 +56,4 @@ cors:
 sentry:
   dsn: ${SENTRY_DSN}
   send-default-pii: true
+  environment: ${profile}
