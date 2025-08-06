@@ -13,4 +13,8 @@ public enum LeaveType {
     ;
 
     private String description;
+
+    public boolean isHalf() {
+        return this == HALF_AM || this == HALF_PM;
+    }
 }

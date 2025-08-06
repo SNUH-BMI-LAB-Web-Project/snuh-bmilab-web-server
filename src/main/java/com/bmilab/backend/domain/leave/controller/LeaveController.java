@@ -2,6 +2,8 @@ package com.bmilab.backend.domain.leave.controller;
 
 import com.bmilab.backend.domain.leave.dto.request.ApplyLeaveRequest;
 import com.bmilab.backend.domain.leave.dto.response.LeaveFindAllResponse;
+import com.bmilab.backend.domain.leave.dto.response.UserLeaveResponse;
+import com.bmilab.backend.domain.leave.enums.LeaveStatus;
 import com.bmilab.backend.domain.leave.service.LeaveService;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import jakarta.validation.Valid;
@@ -15,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/leaves")
@@ -25,14 +27,14 @@ public class LeaveController implements LeaveApi {
 
     @GetMapping
     public ResponseEntity<LeaveFindAllResponse> getLeaves(
-            @RequestParam(required = false) LocalDateTime startDate,
-            @RequestParam(required = false) LocalDateTime endDate
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate
     ) {
-        return ResponseEntity.ok(leaveService.getLeaves(startDate, endDate));
+        return ResponseEntity.ok(leaveService.getLeaves(startDate, endDate, LeaveStatus.APPROVED));
     }
 
     @GetMapping("/me")
-    public ResponseEntity<LeaveFindAllResponse> getLeavesByUser(
+    public ResponseEntity<UserLeaveResponse> getLeavesByUser(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo
     ) {
         return ResponseEntity.ok(leaveService.getLeavesByUser(userAuthInfo.getUserId()));
