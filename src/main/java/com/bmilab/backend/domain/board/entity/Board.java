@@ -12,7 +12,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -66,9 +65,6 @@ public class Board extends BaseTimeEntity {
     @LastModifiedDate
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-
-    @Version
-    private Long version;
 
     public boolean canBeEditedBy(User user) {
         return this.author.getId().equals(user.getId()) || user.getRole() == Role.ADMIN;

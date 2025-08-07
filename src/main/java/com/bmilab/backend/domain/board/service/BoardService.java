@@ -19,7 +19,6 @@ import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.service.UserService;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.external.s3.S3Service;
-import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -156,7 +155,8 @@ public class BoardService {
 
     @Transactional
     public void updateBoardPinStatus(Long boardId, BoardPinRequest request) {
-        Board board = findBoardById(boardId);
+        Board board = boardRepository.findByIdWithPessimisticLock(boardId)
+                .orElseThrow(() -> new ApiException(BoardErrorCode.BOARD_PIN_VERSION_CONFLICT));
 
         if(request.isPinned()){
             long pinCount = boardRepository.countByIsPinned(true);
@@ -168,11 +168,7 @@ public class BoardService {
 
         board.setPinned(request.isPinned());
 
-        try {
-            boardRepository.save(board);
-        } catch (OptimisticLockException e) {
-            throw new ApiException(BoardErrorCode.BOARD_PIN_VERSION_CONFLICT);
-        }
+        boardRepository.save(board);
     }
 
     private void validateBoardAccessPermission(User user, Board board) {
