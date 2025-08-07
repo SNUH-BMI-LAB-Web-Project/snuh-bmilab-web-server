@@ -8,6 +8,8 @@ import java.util.List;
 
 import com.bmilab.backend.domain.leave.enums.LeaveStatus;
 import com.bmilab.backend.domain.leave.enums.LeaveType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -23,6 +25,8 @@ public interface LeaveRepository extends JpaRepository<Leave, Long> {
     List<Leave> findAllByBetweenDatesAndStatus(LocalDate start, LocalDate end, LeaveStatus status);
 
     List<Leave> findAllByUserId(Long userId);
+
+    Page<Leave> findAllByStatus(LeaveStatus status, Pageable pageable);
 
     List<Leave> findAllByStatus(LeaveStatus status);
 }

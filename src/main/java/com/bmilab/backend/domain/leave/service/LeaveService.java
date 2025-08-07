@@ -23,6 +23,9 @@ import java.time.YearMonth;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +44,14 @@ public class LeaveService {
                         leaveRepository.findAll();
 
         return LeaveFindAllResponse.of(leaves);
+    }
+
+    public LeaveFindAllResponse getLeavesByAdmin(LeaveStatus status, Pageable pageable) {
+        Page<Leave> leaves = (status != null) ?
+                leaveRepository.findAllByStatus(status, pageable) :
+                leaveRepository.findAll(pageable);
+
+        return LeaveFindAllResponse.of(leaves.getContent(), leaves.getTotalPages());
     }
 
     public LeaveFindAllResponse getLeaves(LocalDate startDate, LocalDate endDate, LeaveStatus status) {

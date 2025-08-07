@@ -2,11 +2,16 @@ package com.bmilab.backend.domain.leave.controller;
 
 import com.bmilab.backend.domain.leave.dto.request.RejectLeaveRequest;
 import com.bmilab.backend.domain.leave.dto.response.LeaveFindAllResponse;
+import com.bmilab.backend.domain.leave.enums.LeaveStatus;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -64,7 +69,7 @@ public interface AdminLeaveApi {
             }
     )
     ResponseEntity<LeaveFindAllResponse> getLeaves(
-            @RequestParam(required = false) LocalDate startDate,
-            @RequestParam(required = false) LocalDate endDate
+            @RequestParam(required = false) LeaveStatus status,
+            @PageableDefault(size = 10, sort = "applicatedAt", direction = Sort.Direction.DESC) @ParameterObject Pageable pageable
     );
 }
