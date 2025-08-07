@@ -15,7 +15,7 @@ public record ApplyLeaveRequest(
         LocalDate startDate,
 
         @Schema(description = "휴가 종료일")
-        @NotNull(message = "휴가 종료일은 필수입니다.")
+        @Nullable
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         LocalDate endDate,
 
