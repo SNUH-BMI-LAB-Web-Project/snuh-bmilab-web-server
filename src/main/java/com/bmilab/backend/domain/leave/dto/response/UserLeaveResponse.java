@@ -13,17 +13,20 @@ public record UserLeaveResponse(
         @Schema(description = "사용한 연차 수", example = "3.5")
         Double usedLeaveCount,
 
-        List<LeaveDetail> leaves
+        List<LeaveDetail> leaves,
+
+        Integer totalPage
 ) {
 
-    public static UserLeaveResponse of(UserLeave userLeave, List<Leave> leaves) {
+    public static UserLeaveResponse of(UserLeave userLeave, List<Leave> leaves, Integer totalPage) {
 
         return new UserLeaveResponse(
                 userLeave.getAnnualLeaveCount(),
                 userLeave.getUsedLeaveCount(),
                 leaves.stream()
                         .map(LeaveDetail::from)
-                        .toList()
+                        .toList(),
+                totalPage
         );
     }
 }

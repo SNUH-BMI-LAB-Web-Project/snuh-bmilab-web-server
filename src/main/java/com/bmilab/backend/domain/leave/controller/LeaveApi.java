@@ -10,6 +10,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.time.LocalDate;
+
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,7 +45,8 @@ public interface LeaveApi {
             }
     )
     ResponseEntity<UserLeaveResponse> getLeavesByUser(
-            @AuthenticationPrincipal UserAuthInfo userAuthInfo
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PageableDefault(size = 10, sort = "applicatedAt", direction = Sort.Direction.DESC) @ParameterObject Pageable pageable
     );
 
     @Operation(summary = "휴가 신청", description = "사용자가 휴가를 신청하는 POST API")
