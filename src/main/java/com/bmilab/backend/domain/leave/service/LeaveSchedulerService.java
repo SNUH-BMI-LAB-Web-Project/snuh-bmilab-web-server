@@ -22,7 +22,6 @@ import org.springframework.web.client.RestClient;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class LeaveSchedulerService {
     private final LeaveService leaveService;
     @Value("${data-portal.service-key}")
@@ -34,12 +33,12 @@ public class LeaveSchedulerService {
     @Scheduled(cron = "0 0 0 1 * *", zone = "Asia/Seoul")
     @Transactional
     public void updateUserAnnualLeaves() {
-        if (YearMonth.from(LocalDate.now()).getYear() == 2025) {
-            log.info("임시 중단");
+        YearMonth lastMonthWithYear = YearMonth.now().minusMonths(1);
+
+        if (lastMonthWithYear.getYear() == 2025) {
             return;
         }
 
-        YearMonth lastMonthWithYear = YearMonth.now().minusMonths(1);
         int endOfMonth = lastMonthWithYear.lengthOfMonth();
         int holidayCount = countHolidays(lastMonthWithYear);
         int weekendCount = (int) countWeekends(lastMonthWithYear);
@@ -72,7 +71,7 @@ public class LeaveSchedulerService {
                         leaveIncrement += 1;
                     }
 
-                    if (((weekdayCount * 2) / 3) <= workedCount) {
+                    if (((weekdayCount * 4) / 5) <= workedCount) {
                         log.info("[user={}] Worked", userId);
                         leaveIncrement += 1;
                     }

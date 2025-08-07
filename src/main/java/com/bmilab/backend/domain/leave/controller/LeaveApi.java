@@ -2,12 +2,14 @@ package com.bmilab.backend.domain.leave.controller;
 
 import com.bmilab.backend.domain.leave.dto.request.ApplyLeaveRequest;
 import com.bmilab.backend.domain.leave.dto.response.LeaveFindAllResponse;
+import com.bmilab.backend.domain.leave.dto.response.UserLeaveResponse;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.time.LocalDateTime;
+
+import java.time.LocalDate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,8 +26,8 @@ public interface LeaveApi {
             }
     )
     ResponseEntity<LeaveFindAllResponse> getLeaves(
-            @RequestParam(required = false) LocalDateTime startDate,
-            @RequestParam(required = false) LocalDateTime endDate
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate
     );
 
     @Operation(summary = "사용자 휴가 조회", description = "사용자의 휴가 정보를 조회하는 GET API")
@@ -37,7 +39,7 @@ public interface LeaveApi {
                     )
             }
     )
-    ResponseEntity<LeaveFindAllResponse> getLeavesByUser(
+    ResponseEntity<UserLeaveResponse> getLeavesByUser(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo
     );
 
