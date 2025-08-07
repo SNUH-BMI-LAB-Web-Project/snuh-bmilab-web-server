@@ -63,12 +63,12 @@ public class LeaveService {
         return LeaveFindAllResponse.of(leaves);
     }
 
-    public UserLeaveResponse getLeavesByUser(Long userId) {
-        List<Leave> leaves = leaveRepository.findAllByUserId(userId);
+    public UserLeaveResponse getLeavesByUser(Long userId, Pageable pageable) {
+        Page<Leave> leaves = leaveRepository.findAllByUserId(userId, pageable);
         UserLeave userLeave = userLeaveRepository.findByUserId(userId)
                 .orElseThrow(() -> new ApiException(LeaveErrorCode.USER_LEAVE_NOT_FOUND));
 
-        return UserLeaveResponse.of(userLeave, leaves);
+        return UserLeaveResponse.of(userLeave, leaves.getContent(), leaves.getTotalPages());
     }
 
     @Transactional

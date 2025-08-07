@@ -24,6 +24,8 @@ public interface LeaveRepository extends JpaRepository<Leave, Long> {
             + " AND l.status = :status")
     List<Leave> findAllByBetweenDatesAndStatus(LocalDate start, LocalDate end, LeaveStatus status);
 
+    Page<Leave> findAllByUserId(Long userId, Pageable pageable);
+
     List<Leave> findAllByUserId(Long userId);
 
     Page<Leave> findAllByStatus(LeaveStatus status, Pageable pageable);
