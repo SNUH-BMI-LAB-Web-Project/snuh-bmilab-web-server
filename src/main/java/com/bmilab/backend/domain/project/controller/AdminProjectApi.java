@@ -1,6 +1,7 @@
 package com.bmilab.backend.domain.project.controller;
 
 import com.bmilab.backend.domain.project.dto.request.ExternalProfessorRequest;
+import com.bmilab.backend.domain.project.dto.request.ProjectPinRequest;
 import com.bmilab.backend.domain.project.dto.response.ExternalProfessorFindAllResponse;
 import com.bmilab.backend.global.exception.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,11 +10,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@Tag(name = "(Admin) External Professor", description = "(관리자용) 외부 교수 관리 API")
+@Tag(name = "(Admin) Project", description = "(관리자용) 연구 관리 API")
 public interface AdminProjectApi {
 
     @Operation(summary = "외부 교수 등록", description = "외부 교수 정보를 등록하는 POST API")
@@ -77,4 +79,15 @@ public interface AdminProjectApi {
             }
     )
     ResponseEntity<Void> deleteExternalProfessor(@PathVariable Long professorId);
+
+    @Operation(summary = "연구 고정 상태 수정", description = "기존 연구 고정상태를 수정하기 위한 PATCH API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "연구 고정 상태 수정 성공"),
+            }
+    )
+    ResponseEntity<Void> updateProjectPinStatus(
+            @PathVariable Long projectId,
+            @RequestBody @Valid ProjectPinRequest request
+    );
 }

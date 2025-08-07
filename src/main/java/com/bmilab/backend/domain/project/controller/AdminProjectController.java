@@ -1,6 +1,7 @@
 package com.bmilab.backend.domain.project.controller;
 
 import com.bmilab.backend.domain.project.dto.request.ExternalProfessorRequest;
+import com.bmilab.backend.domain.project.dto.request.ProjectPinRequest;
 import com.bmilab.backend.domain.project.dto.response.ExternalProfessorFindAllResponse;
 import com.bmilab.backend.domain.project.service.ProjectService;
 import com.bmilab.backend.global.annotation.OnlyAdmin;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -49,6 +51,16 @@ public class AdminProjectController implements AdminProjectApi{
     @DeleteMapping("/external-professors/{professorId}")
     public ResponseEntity<Void> deleteExternalProfessor(@PathVariable Long professorId) {
         projectService.deleteExternalProfessor(professorId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{projectId}/pin")
+    public ResponseEntity<Void> updateProjectPinStatus(
+            @PathVariable Long projectId,
+            @RequestBody @Valid ProjectPinRequest request
+    ) {
+        projectService.updateProjectPinStatus(projectId, request);
 
         return ResponseEntity.ok().build();
     }

@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @OnlyAdmin
 @RestController
-@RequestMapping("/admin/board")
+@RequestMapping("/admin/boards")
 @RequiredArgsConstructor
 public class AdminBoardController implements AdminBoardApi {
 
