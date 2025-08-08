@@ -72,4 +72,8 @@ public class User extends BaseTimeEntity {
     public void updateRole(Role role) {
         this.role = role;
     }
+
+    public boolean isAdmin() {
+        return Role.ADMIN.equals(role);
+    }
 }

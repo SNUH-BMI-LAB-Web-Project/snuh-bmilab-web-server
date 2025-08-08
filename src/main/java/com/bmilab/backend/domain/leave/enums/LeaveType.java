@@ -9,7 +9,8 @@ public enum LeaveType {
     HALF_PM("오후 반차"),
     SPECIAL_HALF_AM("특별 오전 반차"),
     SPECIAL_HALF_PM("특별 오후 반차"),
-    SPECIAL_ANNUAL("특별 연차")
+    SPECIAL_ANNUAL("특별 연차"),
+    ALL("전체 휴무"),
     ;
 
     private String description;

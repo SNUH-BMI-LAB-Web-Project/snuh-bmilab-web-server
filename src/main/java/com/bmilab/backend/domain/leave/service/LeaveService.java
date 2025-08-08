@@ -74,9 +74,12 @@ public class LeaveService {
     @Transactional
     public void applyLeave(Long userId, ApplyLeaveRequest request) {
         User user = userService.findUserById(userId);
+        LeaveType type = request.type();
         double leaveCount = (request.endDate() == null) ? 1 : calculateLeaveCount(request.startDate(), request.endDate());
 
-        if (request.type().isHalf()) {
+        validateLeaveTypeAccessPermission(user, type);
+
+        if (type.isHalf()) {
             leaveCount *= 0.5;
         }
 
@@ -84,7 +87,7 @@ public class LeaveService {
                 .user(user)
                 .startDate(request.startDate())
                 .endDate(request.endDate())
-                .type(request.type())
+                .type(type)
                 .leaveCount(leaveCount)
                 .status(LeaveStatus.PENDING)
                 .reason(request.reason())
@@ -139,5 +142,11 @@ public class LeaveService {
                 .filter(Leave::isApproved)
                 .mapToInt((leave) -> leave.countDaysInYearMonth(yearMonth))
                 .sum();
+    }
+
+    private void validateLeaveTypeAccessPermission(User user, LeaveType type) {
+        if ((!user.isAdmin()) && type == LeaveType.ALL) {
+            throw new ApiException(LeaveErrorCode.ACCESS_DENIED);
+        }
     }
 }
