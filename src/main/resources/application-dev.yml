@@ -57,3 +57,6 @@ sentry:
   dsn: ${SENTRY_DSN}
   send-default-pii: true
   environment: ${profile}
+
+service:
+  professor-mail-address: ${SERVICE_PROFESSOR_MAIL_ADDRESS}

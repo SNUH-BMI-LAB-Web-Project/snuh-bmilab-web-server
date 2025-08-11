@@ -337,7 +337,7 @@ public class UserService {
 
         user.updatePassword(passwordEncoder.encode(newPassword));
 
-        emailSender.sendFindPasswordEmailAync(email, user.getName(), newPassword);
+        emailSender.sendFindPasswordEmailAsync(email, user.getName(), newPassword);
     }
 
     public void validateEmailDuplicate(String email) {

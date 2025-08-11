@@ -4,8 +4,11 @@ import com.bmilab.backend.domain.report.dto.request.ReportRequest;
 import com.bmilab.backend.domain.report.dto.response.ReportFindAllResponse;
 import com.bmilab.backend.domain.report.service.ReportService;
 import com.bmilab.backend.global.security.UserAuthInfo;
+import com.bmilab.backend.global.utils.ExcelGenerator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 
 @RestController
@@ -72,5 +76,19 @@ public class ReportController implements ReportApi {
                 startDate,
                 endDate
         ));
+    }
+
+    @GetMapping("/excel")
+    public ResponseEntity<InputStreamResource> getExcelFileByCurrentUser(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo
+    ) {
+
+        ByteArrayInputStream excel = reportService.getReportExcelFileByUserAsBytes(userAuthInfo.getUserId());
+        MediaType excelMediaType = MediaType.valueOf(ExcelGenerator.EXCEL_MEDIA_TYPE);
+
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=report_" + userAuthInfo.getUserId() + ".xlsx")
+                .contentType(excelMediaType)
+                .body(new InputStreamResource(excel));
     }
 }
