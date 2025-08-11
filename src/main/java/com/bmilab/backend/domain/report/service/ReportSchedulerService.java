@@ -22,7 +22,7 @@ public class ReportSchedulerService {
     private String professorMailAddress;
 
     //@Scheduled(cron = "0 0 9 * * MON-FRI", zone = "Asia/Seoul")
-    @Scheduled(cron = "0 50 20 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 53 20 * * *", zone = "Asia/Seoul")
     public void sendReportMail() {
         //월요일 -> 금요일꺼 나머지는 전날 꺼
         LocalDate today = LocalDate.now();
