@@ -16,7 +16,9 @@ public enum ProjectErrorCode implements ErrorCode {
     EXTERNAL_PROFESSOR_NOT_FOUND("외부 교수 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     EXTERNAL_PROFESSOR_DUPLICATE("외부 교수 정보가 이미 존재합니다.", HttpStatus.CONFLICT),
     IRB_FILES_IS_EMPTY("IRB 파일이 없습니다.", HttpStatus.NOT_FOUND),
-    DRB_FILES_IS_EMPTY("DRB 파일이 없습니다.", HttpStatus.NOT_FOUND)
+    DRB_FILES_IS_EMPTY("DRB 파일이 없습니다.", HttpStatus.NOT_FOUND),
+    PROJECT_PIN_LIMIT_EXCEEDED("고정글은 최대 5개까지만 설정할 수 있습니다.",  HttpStatus.BAD_REQUEST),
+    PROJECT_PIN_VERSION_CONFLICT("동시에 다른 관리자가 연구를 수정하여 충돌이 발생했습니다. 다시 시도해주세요.", HttpStatus.CONFLICT);
     ;
 
     private final String message;
