@@ -63,7 +63,7 @@ public class ExcelGenerator {
 
         CellStyle headerCellStyle = workbook.createCellStyle();
         headerCellStyle.setFont(headerFont);
-        headerCellStyle.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
+        headerCellStyle.setFillBackgroundColor(IndexedColors.DARK_BLUE.getIndex());
 
         SXSSFRow headerRow = sheet.createRow(HEADER_ROW);
 

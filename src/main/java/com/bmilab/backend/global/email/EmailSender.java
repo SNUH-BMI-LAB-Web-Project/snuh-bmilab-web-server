@@ -3,6 +3,7 @@ package com.bmilab.backend.global.email;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeUtility;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.mail.MailProperties;
@@ -65,7 +66,7 @@ public class EmailSender {
             messageHelper.setReplyTo(mailProperties.getUsername());
 
             FileSystemResource file = new FileSystemResource(attachment);
-            messageHelper.addAttachment(attachment.getName(), file);
+            messageHelper.addAttachment(MimeUtility.encodeText(attachment.getName(), "UTF-8", "B"), file);
 
             message.addHeader("Precedence", "normal");
             message.addHeader("X-Auto-Response-Suppress", "OOF, AutoReply");
