@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface BoardRepository extends JpaRepository<Board, Long>, BoardRepositoryCustom {
@@ -14,5 +15,7 @@ public interface BoardRepository extends JpaRepository<Board, Long>, BoardReposi
     @Query("SELECT b FROM Board b WHERE b.id = :boardId")
     Optional<Board> findByIdWithPessimisticLock(@Param("boardId") Long boardId);
 
-    long countByIsPinned(Boolean isPinned);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT b FROM Board b WHERE b.isPinned = true ORDER BY b.id ASC")
+    List<Board> findAllPinnedForUpdate();
 }
