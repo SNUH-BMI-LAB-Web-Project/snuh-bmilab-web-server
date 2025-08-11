@@ -45,13 +45,20 @@ import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.service.UserService;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.external.s3.S3Service;
+import jakarta.persistence.LockTimeoutException;
+import jakarta.persistence.PessimisticLockException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.time.LocalDate;
@@ -79,6 +86,7 @@ public class ProjectService {
     private final UserService userService;
     private final ProjectCategoryService projectCategoryService;
     private final ExternalProfessorRepository externalProfessorRepository;
+    private final PlatformTransactionManager txManager;
 
     public Project findProjectById(Long projectId) {
         return projectRepository.findById(projectId)
@@ -538,12 +546,45 @@ public class ProjectService {
         return s3Service.downloadS3FilesByZip(fileKeys);
     }
 
-    @Transactional
     public void updateProjectPinStatus(Long projectId, ProjectPinRequest request){
-        Project project = findProjectById(projectId);
+        TransactionTemplate tt = new TransactionTemplate(txManager);
+        tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
-        project.setPinned(request.isPinned());
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            try {
+                tt.executeWithoutResult(status -> {
+                    Project project;
+                    try {
+                        project = projectRepository.findByIdWithPessimisticLock(projectId)
+                                .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
+                    } catch (PessimisticLockException | LockTimeoutException e) {
+                        throw new CannotAcquireLockException("Lock acquisition failed", e);
+                    }
 
-        projectRepository.save(project);
+                    boolean targetPin = request.isPinned();
+                    boolean alreadyPinned = project.isPinned();
+                    if (targetPin && !alreadyPinned) {
+                        List<Project> pinned = projectRepository.findAllPinnedForUpdate();
+                        if (pinned.size() >= 5) {
+                            throw new ApiException(ProjectErrorCode.PROJECT_PIN_LIMIT_EXCEEDED);
+                        }
+                    }
+
+                    project.setPinned(targetPin);
+                    projectRepository.save(project);
+                });
+                return; // success
+            } catch (PessimisticLockingFailureException e) {
+                if (attempt == 3) {
+                    throw new ApiException(ProjectErrorCode.PROJECT_PIN_VERSION_CONFLICT);
+                }
+                try {
+                    Thread.sleep(50L * attempt); // tiny backoff: 50ms, 100ms
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new ApiException(ProjectErrorCode.PROJECT_PIN_VERSION_CONFLICT);
+                }
+            }
+        }
     }
 }
