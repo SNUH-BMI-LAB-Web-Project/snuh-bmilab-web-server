@@ -15,10 +15,15 @@ import com.bmilab.backend.domain.report.repository.ReportRepository;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.service.UserService;
 import com.bmilab.backend.global.exception.ApiException;
+import com.bmilab.backend.global.utils.ExcelGenerator;
+import com.bmilab.backend.global.utils.ExcelRow;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -32,6 +37,7 @@ public class ReportService {
     private final FileInformationRepository fileInformationRepository;
     private final FileService fileService;
     private final ProjectService projectService;
+    private final ExcelGenerator excelGenerator;
 
     public Report findReportById(Long reportId) {
 
@@ -132,10 +138,139 @@ public class ReportService {
         reportRepository.delete(report);
     }
 
+    public ByteArrayInputStream getReportExcelFileByDateAsBytes(LocalDate date) {
+
+        List<GetAllReportsQueryResult> results = reportRepository.findAllByDateWithFiles(date);
+        String[] headerTitles = { "보고 일자", "이름", "이메일", "연구명", "보고 내용", "첨부파일 URL" };
+
+        List<ExcelRow> excelRows = results.stream().map((result) -> {
+            Report report = result.report();
+            List<FileInformation> files = result.files();
+            String projectTitle = report.getProject().getTitle();
+            String userName = report.getUser().getName();
+            String email = report.getUser().getEmail();
+            String content = report.getContent();
+            List<String> fileUrls = files.stream().map(FileInformation::getUploadUrl).toList();
+
+            return ExcelRow.of(
+                    date.toString(),
+                    userName,
+                    email,
+                    projectTitle,
+                    content,
+                    String.join("\n", fileUrls)
+            );
+        }).toList();
+
+        try {
+            return excelGenerator.generateBy(headerTitles, excelRows);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new ApiException(e);
+        }
+    }
+
+    public File getReportExcelFileByDateAsFile(LocalDate date) {
+
+        List<GetAllReportsQueryResult> results = reportRepository.findAllByDateWithFiles(date);
+        String[] headerTitles = { "보고 일자", "이름", "이메일", "연구명", "보고 내용", "첨부파일 URL" };
+
+        List<ExcelRow> excelRows = results.stream().map((result) -> {
+            Report report = result.report();
+            List<FileInformation> files = result.files();
+            String projectTitle = report.getProject().getTitle();
+            String userName = report.getUser().getName();
+            String email = report.getUser().getEmail();
+            String content = report.getContent();
+            List<String> fileUrls = files.stream().map(FileInformation::getUploadUrl).toList();
+
+            return ExcelRow.of(
+                    date.toString(),
+                    userName,
+                    email,
+                    projectTitle,
+                    content,
+                    String.join("\n", fileUrls)
+            );
+        }).toList();
+
+        try {
+            return excelGenerator.generateExcelFile(headerTitles, excelRows, "일일업무보고_" + date + ".xlsx");
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ApiException(e);
+        }
+    }
+
     private void validateUserIsReportAuthor(User user, Report report) {
 
         if (!report.isAuthor(user)) {
             throw new ApiException(ReportErrorCode.REPORT_ACCESS_DENIED);
+        }
+    }
+
+    public ByteArrayInputStream getReportExcelFileByUserAsBytes(Long userId) {
+
+        List<GetAllReportsQueryResult> results = reportRepository.findAllByUser(userId);
+        String[] headerTitles = { "보고 일자", "이름", "이메일", "연구명", "보고 내용", "첨부파일 URL" };
+
+        List<ExcelRow> excelRows = results.stream().map((result) -> {
+            Report report = result.report();
+            List<FileInformation> files = result.files();
+            String projectTitle = report.getProject().getTitle();
+            String userName = report.getUser().getName();
+            String email = report.getUser().getEmail();
+            String date = report.getDate().toString();
+            String content = report.getContent();
+            List<String> fileUrls = files.stream().map(FileInformation::getUploadUrl).toList();
+
+            return ExcelRow.of(
+                    date,
+                    userName,
+                    email,
+                    projectTitle,
+                    content,
+                    String.join("\n", fileUrls)
+            );
+        }).toList();
+
+        try {
+            return excelGenerator.generateBy(headerTitles, excelRows);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new ApiException(e);
+        }
+    }
+
+    public ByteArrayInputStream getReportExcelFileByPeriodAsBytes(LocalDate startDate, LocalDate endDate) {
+        List<GetAllReportsQueryResult> results = reportRepository.findReportsByCondition(null, null, startDate, endDate, null);
+        String[] headerTitles = { "보고 일자", "이름", "이메일", "연구명", "보고 내용", "첨부파일 URL" };
+
+        List<ExcelRow> excelRows = results.stream().map((result) -> {
+            Report report = result.report();
+            List<FileInformation> files = result.files();
+            String projectTitle = report.getProject().getTitle();
+            String date = report.getDate().toString();
+            String userName = report.getUser().getName();
+            String email = report.getUser().getEmail();
+            String content = report.getContent();
+            List<String> fileUrls = files.stream().map(FileInformation::getUploadUrl).toList();
+
+            return ExcelRow.of(
+                    date,
+                    userName,
+                    email,
+                    projectTitle,
+                    content,
+                    String.join("\n", fileUrls)
+            );
+        }).toList();
+
+        try {
+            return excelGenerator.generateBy(headerTitles, excelRows);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new ApiException(e);
         }
     }
 }

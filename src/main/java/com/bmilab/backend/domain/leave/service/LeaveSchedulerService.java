@@ -56,7 +56,7 @@ public class LeaveSchedulerService {
 
                     //매해 연가 개수와 사용한 휴가 수 초기화
                     if (lastMonthWithYear.getMonth().equals(Month.DECEMBER)) {
-                        log.info("[user={}] Happy New Year!", userId);
+                        log.info("[user={}] ", userId);
                         userLeave.resetLeaveCounts();
                     }
 
