@@ -19,11 +19,18 @@ import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.service.UserService;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.external.s3.S3Service;
+import jakarta.persistence.LockTimeoutException;
+import jakarta.persistence.PessimisticLockException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.UUID;
@@ -39,6 +46,8 @@ public class BoardService {
     private final FileService fileService;
     private final FileInformationRepository fileInformationRepository;
     private final S3Service s3Service;
+    private final PlatformTransactionManager txManager;
+
 
     public Board findBoardById(Long boardId){
         return boardRepository.findById(boardId)
@@ -153,14 +162,47 @@ public class BoardService {
         return BoardDetail.from(board, files);
     }
 
-    @Transactional
     public void updateBoardPinStatus(Long boardId, BoardPinRequest request) {
 
-        Board board = findBoardById(boardId);
+        TransactionTemplate tt = new TransactionTemplate(txManager);
+        tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
 
-        board.setPinned(request.isPinned());
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            try {
+                tt.executeWithoutResult(status -> {
+                    Board board;
+                    try {
+                        board = boardRepository.findByIdWithPessimisticLock(boardId)
+                                .orElseThrow(() -> new ApiException(BoardErrorCode.BOARD_NOT_FOUND));
+                    } catch (PessimisticLockException | LockTimeoutException e) {
+                        throw new CannotAcquireLockException("Lock acquisition failed", e);
+                    }
 
-        boardRepository.save(board);
+                    boolean targetPin = request.isPinned();
+                    boolean alreadyPinned = board.isPinned();
+                    if (targetPin && !alreadyPinned) {
+                        List<Board> pinned = boardRepository.findAllPinnedForUpdate();
+                        if (pinned.size() >= 5) {
+                            throw new ApiException(BoardErrorCode.BOARD_PIN_LIMIT_EXCEEDED);
+                        }
+                    }
+
+                    board.setPinned(targetPin);
+                    boardRepository.save(board);
+                });
+                return; // success
+            } catch (PessimisticLockingFailureException e) {
+                if (attempt == 3) {
+                    throw new ApiException(BoardErrorCode.BOARD_PIN_VERSION_CONFLICT);
+                }
+                try {
+                    Thread.sleep(50L * attempt); // tiny backoff: 50ms, 100ms
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new ApiException(BoardErrorCode.BOARD_PIN_VERSION_CONFLICT);
+                }
+            }
+        }
     }
 
     private void validateBoardAccessPermission(User user, Board board) {
