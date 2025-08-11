@@ -21,4 +21,8 @@ public interface ReportRepositoryCustom {
             LocalDate endDate,
             String keyword
     );
+
+    List<GetAllReportsQueryResult> findAllByDateWithFiles(LocalDate date);
+
+    List<GetAllReportsQueryResult> findAllByUser(Long userId);
 }

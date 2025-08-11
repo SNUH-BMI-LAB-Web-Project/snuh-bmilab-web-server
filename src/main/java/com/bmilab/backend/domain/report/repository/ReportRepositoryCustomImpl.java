@@ -58,6 +58,62 @@ public class ReportRepositoryCustomImpl implements ReportRepositoryCustom {
                 .toList();
     }
 
+    public List<GetAllReportsQueryResult> findAllByUser(Long userId) {
+        QFileInformation file = QFileInformation.fileInformation;
+        QReport report = QReport.report;
+
+        BooleanExpression userFilter = userId != null ? report.user.id.eq(userId) : null;
+
+        List<Report> reports = queryFactory
+                .selectFrom(report)
+                .where(ExpressionUtils.allOf(userFilter))
+                .fetch();
+
+        Map<Long, List<FileInformation>> fileMap = queryFactory
+                .selectFrom(file)
+                .where(
+                        file.domainType.eq(FileDomainType.REPORT),
+                        file.entityId.in(reports.stream().map(Report::getId).toList())
+                )
+                .fetch()
+                .stream()
+                .collect(Collectors.groupingBy(FileInformation::getEntityId));
+
+        return reports.stream()
+                .map(r -> new GetAllReportsQueryResult(
+                        r,
+                        fileMap.getOrDefault(r.getId(), List.of())
+                ))
+                .toList();
+    }
+
+    public List<GetAllReportsQueryResult> findAllByDateWithFiles(LocalDate date) {
+        QFileInformation file = QFileInformation.fileInformation;
+        QReport report = QReport.report;
+
+        List<Report> reports = queryFactory
+                .selectFrom(report)
+                .where(report.date.eq(date))
+                .fetch();
+
+        Map<Long, List<FileInformation>> fileMap = queryFactory
+                .selectFrom(file)
+                .where(
+                        file.domainType.eq(FileDomainType.REPORT),
+                        file.entityId.in(reports.stream().map(Report::getId).toList())
+                )
+                .fetch()
+                .stream()
+                .collect(Collectors.groupingBy(FileInformation::getEntityId));
+
+        return reports.stream()
+                .map(r -> new GetAllReportsQueryResult(
+                        r,
+                        fileMap.getOrDefault(r.getId(), List.of())
+                ))
+                .toList();
+    }
+
     public List<GetAllReportsQueryResult> findReportsByCondition(
             Long userId,
             Long projectId,
