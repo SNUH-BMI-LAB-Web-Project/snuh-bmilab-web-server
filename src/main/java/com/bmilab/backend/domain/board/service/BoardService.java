@@ -22,7 +22,6 @@ import com.bmilab.backend.global.external.s3.S3Service;
 import jakarta.persistence.LockTimeoutException;
 import jakarta.persistence.PessimisticLockException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.data.domain.Page;
@@ -47,9 +46,7 @@ public class BoardService {
     private final FileService fileService;
     private final FileInformationRepository fileInformationRepository;
     private final S3Service s3Service;
-
-    @Autowired
-    private PlatformTransactionManager txManager;
+    private final PlatformTransactionManager txManager;
 
 
     public Board findBoardById(Long boardId){
