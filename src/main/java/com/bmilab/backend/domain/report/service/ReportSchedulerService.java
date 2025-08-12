@@ -7,7 +7,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 
@@ -22,8 +23,8 @@ public class ReportSchedulerService {
     private String professorMailAddress;
 
     //@Scheduled(cron = "0 0 9 * * MON-FRI", zone = "Asia/Seoul")
-    @Scheduled(cron = "0 43 12 * * *", zone = "Asia/Seoul")
-    public void sendReportMail() {
+    @Scheduled(cron = "0 56 12 * * *", zone = "Asia/Seoul")
+    public void sendReportMail() throws IOException {
         //월요일 -> 금요일꺼 나머지는 전날 꺼
         LocalDate today = LocalDate.now();
         LocalDate reportDay = today.minusDays(1);
@@ -32,7 +33,7 @@ public class ReportSchedulerService {
             reportDay = today.minusDays(3);
         }
 
-        File excelFile = reportExcelService.getReportExcelFileByDateAsFile(reportDay);
+        ByteArrayInputStream excelFile = reportExcelService.getReportExcelFileByDateAsBytes(reportDay);
         emailSender.sendReportEmailAsync(professorMailAddress, reportDay, excelFile);
     }
 }
