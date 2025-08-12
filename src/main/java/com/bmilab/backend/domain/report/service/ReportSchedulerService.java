@@ -3,6 +3,7 @@ package com.bmilab.backend.domain.report.service;
 import com.bmilab.backend.global.email.EmailSender;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +14,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 
 @Service
+@Profile("prod")
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ReportSchedulerService {
