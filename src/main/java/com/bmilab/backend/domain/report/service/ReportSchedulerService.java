@@ -15,14 +15,14 @@ import java.time.LocalDate;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ReportSchedulerService {
-    private final ReportService reportService;
+    private final ReportExcelService reportExcelService;
     private final EmailSender emailSender;
 
     @Value("${service.professor-mail-address}")
     private String professorMailAddress;
 
     //@Scheduled(cron = "0 0 9 * * MON-FRI", zone = "Asia/Seoul")
-    @Scheduled(cron = "0 5 21 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 43 12 * * *", zone = "Asia/Seoul")
     public void sendReportMail() {
         //월요일 -> 금요일꺼 나머지는 전날 꺼
         LocalDate today = LocalDate.now();
@@ -32,7 +32,7 @@ public class ReportSchedulerService {
             reportDay = today.minusDays(3);
         }
 
-        File excelFile = reportService.getReportExcelFileByDateAsFile(reportDay);
+        File excelFile = reportExcelService.getReportExcelFileByDateAsFile(reportDay);
         emailSender.sendReportEmailAsync(professorMailAddress, reportDay, excelFile);
     }
 }

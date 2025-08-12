@@ -2,6 +2,7 @@ package com.bmilab.backend.domain.report.controller;
 
 import com.bmilab.backend.domain.report.dto.request.ReportRequest;
 import com.bmilab.backend.domain.report.dto.response.ReportFindAllResponse;
+import com.bmilab.backend.domain.report.service.ReportExcelService;
 import com.bmilab.backend.domain.report.service.ReportService;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import com.bmilab.backend.global.utils.ExcelGenerator;
@@ -30,6 +31,7 @@ import java.time.LocalDate;
 public class ReportController implements ReportApi {
 
     private final ReportService reportService;
+    private final ReportExcelService reportExcelService;
 
     @PostMapping
     public ResponseEntity<Void> createReport(
@@ -83,7 +85,7 @@ public class ReportController implements ReportApi {
             @AuthenticationPrincipal UserAuthInfo userAuthInfo
     ) {
 
-        ByteArrayInputStream excel = reportService.getReportExcelFileByUserAsBytes(userAuthInfo.getUserId());
+        ByteArrayInputStream excel = reportExcelService.getReportExcelFileByUserAsBytes(userAuthInfo.getUserId());
         MediaType excelMediaType = MediaType.valueOf(ExcelGenerator.EXCEL_MEDIA_TYPE);
 
         return ResponseEntity.ok()

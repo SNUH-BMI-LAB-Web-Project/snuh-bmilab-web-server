@@ -1,6 +1,7 @@
 package com.bmilab.backend.domain.report.controller;
 
 import com.bmilab.backend.domain.report.dto.response.ReportFindAllResponse;
+import com.bmilab.backend.domain.report.service.ReportExcelService;
 import com.bmilab.backend.domain.report.service.ReportService;
 import com.bmilab.backend.global.utils.ExcelGenerator;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import java.time.LocalDate;
 public class AdminReportController implements AdminReportApi{
 
     private final ReportService reportService;
+    private final ReportExcelService reportExcelService;
 
     @GetMapping
     public ResponseEntity<ReportFindAllResponse> getReportsByAllUser(
@@ -48,7 +50,7 @@ public class AdminReportController implements AdminReportApi{
             @RequestParam(required = false) LocalDate endDate
     ) {
 
-        ByteArrayInputStream excel = reportService.getReportExcelFileByPeriodAsBytes(startDate, endDate);
+        ByteArrayInputStream excel = reportExcelService.getReportExcelFileByPeriodAsBytes(startDate, endDate);
         MediaType excelMediaType = MediaType.valueOf(ExcelGenerator.EXCEL_MEDIA_TYPE);
 
         return ResponseEntity.ok()
