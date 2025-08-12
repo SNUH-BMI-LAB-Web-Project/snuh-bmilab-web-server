@@ -54,11 +54,11 @@ public class Leave extends BaseTimeEntity {
     @Column(name = "end_date")
     private LocalDate endDate;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     @Column(name = "leave_status", nullable = false)
     private LeaveStatus status;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     @Column(name = "leave_type", nullable = false)
     private LeaveType type;
 
