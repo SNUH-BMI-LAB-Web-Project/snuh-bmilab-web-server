@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.boot.autoconfigure.mail.MailProperties;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -18,7 +17,6 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
@@ -68,6 +66,7 @@ public class EmailSender {
             messageHelper.setTo(email);
             messageHelper.setSubject("[SNUH BMI Lab] " + title);
             messageHelper.setReplyTo(mailProperties.getUsername());
+            messageHelper.setText("", false);
 
             messageHelper.addAttachment(MimeUtility.encodeText(fileName, "UTF-8", "B"),
                     new ByteArrayResource(IOUtils.toByteArray(attachment)));
