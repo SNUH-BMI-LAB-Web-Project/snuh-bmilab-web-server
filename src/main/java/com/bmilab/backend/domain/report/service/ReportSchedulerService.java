@@ -22,8 +22,7 @@ public class ReportSchedulerService {
     @Value("${service.professor-mail-address}")
     private String professorMailAddress;
 
-    //@Scheduled(cron = "0 0 9 * * MON-FRI", zone = "Asia/Seoul")
-    @Scheduled(cron = "0 2 13 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 0 9 * * MON-FRI", zone = "Asia/Seoul")
     public void sendReportMail() throws IOException {
         //월요일 -> 금요일꺼 나머지는 전날 꺼
         LocalDate today = LocalDate.now();
