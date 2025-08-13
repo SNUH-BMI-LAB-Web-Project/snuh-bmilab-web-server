@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.cglib.core.Local;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -87,6 +88,8 @@ public interface ReportApi {
             }
     )
     ResponseEntity<InputStreamResource> getExcelFileByCurrentUser(
-            @AuthenticationPrincipal UserAuthInfo userAuthInfo
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate
     );
 }

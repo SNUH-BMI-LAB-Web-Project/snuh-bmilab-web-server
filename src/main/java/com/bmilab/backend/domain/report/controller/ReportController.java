@@ -82,14 +82,17 @@ public class ReportController implements ReportApi {
 
     @GetMapping("/excel")
     public ResponseEntity<InputStreamResource> getExcelFileByCurrentUser(
-            @AuthenticationPrincipal UserAuthInfo userAuthInfo
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate
     ) {
 
-        ByteArrayInputStream excel = reportExcelService.getReportExcelFileByUserAsBytes(userAuthInfo.getUserId());
+        Long userId = userAuthInfo.getUserId();
+        ByteArrayInputStream excel = reportExcelService.getReportExcelFileByUserAsBytes(userId, startDate, endDate);
         MediaType excelMediaType = MediaType.valueOf(ExcelGenerator.EXCEL_MEDIA_TYPE);
 
         return ResponseEntity.ok()
-                .header("Content-Disposition", "attachment; filename=report_" + userAuthInfo.getUserId() + ".xlsx")
+                .header("Content-Disposition", "attachment; filename=report_" + userId + ".xlsx")
                 .contentType(excelMediaType)
                 .body(new InputStreamResource(excel));
     }

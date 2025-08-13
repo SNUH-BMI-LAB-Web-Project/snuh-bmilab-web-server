@@ -66,9 +66,9 @@ public class ReportExcelService {
         }
     }
 
-    public ByteArrayInputStream getReportExcelFileByUserAsBytes(Long userId) {
+    public ByteArrayInputStream getReportExcelFileByUserAsBytes(Long userId, LocalDate startDate, LocalDate endDate) {
 
-        List<GetAllReportsQueryResult> results = reportRepository.findAllByUser(userId);
+        List<GetAllReportsQueryResult> results = reportRepository.findReportsByCondition(userId, null, startDate, endDate, null);
         List<ExcelRow> excelRows = generateExcelRows(results);
 
         try {
