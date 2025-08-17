@@ -78,7 +78,6 @@ public class ProjectService {
     private final S3Service s3Service;
     private final ApplicationEventPublisher eventPublisher;
     private final ProjectParticipantRepository projectParticipantRepository;
-    private final FileInformationRepository fileInformationRepository;
     private final ProjectFileRepository projectFileRepository;
     private final FileService fileService;
     private final TimelineRepository timelineRepository;
@@ -174,7 +173,7 @@ public class ProjectService {
             return;
         }
 
-        List<FileInformation> files = fileInformationRepository.findAllById(fileIds);
+        List<FileInformation> files = fileService.findAllById(fileIds);
 
         List<ProjectFile> projectFiles = files
                 .stream()
@@ -186,7 +185,7 @@ public class ProjectService {
 
         projectFileRepository.saveAll(projectFiles);
 
-        files.forEach(file -> file.updateDomain(FileDomainType.PROJECT, project.getId()));
+        files.forEach(file -> fileService.updateFileDomain(file, FileDomainType.PROJECT, project.getId()));
     }
 
     public ProjectFindAllResponse getAllProjects(
@@ -297,14 +296,13 @@ public class ProjectService {
 
         validateProjectAccessPermission(project, user, ProjectAccessPermission.EDIT, false);
 
-        FileInformation file = fileInformationRepository.findById(fileId)
-                .orElseThrow(() -> new ApiException(FileErrorCode.FILE_NOT_FOUND));
+        FileInformation file = fileService.findFileById(fileId);
 
         ProjectFile projectFile = projectFileRepository.findByFileInformation(file)
                 .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_FILE_NOT_FOUND));
 
-        s3Service.deleteFile(file.getUploadUrl());
         projectFileRepository.delete(projectFile);
+        fileService.deleteFile(file);
     }
 
     @Transactional

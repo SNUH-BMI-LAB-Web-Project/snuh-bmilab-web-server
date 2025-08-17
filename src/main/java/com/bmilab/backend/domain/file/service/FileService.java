@@ -25,6 +25,11 @@ public class FileService {
     private final S3Service s3Service;
     private final FileInformationRepository fileInformationRepository;
 
+    public FileInformation findFileById(UUID fileId) {
+        return fileInformationRepository.findById(fileId)
+                .orElseThrow(() -> new ApiException(FileErrorCode.FILE_NOT_FOUND));
+    }
+
     public List<FileInformation> findAllById(List<UUID> fileIds) {
         return fileInformationRepository.findAllById(fileIds);
     }
@@ -77,6 +82,22 @@ public class FileService {
     public void updateAllFileDomainByIds(List<UUID> fileIds, FileDomainType domainType, Long entityId) {
         List<FileInformation> files = fileInformationRepository.findAllById(fileIds);
         files.forEach(file -> updateFileDomain(file, domainType, entityId));
+    }
+
+    public void syncFiles(List<UUID> requestFileIds, FileDomainType domainType, Long entityId) {
+        List<FileInformation> requestFiles = fileInformationRepository.findAllById(requestFileIds);
+        List<FileInformation> dbFiles = fileInformationRepository.findAllByDomainTypeAndEntityId(domainType, entityId);
+
+        List<FileInformation> newFiles = requestFiles.stream()
+                .filter(file -> !dbFiles.contains(file))
+                .toList();
+
+        List<FileInformation> deletedFiles = dbFiles.stream()
+                .filter(file -> !requestFiles.contains(file))
+                .toList();
+
+        newFiles.forEach(file -> updateFileDomain(file, domainType, entityId));
+        deletedFiles.forEach(this::deleteFile);
     }
 
     @Transactional

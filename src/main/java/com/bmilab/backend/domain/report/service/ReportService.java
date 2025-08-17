@@ -63,9 +63,7 @@ public class ReportService {
 
         reportRepository.save(report);
 
-        List<FileInformation> files = fileInformationRepository.findAllById(request.fileIds());
-
-        files.forEach(file -> file.updateDomain(FileDomainType.REPORT, report.getId()));
+        fileService.updateAllFileDomainByIds(request.fileIds(), FileDomainType.REPORT, report.getId());
     }
 
 
@@ -84,9 +82,7 @@ public class ReportService {
 
         report.update(project, request.date(), request.content());
 
-        List<FileInformation> files = fileInformationRepository.findAllById(request.fileIds());
-
-        files.forEach(file -> file.updateDomain(FileDomainType.REPORT, report.getId()));
+        fileService.syncFiles(request.fileIds(), FileDomainType.REPORT, report.getId());
     }
 
     public ReportFindAllResponse getReportsByCurrentUser(

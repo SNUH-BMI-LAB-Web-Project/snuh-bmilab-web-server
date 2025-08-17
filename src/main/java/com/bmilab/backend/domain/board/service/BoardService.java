@@ -88,25 +88,8 @@ public class BoardService {
         );
 
         //신규 파일만 인식하기 + 이미지 업데이트 처리
-        updateBoardImageFiles(boardId, request.imageFileIds());
+        fileService.syncFiles(request.fileIds(), FileDomainType.BOARD, board.getId());
         fileService.updateAllFileDomainByIds(request.fileIds(), FileDomainType.BOARD, board.getId());
-    }
-
-    private void updateBoardImageFiles(Long boardId, List<UUID> imageFileIds) {
-        List<FileInformation> requestImageFiles = fileService.findAllById(imageFileIds);
-        List<FileInformation> boardImageFiles = fileService.findAllByDomainTypeAndEntityId(FileDomainType.BOARD_IMAGE,
-                boardId);
-
-        List<FileInformation> newBoardImageFiles = requestImageFiles.stream()
-                .filter(file -> !boardImageFiles.contains(file))
-                .toList();
-
-        List<FileInformation> deletedImageFiles = boardImageFiles.stream()
-                .filter(file -> !requestImageFiles.contains(file))
-                .toList();
-
-        newBoardImageFiles.forEach(file -> fileService.updateFileDomain(file, FileDomainType.BOARD_IMAGE, boardId));
-        deletedImageFiles.forEach(fileService::deleteFile);
     }
 
     @Transactional
