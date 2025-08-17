@@ -23,10 +23,6 @@ public record UploadFileRequest(
 
         @Schema(description = "파일 크기 (바이트 단위)", example = "1024")
         @Min(value = 1, message = "파일 크기는 1바이트 이상이어야 합니다.")
-        long size,
-
-        @Schema(description = "파일 도메인 타입", example = "PROJECT")
-        @NotNull(message = "파일 도메인 타입은 필수입니다.")
-        FileDomainType domainType
+        long size
 ) {
 }

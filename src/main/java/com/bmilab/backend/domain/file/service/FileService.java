@@ -51,14 +51,14 @@ public class FileService {
 
     @Transactional
     public FileSummary uploadFile(UploadFileRequest request) {
-        String fileKey = request.domainType().name().toLowerCase() + "/" + request.uuid() + "_" + URLEncoder.encode(
+        String fileKey = "temp/" + request.uuid() + "_" + URLEncoder.encode(
                 request.fileName(), StandardCharsets.UTF_8);
 
         FileInformation fileInformation = FileInformation.builder()
                 .id(request.uuid())
                 .name(request.fileName())
                 .extension(request.extension())
-                .domainType(request.domainType())
+                .domainType(FileDomainType.TEMP)
                 .size(request.size())
                 .uploadUrl(s3Service.getUploadedFileUrl(fileKey))
                 .build();

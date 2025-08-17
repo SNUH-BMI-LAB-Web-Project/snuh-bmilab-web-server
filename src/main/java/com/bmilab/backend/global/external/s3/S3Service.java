@@ -79,7 +79,12 @@ public class S3Service {
 
     public void moveFileDirectory(String fileUrl, String previousDirectory, String newDirectory) {
         String fileKey = getS3Key(fileUrl);
-        String newFileKey = fileKey.replace(previousDirectory + "/", newDirectory + "/");
+        String previousDirectoryByProfile = ((!previousDirectory.equals("temp")) && (activeProfile.equals("dev"))) ?
+                "dev/" + previousDirectory :
+                previousDirectory;
+        String newDirectoryByProfile = (activeProfile.equals("dev")) ? "dev/" + newDirectory : newDirectory;
+        String newFileKey = fileKey.replace(previousDirectoryByProfile + "/", newDirectoryByProfile + "/");
+
         amazonS3.copyObject(new CopyObjectRequest(bucket, fileKey, bucket, newFileKey));
         amazonS3.deleteObject(bucket, fileKey);
     }
