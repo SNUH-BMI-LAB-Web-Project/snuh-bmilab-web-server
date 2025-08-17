@@ -101,6 +101,7 @@ public class BoardService {
         validateBoardAccessPermission(user, board);
 
         fileService.deleteAllFileByDomainTypeAndEntityId(FileDomainType.BOARD, board.getId());
+        fileService.deleteAllFileByDomainTypeAndEntityId(FileDomainType.BOARD_IMAGE, board.getId());
 
         boardRepository.delete(board);
     }
