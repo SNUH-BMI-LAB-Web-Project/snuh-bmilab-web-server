@@ -30,11 +30,11 @@ public class FileController implements FileApi {
 
     @GetMapping("/presigned-url")
     public ResponseEntity<FilePresignedUrlResponse> generatePresignedUrl(
-            @RequestParam FileDomainType domainType, @RequestParam String fileName, @RequestParam String contentType
+            @RequestParam String fileName,
+            @RequestParam String contentType
     ) {
 
         return ResponseEntity.ok(fileService.generatePresignedUrl(
-                domainType,
                 URLDecoder.decode(fileName, StandardCharsets.UTF_8),
                 URLDecoder.decode(contentType, StandardCharsets.UTF_8)
         ));

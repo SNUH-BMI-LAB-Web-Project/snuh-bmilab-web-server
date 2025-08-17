@@ -25,13 +25,20 @@ public class FileService {
     private final S3Service s3Service;
     private final FileInformationRepository fileInformationRepository;
 
+    public List<FileInformation> findAllById(List<UUID> fileIds) {
+        return fileInformationRepository.findAllById(fileIds);
+    }
+
+    public List<FileInformation> findAllByDomainTypeAndEntityId(FileDomainType domainType, Long entityId) {
+        return fileInformationRepository.findAllByDomainTypeAndEntityId(domainType, entityId);
+    }
+
     public FilePresignedUrlResponse generatePresignedUrl(
-            FileDomainType domainType,
             String fileName,
             String contentType
     ) {
         UUID uuid = UUID.randomUUID();
-        String fileKey = domainType.name().toLowerCase() + "/" + uuid + "_" + fileName;
+        String fileKey = "temp/" + uuid + "_" + fileName;
         URL presignedUrl = s3Service.generatePresignedUploadUrl(fileKey, contentType, 10L);
 
         return new FilePresignedUrlResponse(uuid, presignedUrl.toString());
@@ -57,6 +64,22 @@ public class FileService {
     }
 
     @Transactional
+    public void updateFileDomain(FileInformation fileInformation, FileDomainType domainType, Long entityId) {
+        fileInformation.updateDomain(domainType, entityId);
+
+        String previousDirectory = fileInformation.getDomainType().name().toLowerCase();
+        String newDirectory = domainType.name().toLowerCase();
+
+        s3Service.moveFileDirectory(fileInformation.getUploadUrl(), previousDirectory, newDirectory);
+    }
+
+    @Transactional
+    public void updateAllFileDomainByIds(List<UUID> fileIds, FileDomainType domainType, Long entityId) {
+        List<FileInformation> files = fileInformationRepository.findAllById(fileIds);
+        files.forEach(file -> updateFileDomain(file, domainType, entityId));
+    }
+
+    @Transactional
     public void deleteFile(FileDomainType domainType, UUID fileId) {
         FileInformation fileInformation = fileInformationRepository.findById(fileId)
                 .orElseThrow(() -> new ApiException(FileErrorCode.FILE_NOT_FOUND));
@@ -67,6 +90,16 @@ public class FileService {
 
         s3Service.deleteFile(fileInformation.getUploadUrl());
         fileInformationRepository.deleteById(fileId);
+    }
+
+    @Transactional
+    public void deleteFile(FileInformation fileInformation) {
+        if (fileInformation == null) {
+            return;
+        }
+
+        s3Service.deleteFile(fileInformation.getUploadUrl());
+        fileInformationRepository.delete(fileInformation);
     }
 
     @Transactional

@@ -44,12 +44,10 @@ public class BoardService {
     private final UserService userService;
     private final BoardCategoryService boardCategoryService;
     private final FileService fileService;
-    private final FileInformationRepository fileInformationRepository;
-    private final S3Service s3Service;
     private final PlatformTransactionManager txManager;
 
 
-    public Board findBoardById(Long boardId){
+    public Board findBoardById(Long boardId) {
         return boardRepository.findById(boardId)
                 .orElseThrow(() -> new ApiException(BoardErrorCode.BOARD_NOT_FOUND));
     }
@@ -69,9 +67,8 @@ public class BoardService {
 
         boardRepository.save(board);
 
-        List<FileInformation> files = fileInformationRepository.findAllById(request.fileIds());
-
-        files.forEach(file -> file.updateDomain(FileDomainType.BOARD, board.getId()));
+        fileService.updateAllFileDomainByIds(request.fileIds(), FileDomainType.BOARD, board.getId());
+        fileService.updateAllFileDomainByIds(request.imageFileIds(), FileDomainType.BOARD_IMAGE, board.getId());
     }
 
     @Transactional
@@ -90,9 +87,26 @@ public class BoardService {
                 request.content()
         );
 
-        List<FileInformation> files = fileInformationRepository.findAllById(request.fileIds());
+        //신규 파일만 인식하기 + 이미지 업데이트 처리
+        updateBoardImageFiles(boardId, request.imageFileIds());
+        fileService.updateAllFileDomainByIds(request.fileIds(), FileDomainType.BOARD, board.getId());
+    }
 
-        files.forEach(file -> file.updateDomain(FileDomainType.BOARD, board.getId()));
+    private void updateBoardImageFiles(Long boardId, List<UUID> imageFileIds) {
+        List<FileInformation> requestImageFiles = fileService.findAllById(imageFileIds);
+        List<FileInformation> boardImageFiles = fileService.findAllByDomainTypeAndEntityId(FileDomainType.BOARD_IMAGE,
+                boardId);
+
+        List<FileInformation> newBoardImageFiles = requestImageFiles.stream()
+                .filter(file -> !boardImageFiles.contains(file))
+                .toList();
+
+        List<FileInformation> deletedImageFiles = boardImageFiles.stream()
+                .filter(file -> !requestImageFiles.contains(file))
+                .toList();
+
+        newBoardImageFiles.forEach(file -> fileService.updateFileDomain(file, FileDomainType.BOARD_IMAGE, boardId));
+        deletedImageFiles.forEach(fileService::deleteFile);
     }
 
     @Transactional
@@ -116,14 +130,8 @@ public class BoardService {
 
         validateBoardAccessPermission(user, board);
 
-        FileInformation file = fileInformationRepository.findById(fileId)
-                .orElseThrow(() -> new ApiException(FileErrorCode.FILE_NOT_FOUND));
-
-        s3Service.deleteFile(file.getUploadUrl());
-
-        fileInformationRepository.deleteById(fileId);
+        fileService.deleteFile(FileDomainType.BOARD, fileId);
     }
-
 
     public BoardFindAllResponse getAllBoards(
         Long userId,
@@ -157,7 +165,7 @@ public class BoardService {
 
         validateBoardAccessPermission(user, board);
 
-        List<FileInformation> files = fileInformationRepository.findAllByDomainTypeAndEntityId(FileDomainType.BOARD, board.getId());
+        List<FileInformation> files = fileService.findAllByDomainTypeAndEntityId(FileDomainType.BOARD, board.getId());
 
         return BoardDetail.from(board, files);
     }
