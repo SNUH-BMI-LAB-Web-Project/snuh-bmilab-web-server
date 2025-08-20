@@ -70,11 +70,10 @@ public class FileService {
 
     @Transactional
     public void updateFileDomain(FileInformation fileInformation, FileDomainType domainType, Long entityId) {
-        fileInformation.updateDomain(domainType, entityId);
-
         String previousDirectory = fileInformation.getDomainType().name().toLowerCase();
         String newDirectory = domainType.name().toLowerCase();
 
+        fileInformation.updateDomain(domainType, entityId);
         s3Service.moveFileDirectory(fileInformation.getUploadUrl(), previousDirectory, newDirectory);
     }
 
@@ -85,19 +84,21 @@ public class FileService {
     }
 
     public void syncFiles(List<UUID> requestFileIds, FileDomainType domainType, Long entityId) {
-        List<FileInformation> requestFiles = fileInformationRepository.findAllById(requestFileIds);
-        List<FileInformation> dbFiles = fileInformationRepository.findAllByDomainTypeAndEntityId(domainType, entityId);
-
-        List<FileInformation> newFiles = requestFiles.stream()
-                .filter(file -> !dbFiles.contains(file))
+        List<UUID> dbFileIds = fileInformationRepository.findAllByDomainTypeAndEntityId(domainType, entityId)
+                .stream()
+                .map(FileInformation::getId)
                 .toList();
 
-        List<FileInformation> deletedFiles = dbFiles.stream()
-                .filter(file -> !requestFiles.contains(file))
+        List<UUID> newFileIds = requestFileIds.stream()
+                .filter(fileId -> !dbFileIds.contains(fileId))
                 .toList();
 
-        newFiles.forEach(file -> updateFileDomain(file, domainType, entityId));
-        deletedFiles.forEach(this::deleteFile);
+        List<UUID> deletedFileIds = dbFileIds.stream()
+                .filter(fileId -> !requestFileIds.contains(fileId))
+                .toList();
+
+        updateAllFileDomainByIds(newFileIds, domainType, entityId);
+        fileInformationRepository.deleteAllById(deletedFileIds);
     }
 
     @Transactional
