@@ -76,7 +76,7 @@ public class S3Service {
         }
     }
 
-    public void moveFileDirectory(String fileUrl, String previousDirectory, String newDirectory) {
+    public String moveFileDirectory(String fileUrl, String previousDirectory, String newDirectory) {
         String fileKey = getS3Key(fileUrl);
         String previousDirectoryByProfile = getFilePathWithProfile(previousDirectory);
         String newDirectoryByProfile = getFilePathWithProfile(newDirectory);
@@ -84,6 +84,8 @@ public class S3Service {
 
         amazonS3.copyObject(new CopyObjectRequest(bucket, fileKey, bucket, newFileKey));
         amazonS3.deleteObject(bucket, fileKey);
+
+        return getUploadedFileUrl(newFileKey);
     }
 
     public URL generatePresignedUploadUrl(String key, String contentType, long expirationInMinutes) {

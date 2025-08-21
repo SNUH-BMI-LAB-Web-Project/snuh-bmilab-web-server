@@ -15,9 +15,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -76,7 +78,9 @@ public class FileService {
         String newDirectory = domainType.name().toLowerCase();
 
         fileInformation.updateDomain(domainType, entityId);
-        s3Service.moveFileDirectory(fileInformation.getUploadUrl(), previousDirectory, newDirectory);
+
+        String newUrl = s3Service.moveFileDirectory(fileInformation.getUploadUrl(), previousDirectory, newDirectory);
+        fileInformation.updateUploadUrl(newUrl);
     }
 
     @Transactional
