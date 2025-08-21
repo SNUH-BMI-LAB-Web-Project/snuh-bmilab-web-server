@@ -51,10 +51,8 @@ public class FileService {
 
     @Transactional
     public FileSummary uploadFile(UploadFileRequest request) {
-        String fileKey = s3Service.createTempFileKey(
-                request.uuid(),
-                URLEncoder.encode(request.fileName(), StandardCharsets.UTF_8)
-        );
+        String fileKey = "temp/" + request.uuid() + "_" + URLEncoder.encode(
+                request.fileName(), StandardCharsets.UTF_8);
 
         FileInformation fileInformation = FileInformation.builder()
                 .id(request.uuid())
