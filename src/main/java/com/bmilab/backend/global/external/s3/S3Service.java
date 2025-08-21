@@ -78,9 +78,7 @@ public class S3Service {
 
     public void moveFileDirectory(String fileUrl, String previousDirectory, String newDirectory) {
         String fileKey = getS3Key(fileUrl);
-        String previousDirectoryByProfile = ((!previousDirectory.equals("temp")) && (activeProfile.equals("dev"))) ?
-                "dev/" + previousDirectory :
-                previousDirectory;
+        String previousDirectoryByProfile = getFilePathWithProfile(previousDirectory);
         String newDirectoryByProfile = getFilePathWithProfile(newDirectory);
         String newFileKey = fileKey.replace(previousDirectoryByProfile + "/", newDirectoryByProfile + "/");
 
