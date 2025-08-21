@@ -4,6 +4,8 @@ import com.bmilab.backend.global.jwt.TokenAuthenticationFilter;
 import com.bmilab.backend.global.jwt.TokenProvider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
+
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -53,6 +55,7 @@ public class SecurityConfig {
                 .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((httpRequests) ->
                         httpRequests
+                                .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
                                 .requestMatchers("/auth/**").permitAll()
                                 .requestMatchers("/users/password").permitAll()
                                 .requestMatchers(SWAGGER_API_PATH).permitAll()
