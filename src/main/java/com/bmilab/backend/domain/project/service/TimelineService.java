@@ -30,7 +30,6 @@ public class TimelineService {
     private final TimelineRepository timelineRepository;
     private final ProjectRepository projectRepository;
     private final FileService fileService;
-    private final FileInformationRepository fileInformationRepository;
     private final UserService userService;
     private final ProjectService projectService;
 
@@ -61,10 +60,7 @@ public class TimelineService {
                 .build();
 
         timelineRepository.save(timeline);
-
-        List<FileInformation> files = fileInformationRepository.findAllById(request.fileIds());
-
-        files.forEach(file -> file.updateDomain(FileDomainType.TIMELINE, timeline.getId()));
+        fileService.updateAllFileDomainByIds(request.fileIds(), FileDomainType.TIMELINE, timeline.getId());
     }
 
     public TimelineFindAllResponse getAllTimelinesByProjectId(Long projectId) {
@@ -107,9 +103,7 @@ public class TimelineService {
                 request.summary()
         );
 
-        List<FileInformation> files = fileInformationRepository.findAllById(request.fileIds());
-
-        files.forEach(file -> file.updateDomain(FileDomainType.TIMELINE, timeline.getId()));
+        fileService.syncFiles(request.fileIds(), FileDomainType.TIMELINE, timeline.getId());
     }
 
     @Transactional

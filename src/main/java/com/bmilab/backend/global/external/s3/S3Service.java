@@ -2,6 +2,7 @@ package com.bmilab.backend.global.external.s3;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -74,6 +75,18 @@ public class S3Service {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    public void moveFileDirectory(String fileUrl, String previousDirectory, String newDirectory) {
+        String fileKey = getS3Key(fileUrl);
+        String previousDirectoryByProfile = ((!previousDirectory.equals("temp")) && (activeProfile.equals("dev"))) ?
+                "dev/" + previousDirectory :
+                previousDirectory;
+        String newDirectoryByProfile = (activeProfile.equals("dev")) ? "dev/" + newDirectory : newDirectory;
+        String newFileKey = fileKey.replace(previousDirectoryByProfile + "/", newDirectoryByProfile + "/");
+
+        amazonS3.copyObject(new CopyObjectRequest(bucket, fileKey, bucket, newFileKey));
+        amazonS3.deleteObject(bucket, fileKey);
     }
 
     public URL generatePresignedUploadUrl(String key, String contentType, long expirationInMinutes) {

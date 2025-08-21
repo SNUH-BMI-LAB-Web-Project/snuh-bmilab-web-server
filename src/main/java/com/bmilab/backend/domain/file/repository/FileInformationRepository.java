@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface FileInformationRepository extends JpaRepository<FileInformation, UUID> {
     List<FileInformation> findAllByDomainTypeAndEntityId(FileDomainType domainType, Long entityId);
+
+    List<FileInformation> findAllByDomainType(FileDomainType domainType);
 }

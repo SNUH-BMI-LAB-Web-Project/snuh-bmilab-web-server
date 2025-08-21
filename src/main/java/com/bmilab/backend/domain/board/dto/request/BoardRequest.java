@@ -23,6 +23,10 @@ public record BoardRequest (
 
         @Schema(description  = "일반 첨부파일 ID 리스트", example = "[\"dfaef-afaefaef-aefaefae-...\", \"dfaef-afaefaef-aefaefae-..., dfaef-afaefaef-aefaefae-...\"]")
         @Nullable
-        List<UUID> fileIds
+        List<UUID> fileIds,
+
+        @Schema(description  = "내용 이미지 파일 ID 리스트", example = "[\"dfaef-afaefaef-aefaefae-...\", \"dfaef-afaefaef-aefaefae-..., dfaef-afaefaef-aefaefae-...\"]")
+        @Nullable
+        List<UUID> imageFileIds
 ){
 }
