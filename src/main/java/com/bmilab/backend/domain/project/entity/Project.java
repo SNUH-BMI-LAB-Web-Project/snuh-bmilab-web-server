@@ -40,6 +40,7 @@ public class Project extends BaseTimeEntity {
 
     @ManyToOne
     @JoinColumn(name = "author_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private User author;
 
     @Column(nullable = false)
