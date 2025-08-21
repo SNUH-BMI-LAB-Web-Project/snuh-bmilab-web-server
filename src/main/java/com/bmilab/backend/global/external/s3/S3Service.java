@@ -13,11 +13,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +44,7 @@ public class S3Service {
     public String uploadFile(MultipartFile file, String newFileName) {
         String originalName = file.getOriginalFilename();
         String ext = originalName.substring(originalName.lastIndexOf("."));
-        String fileNameByProfile = (activeProfile.equals("dev")) ? "dev/" + newFileName : newFileName;
+        String fileNameByProfile = getFilePathWithProfile(newFileName);
         String changedName = fileNameByProfile + ext;
 
         ObjectMetadata metadata = new ObjectMetadata();
@@ -82,7 +81,7 @@ public class S3Service {
         String previousDirectoryByProfile = ((!previousDirectory.equals("temp")) && (activeProfile.equals("dev"))) ?
                 "dev/" + previousDirectory :
                 previousDirectory;
-        String newDirectoryByProfile = (activeProfile.equals("dev")) ? "dev/" + newDirectory : newDirectory;
+        String newDirectoryByProfile = getFilePathWithProfile(newDirectory);
         String newFileKey = fileKey.replace(previousDirectoryByProfile + "/", newDirectoryByProfile + "/");
 
         amazonS3.copyObject(new CopyObjectRequest(bucket, fileKey, bucket, newFileKey));
@@ -131,4 +130,11 @@ public class S3Service {
         };
     }
 
+    private String getFilePathWithProfile(String fileName) {
+        return (activeProfile.equals("dev")) ? "dev/" + fileName : fileName;
+    }
+
+    public String createTempFileKey(UUID uuid, String fileName) {
+        return getFilePathWithProfile("temp") + "/" + uuid + "_" + fileName;
+    }
 }

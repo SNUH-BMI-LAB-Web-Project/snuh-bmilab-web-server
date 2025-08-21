@@ -43,7 +43,7 @@ public class FileService {
             String contentType
     ) {
         UUID uuid = UUID.randomUUID();
-        String fileKey = "temp/" + uuid + "_" + fileName;
+        String fileKey = s3Service.createTempFileKey(uuid, fileName);
         URL presignedUrl = s3Service.generatePresignedUploadUrl(fileKey, contentType, 10L);
 
         return new FilePresignedUrlResponse(uuid, presignedUrl.toString());
@@ -51,8 +51,10 @@ public class FileService {
 
     @Transactional
     public FileSummary uploadFile(UploadFileRequest request) {
-        String fileKey = "temp/" + request.uuid() + "_" + URLEncoder.encode(
-                request.fileName(), StandardCharsets.UTF_8);
+        String fileKey = s3Service.createTempFileKey(
+                request.uuid(),
+                URLEncoder.encode(request.fileName(), StandardCharsets.UTF_8)
+        );
 
         FileInformation fileInformation = FileInformation.builder()
                 .id(request.uuid())
