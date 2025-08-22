@@ -17,7 +17,7 @@ public interface LeaveRepository extends JpaRepository<Leave, Long> {
 
     @Query("SELECT l FROM Leave l " + "WHERE ( (l.endDate IS NULL AND l.startDate BETWEEN :start AND :end) " +
             "     OR (l.endDate IS NOT NULL AND l.startDate <= :end AND l.endDate >= :start) )")
-    List<Leave> findAllByBetweenDates(LocalDateTime start, LocalDateTime end);
+    List<Leave> findAllByBetweenDates(LocalDate start, LocalDate end);
 
     @Query("SELECT l FROM Leave l " + "WHERE l.status = :status AND " +
             "( (l.endDate IS NULL AND l.startDate BETWEEN :start AND :end) " +
