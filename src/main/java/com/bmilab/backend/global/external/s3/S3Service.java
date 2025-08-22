@@ -142,6 +142,10 @@ public class S3Service {
         String tempPath = baseUrl + "/" + getFilePathWithProfile("temp");
         String domainDirectoryPath = baseUrl + "/" + getFilePathWithProfile(domainDirectory);
 
-        return text.replace(tempPath, domainDirectoryPath);
+        log.info("tempPath: {}, domainDirectoryPath: {}", tempPath, domainDirectoryPath);
+        log.info("text: {}", text);
+        String result = text.replace(tempPath, domainDirectoryPath);
+        log.info("text.replace(tempPath, domainDirectoryPath): {}", result);
+        return result;
     }
 }
