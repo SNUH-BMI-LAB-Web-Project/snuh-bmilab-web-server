@@ -14,14 +14,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 public interface LeaveRepository extends JpaRepository<Leave, Long> {
-    @Query("SELECT l FROM Leave l"
-            + " WHERE (l.startDate BETWEEN :start AND :end)"
-            + " OR(l.endDate BETWEEN  :start AND :end)")
-    List<Leave> findAllByBetweenDates(LocalDate start, LocalDate end);
 
-    @Query("SELECT l FROM Leave l"
-            + " WHERE ((l.startDate BETWEEN :start AND :end) OR (l.endDate BETWEEN  :start AND :end))"
-            + " AND l.status = :status")
+    @Query("SELECT l FROM Leave l " + "WHERE ( (l.endDate IS NULL AND l.startDate BETWEEN :start AND :end) " +
+            "     OR (l.endDate IS NOT NULL AND l.startDate <= :end AND l.endDate >= :start) )")
+    List<Leave> findAllByBetweenDates(LocalDateTime start, LocalDateTime end);
+
+    @Query("SELECT l FROM Leave l " + "WHERE l.status = :status AND " +
+            "( (l.endDate IS NULL AND l.startDate BETWEEN :start AND :end) " +
+            "OR (l.endDate IS NOT NULL AND l.startDate <= :end AND l.endDate >= :start) )")
     List<Leave> findAllByBetweenDatesAndStatus(LocalDate start, LocalDate end, LeaveStatus status);
 
     Page<Leave> findAllByUserId(Long userId, Pageable pageable);
