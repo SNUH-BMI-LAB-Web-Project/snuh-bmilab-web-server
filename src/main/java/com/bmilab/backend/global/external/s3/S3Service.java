@@ -139,13 +139,9 @@ public class S3Service {
     }
 
     public String replaceTempToDomainPath(String text, String domainDirectory) {
-        String tempPath = baseUrl + "/" + getFilePathWithProfile("temp");
-        String domainDirectoryPath = baseUrl + "/" + getFilePathWithProfile(domainDirectory);
+        String tempPath = baseUrl + getFilePathWithProfile("temp");
+        String domainDirectoryPath = baseUrl + getFilePathWithProfile(domainDirectory);
 
-        log.info("tempPath: {}, domainDirectoryPath: {}", tempPath, domainDirectoryPath);
-        log.info("text: {}", text);
-        String result = text.replace(tempPath, domainDirectoryPath);
-        log.info("text.replace(tempPath, domainDirectoryPath): {}", result);
-        return result;
+        return text.replace(tempPath, domainDirectoryPath);
     }
 }
