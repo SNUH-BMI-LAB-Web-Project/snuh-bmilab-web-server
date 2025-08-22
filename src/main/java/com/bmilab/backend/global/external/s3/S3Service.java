@@ -137,4 +137,11 @@ public class S3Service {
     public String createTempFileKey(UUID uuid, String fileName) {
         return getFilePathWithProfile("temp") + "/" + uuid + "_" + fileName;
     }
+
+    public String replaceTempToDomainPath(String text, String domainDirectory) {
+        String tempPath = baseUrl + "/" + getFilePathWithProfile("temp");
+        String domainDirectoryPath = baseUrl + "/" + getFilePathWithProfile(domainDirectory);
+
+        return text.replace(tempPath, domainDirectoryPath);
+    }
 }

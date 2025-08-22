@@ -148,4 +148,8 @@ public class FileService {
     public String getFileKey(FileInformation fileInformation) {
         return s3Service.getS3Key(fileInformation.getUploadUrl());
     }
+
+    public String replacePathTempToDomainType(String text, FileDomainType domainType) {
+        return s3Service.replaceTempToDomainPath(text, domainType.name().toLowerCase());
+    }
 }

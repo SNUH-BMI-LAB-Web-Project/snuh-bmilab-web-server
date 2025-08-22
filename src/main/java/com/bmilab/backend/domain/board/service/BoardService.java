@@ -57,12 +57,13 @@ public class BoardService {
         User user = userService.findUserById(userId);
 
         BoardCategory category = boardCategoryService.getBoardCategoryById(request.boardCategoryId());
+        String content = fileService.replacePathTempToDomainType(request.content(), FileDomainType.BOARD_IMAGE);
 
         Board board = Board.builder()
                 .author(user)
                 .category(category)
                 .title(request.title())
-                .content(request.content())
+                .content(content)
                 .build();
 
         boardRepository.save(board);
@@ -80,11 +81,12 @@ public class BoardService {
         validateBoardAccessPermission(user, board);
 
         BoardCategory category = boardCategoryService.getBoardCategoryById(request.boardCategoryId());
+        String content = fileService.replacePathTempToDomainType(request.content(), FileDomainType.BOARD_IMAGE);
 
         board.update(
                 category,
                 request.title(),
-                request.content()
+                content
         );
 
         //신규 파일만 인식하기 + 이미지 업데이트 처리
