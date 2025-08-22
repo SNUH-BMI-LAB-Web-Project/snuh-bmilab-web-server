@@ -146,7 +146,8 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
                         ),
                         project.status,
                         project.isPrivate,
-                        isAccessible
+                        isAccessible,
+                        project.isPinned
                 ))
                 .from(project)
                 .leftJoin(project.category, category)
@@ -205,9 +206,11 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
     private OrderSpecifier<?>[] getCustomSortOrderSpecifier(Pageable pageable, QProject project) {
 
         Sort sort = pageable.getSort();
+        OrderSpecifier<?> pinnedFirst = project.isPinned.desc();
 
         if (sort.isUnsorted()) {
             return new OrderSpecifier[]{
+                    pinnedFirst,
                     Expressions.numberTemplate(
                             Integer.class,
                             "case when {0} is null then 0 else 1 end",
@@ -222,28 +225,25 @@ public class ProjectRepositoryCustomImpl implements ProjectRepositoryCustom {
             boolean isDesc = order.isDescending();
             String property = order.getProperty();
 
-            switch (property) {
-                case "startDate":
-                    return new OrderSpecifier[]{
-                            isDesc ? project.startDate.desc() : project.startDate.asc()
-                    };
-                case "endDate":
-                    return new OrderSpecifier[]{
-                            Expressions.numberTemplate(
-                                    Integer.class,
-                                    "case when {0} is null then 0 else 1 end",
-                                    project.endDate
-                            ).asc(), // null 우선
-                            isDesc ? project.endDate.desc() : project.endDate.asc()
-                    };
-                default:
-                    return new OrderSpecifier[]{
-                            project.endDate.desc()
-                    };
-            }
+            return switch (property) {
+                case "startDate" -> new OrderSpecifier[] {
+                        pinnedFirst, isDesc ? project.startDate.desc() : project.startDate.asc()
+                };
+                case "endDate" -> new OrderSpecifier[] {
+                        pinnedFirst, Expressions.numberTemplate(
+                        Integer.class,
+                        "case when {0} is null then 0 else 1 end",
+                        project.endDate
+                ).asc(), // null 우선
+                        isDesc ? project.endDate.desc() : project.endDate.asc()
+                };
+                default -> new OrderSpecifier[] {
+                        pinnedFirst, project.endDate.desc()
+                };
+            };
 
         }
 
-        return new OrderSpecifier[]{project.endDate.desc()};
+        return new OrderSpecifier[]{pinnedFirst, project.endDate.desc()};
     }
 }

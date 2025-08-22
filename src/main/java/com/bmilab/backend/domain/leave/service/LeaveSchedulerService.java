@@ -22,7 +22,6 @@ import org.springframework.web.client.RestClient;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class LeaveSchedulerService {
     private final LeaveService leaveService;
     @Value("${data-portal.service-key}")
@@ -30,15 +29,16 @@ public class LeaveSchedulerService {
     private static final String API_URL = "https://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo";
     private final UserLeaveRepository userLeaveRepository;
 
+    //TODO: 입사일 기준 근무일 계산으로 다시 바꾸기
     @Scheduled(cron = "0 0 0 1 * *", zone = "Asia/Seoul")
     @Transactional
     public void updateUserAnnualLeaves() {
-        if (YearMonth.from(LocalDate.now()).getYear() == 2025) {
-            log.info("임시 중단");
+        YearMonth lastMonthWithYear = YearMonth.now().minusMonths(1);
+
+        if (lastMonthWithYear.getYear() == 2025) {
             return;
         }
 
-        YearMonth lastMonthWithYear = YearMonth.now().minusMonths(1);
         int endOfMonth = lastMonthWithYear.lengthOfMonth();
         int holidayCount = countHolidays(lastMonthWithYear);
         int weekendCount = (int) countWeekends(lastMonthWithYear);
@@ -56,7 +56,7 @@ public class LeaveSchedulerService {
 
                     //매해 연가 개수와 사용한 휴가 수 초기화
                     if (lastMonthWithYear.getMonth().equals(Month.DECEMBER)) {
-                        log.info("[user={}] Happy New Year!", userId);
+                        log.info("[user={}] ", userId);
                         userLeave.resetLeaveCounts();
                     }
 
@@ -71,7 +71,7 @@ public class LeaveSchedulerService {
                         leaveIncrement += 1;
                     }
 
-                    if (((weekdayCount * 2) / 3) <= workedCount) {
+                    if (((weekdayCount * 4) / 5) <= workedCount) {
                         log.info("[user={}] Worked", userId);
                         leaveIncrement += 1;
                     }

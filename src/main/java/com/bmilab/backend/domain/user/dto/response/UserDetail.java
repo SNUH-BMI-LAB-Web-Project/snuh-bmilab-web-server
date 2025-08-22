@@ -67,7 +67,6 @@ public record UserDetail(
 
         @Schema(description = "입사일", example = "2023-03-01")
         LocalDate joinedAt
-
 ) {
     public static UserDetail from(
             UserDetailQueryResult queryResult,

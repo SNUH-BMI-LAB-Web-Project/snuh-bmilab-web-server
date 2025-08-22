@@ -5,9 +5,11 @@ import com.bmilab.backend.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @AllArgsConstructor
 @Getter
-public class GetAllBoardsQueryResult {
+public class  GetAllBoardsQueryResult {
     private Long boardId;
 
     private User author;
@@ -17,5 +19,9 @@ public class GetAllBoardsQueryResult {
     private String title;
 
     private Integer viewCount;
+
+    private LocalDateTime createdAt;
+
+    private boolean isPinned;
 }
 

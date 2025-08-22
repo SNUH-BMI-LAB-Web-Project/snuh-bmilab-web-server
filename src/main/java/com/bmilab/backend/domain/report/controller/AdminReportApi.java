@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -27,5 +28,19 @@ public interface AdminReportApi {
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate,
             @RequestParam(required = false) String keyword
+    );
+
+    @Operation(summary = "일별 보고 엑셀파일 다운로드", description = "일별로 업무보고 엑셀파일을 다운로드할 수 있는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "파일 다운로드 성공"
+                    ),
+            }
+    )
+    ResponseEntity<InputStreamResource> createReportExcel(
+            @RequestParam LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate
     );
 }

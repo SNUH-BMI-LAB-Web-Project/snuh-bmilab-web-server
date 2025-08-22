@@ -15,9 +15,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -25,13 +27,25 @@ public class FileService {
     private final S3Service s3Service;
     private final FileInformationRepository fileInformationRepository;
 
+    public FileInformation findFileById(UUID fileId) {
+        return fileInformationRepository.findById(fileId)
+                .orElseThrow(() -> new ApiException(FileErrorCode.FILE_NOT_FOUND));
+    }
+
+    public List<FileInformation> findAllById(List<UUID> fileIds) {
+        return fileInformationRepository.findAllById(fileIds);
+    }
+
+    public List<FileInformation> findAllByDomainTypeAndEntityId(FileDomainType domainType, Long entityId) {
+        return fileInformationRepository.findAllByDomainTypeAndEntityId(domainType, entityId);
+    }
+
     public FilePresignedUrlResponse generatePresignedUrl(
-            FileDomainType domainType,
             String fileName,
             String contentType
     ) {
         UUID uuid = UUID.randomUUID();
-        String fileKey = domainType.name().toLowerCase() + "/" + uuid + "_" + fileName;
+        String fileKey = s3Service.createTempFileKey(uuid, fileName);
         URL presignedUrl = s3Service.generatePresignedUploadUrl(fileKey, contentType, 10L);
 
         return new FilePresignedUrlResponse(uuid, presignedUrl.toString());
@@ -39,14 +53,16 @@ public class FileService {
 
     @Transactional
     public FileSummary uploadFile(UploadFileRequest request) {
-        String fileKey = request.domainType().name().toLowerCase() + "/" + request.uuid() + "_" + URLEncoder.encode(
-                request.fileName(), StandardCharsets.UTF_8);
+        String fileKey = s3Service.createTempFileKey(
+                request.uuid(),
+                URLEncoder.encode(request.fileName(), StandardCharsets.UTF_8)
+        );
 
         FileInformation fileInformation = FileInformation.builder()
                 .id(request.uuid())
                 .name(request.fileName())
                 .extension(request.extension())
-                .domainType(request.domainType())
+                .domainType(FileDomainType.TEMP)
                 .size(request.size())
                 .uploadUrl(s3Service.getUploadedFileUrl(fileKey))
                 .build();
@@ -54,6 +70,41 @@ public class FileService {
         fileInformationRepository.save(fileInformation);
 
         return FileSummary.from(fileInformation);
+    }
+
+    @Transactional
+    public void updateFileDomain(FileInformation fileInformation, FileDomainType domainType, Long entityId) {
+        String previousDirectory = fileInformation.getDomainType().name().toLowerCase();
+        String newDirectory = domainType.name().toLowerCase();
+
+        fileInformation.updateDomain(domainType, entityId);
+
+        String newUrl = s3Service.moveFileDirectory(fileInformation.getUploadUrl(), previousDirectory, newDirectory);
+        fileInformation.updateUploadUrl(newUrl);
+    }
+
+    @Transactional
+    public void updateAllFileDomainByIds(List<UUID> fileIds, FileDomainType domainType, Long entityId) {
+        List<FileInformation> files = fileInformationRepository.findAllById(fileIds);
+        files.forEach(file -> updateFileDomain(file, domainType, entityId));
+    }
+
+    public void syncFiles(List<UUID> requestFileIds, FileDomainType domainType, Long entityId) {
+        List<UUID> dbFileIds = fileInformationRepository.findAllByDomainTypeAndEntityId(domainType, entityId)
+                .stream()
+                .map(FileInformation::getId)
+                .toList();
+
+        List<UUID> newFileIds = requestFileIds.stream()
+                .filter(fileId -> !dbFileIds.contains(fileId))
+                .toList();
+
+        List<UUID> deletedFileIds = dbFileIds.stream()
+                .filter(fileId -> !requestFileIds.contains(fileId))
+                .toList();
+
+        updateAllFileDomainByIds(newFileIds, domainType, entityId);
+        fileInformationRepository.deleteAllById(deletedFileIds);
     }
 
     @Transactional
@@ -67,6 +118,16 @@ public class FileService {
 
         s3Service.deleteFile(fileInformation.getUploadUrl());
         fileInformationRepository.deleteById(fileId);
+    }
+
+    @Transactional
+    public void deleteFile(FileInformation fileInformation) {
+        if (fileInformation == null) {
+            return;
+        }
+
+        s3Service.deleteFile(fileInformation.getUploadUrl());
+        fileInformationRepository.delete(fileInformation);
     }
 
     @Transactional
@@ -86,5 +147,9 @@ public class FileService {
 
     public String getFileKey(FileInformation fileInformation) {
         return s3Service.getS3Key(fileInformation.getUploadUrl());
+    }
+
+    public String replacePathTempToDomainType(String text, FileDomainType domainType) {
+        return s3Service.replaceTempToDomainPath(text, domainType.name().toLowerCase());
     }
 }

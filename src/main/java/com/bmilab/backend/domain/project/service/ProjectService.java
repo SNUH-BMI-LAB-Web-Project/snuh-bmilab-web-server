@@ -10,6 +10,7 @@ import com.bmilab.backend.domain.project.dto.query.GetAllProjectsQueryResult;
 import com.bmilab.backend.domain.project.dto.query.GetAllTimelinesQueryResult;
 import com.bmilab.backend.domain.project.dto.request.ExternalProfessorRequest;
 import com.bmilab.backend.domain.project.dto.request.ProjectCompleteRequest;
+import com.bmilab.backend.domain.project.dto.request.ProjectPinRequest;
 import com.bmilab.backend.domain.project.dto.request.ProjectRequest;
 import com.bmilab.backend.domain.project.dto.response.ExternalProfessorFindAllResponse;
 import com.bmilab.backend.domain.project.dto.response.ProjectDetail;
@@ -44,13 +45,20 @@ import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.service.UserService;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.external.s3.S3Service;
+import jakarta.persistence.LockTimeoutException;
+import jakarta.persistence.PessimisticLockException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.time.LocalDate;
@@ -70,7 +78,6 @@ public class ProjectService {
     private final S3Service s3Service;
     private final ApplicationEventPublisher eventPublisher;
     private final ProjectParticipantRepository projectParticipantRepository;
-    private final FileInformationRepository fileInformationRepository;
     private final ProjectFileRepository projectFileRepository;
     private final FileService fileService;
     private final TimelineRepository timelineRepository;
@@ -78,6 +85,7 @@ public class ProjectService {
     private final UserService userService;
     private final ProjectCategoryService projectCategoryService;
     private final ExternalProfessorRepository externalProfessorRepository;
+    private final PlatformTransactionManager txManager;
 
     public Project findProjectById(Long projectId) {
         return projectRepository.findById(projectId)
@@ -165,7 +173,7 @@ public class ProjectService {
             return;
         }
 
-        List<FileInformation> files = fileInformationRepository.findAllById(fileIds);
+        List<FileInformation> files = fileService.findAllById(fileIds);
 
         List<ProjectFile> projectFiles = files
                 .stream()
@@ -177,7 +185,7 @@ public class ProjectService {
 
         projectFileRepository.saveAll(projectFiles);
 
-        files.forEach(file -> file.updateDomain(FileDomainType.PROJECT, project.getId()));
+        files.forEach(file -> fileService.updateFileDomain(file, FileDomainType.PROJECT, project.getId()));
     }
 
     public ProjectFindAllResponse getAllProjects(
@@ -288,14 +296,13 @@ public class ProjectService {
 
         validateProjectAccessPermission(project, user, ProjectAccessPermission.EDIT, false);
 
-        FileInformation file = fileInformationRepository.findById(fileId)
-                .orElseThrow(() -> new ApiException(FileErrorCode.FILE_NOT_FOUND));
+        FileInformation file = fileService.findFileById(fileId);
 
         ProjectFile projectFile = projectFileRepository.findByFileInformation(file)
                 .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_FILE_NOT_FOUND));
 
-        s3Service.deleteFile(file.getUploadUrl());
         projectFileRepository.delete(projectFile);
+        fileService.deleteFile(file);
     }
 
     @Transactional
@@ -461,6 +468,15 @@ public class ProjectService {
 
     @Transactional
     public void createExternalProfessor(ExternalProfessorRequest request) {
+        if (externalProfessorRepository.existsByNameAndOrganizationAndDepartmentAndPosition(
+                request.name(),
+                request.organization(),
+                request.department(),
+                request.position()
+        )) {
+            throw new ApiException(ProjectErrorCode.EXTERNAL_PROFESSOR_DUPLICATE);
+        }
+
         ExternalProfessor externalProfessor = ExternalProfessor.builder()
                 .name(request.name())
                 .organization(request.organization())
@@ -480,9 +496,10 @@ public class ProjectService {
     }
 
     public ExternalProfessorFindAllResponse getAllExternalProfessors() {
-        List<ExternalProfessor> externalProfessors = externalProfessorRepository.findAll();
+        List<ExternalProfessor> externalProfessors = externalProfessorRepository.findAllByOrderByNameAsc();
 
         return ExternalProfessorFindAllResponse.of(externalProfessors);
+
     }
 
     @Transactional
@@ -525,5 +542,47 @@ public class ProjectService {
                 .toList();
 
         return s3Service.downloadS3FilesByZip(fileKeys);
+    }
+
+    public void updateProjectPinStatus(Long projectId, ProjectPinRequest request){
+        TransactionTemplate tt = new TransactionTemplate(txManager);
+        tt.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+
+        for (int attempt = 1; attempt <= 3; attempt++) {
+            try {
+                tt.executeWithoutResult(status -> {
+                    Project project;
+                    try {
+                        project = projectRepository.findByIdWithPessimisticLock(projectId)
+                                .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
+                    } catch (PessimisticLockException | LockTimeoutException e) {
+                        throw new CannotAcquireLockException("Lock acquisition failed", e);
+                    }
+
+                    boolean targetPin = request.isPinned();
+                    boolean alreadyPinned = project.isPinned();
+                    if (targetPin && !alreadyPinned) {
+                        List<Project> pinned = projectRepository.findAllPinnedForUpdate();
+                        if (pinned.size() >= 5) {
+                            throw new ApiException(ProjectErrorCode.PROJECT_PIN_LIMIT_EXCEEDED);
+                        }
+                    }
+
+                    project.setPinned(targetPin);
+                    projectRepository.save(project);
+                });
+                return; // success
+            } catch (PessimisticLockingFailureException e) {
+                if (attempt == 3) {
+                    throw new ApiException(ProjectErrorCode.PROJECT_PIN_VERSION_CONFLICT);
+                }
+                try {
+                    Thread.sleep(50L * attempt); // tiny backoff: 50ms, 100ms
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new ApiException(ProjectErrorCode.PROJECT_PIN_VERSION_CONFLICT);
+                }
+            }
+        }
     }
 }

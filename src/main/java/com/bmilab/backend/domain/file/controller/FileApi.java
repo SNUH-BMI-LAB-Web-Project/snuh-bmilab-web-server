@@ -24,7 +24,6 @@ public interface FileApi {
             }
     )
     ResponseEntity<FilePresignedUrlResponse> generatePresignedUrl(
-            @RequestParam FileDomainType domainType,
             @RequestParam String fileName,
             @RequestParam String contentType
     );

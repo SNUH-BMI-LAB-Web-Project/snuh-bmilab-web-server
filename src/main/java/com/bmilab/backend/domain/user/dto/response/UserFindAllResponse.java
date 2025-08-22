@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import org.springframework.data.domain.Page;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public record UserFindAllResponse(
@@ -73,7 +74,10 @@ public record UserFindAllResponse(
             String phoneNumber,
 
             @Schema(description = "학력", example = "국민대학교 소프트웨어학부 재학 중")
-            String education
+            String education,
+
+            @Schema(description = "입사일", example = "2023-03-01")
+            LocalDate joinedAt
     ) {
         public static UserItem from(UserInfoQueryResult queryResult) {
             User user = queryResult.getUser();
@@ -96,6 +100,7 @@ public record UserFindAllResponse(
                     .seatNumber(userInfo != null ? userInfo.getSeatNumber() : null)
                     .phoneNumber(userInfo != null ? userInfo.getPhoneNumber() : null)
                     .education(userInfo != null ? userInfo.getEducation() : null)
+                    .joinedAt(userInfo != null ? userInfo.getJoinedAt() : null)
                     .build();
         }
     }

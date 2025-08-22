@@ -1,6 +1,7 @@
 package com.bmilab.backend.domain.board.entity;
 
 import com.bmilab.backend.domain.user.entity.User;
+import com.bmilab.backend.domain.user.enums.Role;
 import com.bmilab.backend.global.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,6 +17,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "boards")
@@ -44,11 +50,24 @@ public class Board extends BaseTimeEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(nullable = false)
+    @Column(name = "view_count")
     private int viewCount = 0;
 
-    public boolean isAuthor(User user) {
-        return this.author.getId().equals(user.getId());
+    @Setter
+    @Builder.Default
+    @Column(name = "is_pinned", columnDefinition = "TINYINT(1)")
+    private boolean isPinned = false;
+
+    @CreatedDate
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
+    public boolean canBeEditedBy(User user) {
+        return this.author.getId().equals(user.getId()) || user.getRole() == Role.ADMIN;
     }
 
     public void update(BoardCategory category, String title, String content) {
@@ -56,4 +75,5 @@ public class Board extends BaseTimeEntity {
         this.title = title;
         this.content = content;
     }
+
 }

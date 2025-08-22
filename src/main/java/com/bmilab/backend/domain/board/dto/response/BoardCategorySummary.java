@@ -10,7 +10,10 @@ public record BoardCategorySummary(
         Long boardCategoryId,
 
         @Schema(description = "게시판 분야 이름", example = "공지사항")
-        String name
+        String name,
+
+        @Schema(description = "게시판 분야 색상", example = "#FFFFFF")
+        String color
 ) {
         public static BoardCategorySummary from(BoardCategory boardCategory) {
                 if(boardCategory == null) {
@@ -19,6 +22,7 @@ public record BoardCategorySummary(
                 return BoardCategorySummary.builder()
                         .boardCategoryId(boardCategory.getId())
                         .name(boardCategory.getName())
+                        .color(boardCategory.getColor())
                         .build();
         }
 }

@@ -19,6 +19,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -38,7 +39,8 @@ public class Project extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "author_id", nullable = false)
+    @JoinColumn(name = "author_id")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
     private User author;
 
     @Column(nullable = false)
@@ -77,6 +79,11 @@ public class Project extends BaseTimeEntity {
     @Builder.Default
     @Column(name = "is_private", columnDefinition = "TINYINT(1)")
     private boolean isPrivate = false;
+
+    @Setter
+    @Builder.Default
+    @Column(name = "is_pinned", columnDefinition = "TINYINT(1)")
+    private boolean isPinned = false;
 
     public boolean canBeEditedBy(User user) {
         return author.getId().equals(user.getId()) || user.getRole() == Role.ADMIN;

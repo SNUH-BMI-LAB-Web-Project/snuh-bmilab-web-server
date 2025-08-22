@@ -27,7 +27,11 @@ public class BoardCategory {
     @Column(nullable = false)
     private String name;
 
-    public void update(String name){
+    @Column(nullable = false)
+    private String color;
+
+    public void update(String name, String color) {
         this.name = name;
+        this.color = color;
     }
 }

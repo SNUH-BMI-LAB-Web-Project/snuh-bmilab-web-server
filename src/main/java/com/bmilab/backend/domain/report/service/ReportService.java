@@ -15,10 +15,15 @@ import com.bmilab.backend.domain.report.repository.ReportRepository;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.service.UserService;
 import com.bmilab.backend.global.exception.ApiException;
+import com.bmilab.backend.global.utils.ExcelGenerator;
+import com.bmilab.backend.global.utils.ExcelRow;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -32,6 +37,7 @@ public class ReportService {
     private final FileInformationRepository fileInformationRepository;
     private final FileService fileService;
     private final ProjectService projectService;
+    private final ExcelGenerator excelGenerator;
 
     public Report findReportById(Long reportId) {
 
@@ -57,9 +63,7 @@ public class ReportService {
 
         reportRepository.save(report);
 
-        List<FileInformation> files = fileInformationRepository.findAllById(request.fileIds());
-
-        files.forEach(file -> file.updateDomain(FileDomainType.REPORT, report.getId()));
+        fileService.updateAllFileDomainByIds(request.fileIds(), FileDomainType.REPORT, report.getId());
     }
 
 
@@ -78,9 +82,7 @@ public class ReportService {
 
         report.update(project, request.date(), request.content());
 
-        List<FileInformation> files = fileInformationRepository.findAllById(request.fileIds());
-
-        files.forEach(file -> file.updateDomain(FileDomainType.REPORT, report.getId()));
+        fileService.syncFiles(request.fileIds(), FileDomainType.REPORT, report.getId());
     }
 
     public ReportFindAllResponse getReportsByCurrentUser(

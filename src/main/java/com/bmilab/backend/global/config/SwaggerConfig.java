@@ -38,7 +38,10 @@ public class SwaggerConfig {
                                 .description("Production"),
                         new Server()
                                 .url("http://localhost:8080")
-                                .description("Local")
+                                .description("Local"),
+                        new Server()
+                                .url("https://dev-api.snuh-bmilab.ai.kr")
+                                .description("Development")
                 ))
                 .addSecurityItem(securityRequirement)
                 .components(components);

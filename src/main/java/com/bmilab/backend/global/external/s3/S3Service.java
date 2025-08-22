@@ -2,6 +2,7 @@ package com.bmilab.backend.global.external.s3;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CopyObjectRequest;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -12,11 +13,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import lombok.RequiredArgsConstructor;
@@ -38,10 +38,14 @@ public class S3Service {
     @Value("${cloud.aws.s3.base-url}")
     private String baseUrl;
 
+    @Value("${spring.profiles.active}")
+    private String activeProfile;
+
     public String uploadFile(MultipartFile file, String newFileName) {
         String originalName = file.getOriginalFilename();
         String ext = originalName.substring(originalName.lastIndexOf("."));
-        String changedName = newFileName + ext;
+        String fileNameByProfile = getFilePathWithProfile(newFileName);
+        String changedName = fileNameByProfile + ext;
 
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentType(file.getContentType());
@@ -70,6 +74,18 @@ public class S3Service {
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    public String moveFileDirectory(String fileUrl, String previousDirectory, String newDirectory) {
+        String fileKey = getS3Key(fileUrl);
+        String previousDirectoryByProfile = getFilePathWithProfile(previousDirectory);
+        String newDirectoryByProfile = getFilePathWithProfile(newDirectory);
+        String newFileKey = fileKey.replace(previousDirectoryByProfile + "/", newDirectoryByProfile + "/");
+
+        amazonS3.copyObject(new CopyObjectRequest(bucket, fileKey, bucket, newFileKey));
+        amazonS3.deleteObject(bucket, fileKey);
+
+        return getUploadedFileUrl(newFileKey);
     }
 
     public URL generatePresignedUploadUrl(String key, String contentType, long expirationInMinutes) {
@@ -114,4 +130,18 @@ public class S3Service {
         };
     }
 
+    private String getFilePathWithProfile(String fileName) {
+        return (activeProfile.equals("dev")) ? "dev/" + fileName : fileName;
+    }
+
+    public String createTempFileKey(UUID uuid, String fileName) {
+        return getFilePathWithProfile("temp") + "/" + uuid + "_" + fileName;
+    }
+
+    public String replaceTempToDomainPath(String text, String domainDirectory) {
+        String tempPath = baseUrl + getFilePathWithProfile("temp");
+        String domainDirectoryPath = baseUrl + getFilePathWithProfile(domainDirectory);
+
+        return text.replace(tempPath, domainDirectoryPath);
+    }
 }

@@ -5,6 +5,7 @@ import com.bmilab.backend.domain.user.dto.response.UserSummary;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
@@ -27,7 +28,13 @@ public record BoardFindAllResponse(
             String title,
 
             @Schema(description = "조회수", example = "1")
-            Integer viewCount
+            Integer viewCount,
+
+            @Schema(description = "게시글 생성 일시", example = "2025-07-28T10:30:00")
+            LocalDateTime createdAt,
+
+            @Schema(description = "게시글 고정 여부")
+            boolean isPinned
     ){
         public static BoardSummary from(GetAllBoardsQueryResult queryResults) {
             return BoardSummary.builder()
@@ -36,6 +43,8 @@ public record BoardFindAllResponse(
                     .boardCategory(BoardCategorySummary.from(queryResults.getBoardCategory()))
                     .title(queryResults.getTitle())
                     .viewCount(queryResults.getViewCount())
+                    .createdAt(queryResults.getCreatedAt())
+                    .isPinned(queryResults.isPinned())
                     .build();
         }
     }

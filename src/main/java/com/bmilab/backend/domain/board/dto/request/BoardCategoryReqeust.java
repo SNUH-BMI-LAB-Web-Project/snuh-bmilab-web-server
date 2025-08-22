@@ -1,13 +1,21 @@
 package com.bmilab.backend.domain.board.dto.request;
 
+import com.bmilab.backend.global.validation.RegExp;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record BoardCategoryReqeust(
         @Schema(description = "게시판 분야 이름", example = "공지사항")
         @NotBlank(message = "게시판 분야 이름은 필수입니다.")
         @Size(max = 30, message = "게시판 분야 이름은 30자 이하로 입력해주세요.")
-        String name
+        String name,
+
+
+        @Schema(description = "게시판 분야 색상", example = "#FFFFFF")
+        @NotBlank(message = "게시판 분야 색상은 필수입니다.")
+        @Pattern(regexp = RegExp.COLOR_EXPRESSION, message = RegExp.COLOR_MESSAGE)
+        String color
 ) {
 }

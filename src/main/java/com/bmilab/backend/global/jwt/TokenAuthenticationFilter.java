@@ -70,7 +70,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
 
-        String[] excludes = { "/auth/", "/swagger-ui", "/api-docs" };
+        String[] excludes = { "/auth/", "/swagger-ui", "/api-docs", "/users/password" };
         String path = request.getRequestURI();
 
         return Arrays.stream(excludes).anyMatch(path::startsWith);

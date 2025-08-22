@@ -39,21 +39,26 @@ public class Leave extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
 
+    @ManyToOne
+    @JoinColumn(name = "processor_id")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    private User processor;
+
     @Column(name = "start_date", nullable = false)
-    private LocalDateTime startDate;
+    private LocalDate startDate;
 
     @Column(name = "end_date")
-    private LocalDateTime endDate;
+    private LocalDate endDate;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     @Column(name = "leave_status", nullable = false)
     private LeaveStatus status;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     @Column(name = "leave_type", nullable = false)
     private LeaveType type;
 
@@ -66,17 +71,24 @@ public class Leave extends BaseTimeEntity {
     @Column(name = "leave_count")
     private Double leaveCount;
 
+    @Column(name = "processed_at")
+    private LocalDateTime processedAt;
+
     @CreatedDate
     @Column(name = "applicated_at", nullable = false)
     private LocalDateTime applicatedAt;
 
-    public void approve() {
+    public void approve(User processor, LocalDateTime now) {
         status = LeaveStatus.APPROVED;
+        this.processor = processor;
+        processedAt = now;
     }
 
-    public void reject(String rejectReason) {
+    public void reject(String rejectReason, User processor, LocalDateTime now) {
         status = LeaveStatus.REJECTED;
         this.rejectReason = rejectReason;
+        this.processor = processor;
+        processedAt = now;
     }
 
     public boolean isNotPending() {
@@ -100,8 +112,8 @@ public class Leave extends BaseTimeEntity {
         LocalDate lastDayOfMonth = yearMonth.atEndOfMonth();
 
         // 실제 비교할 시작일과 종료일 설정
-        LocalDate effectiveStart = startDate.isBefore(firstDayOfMonth.atStartOfDay()) ? firstDayOfMonth : startDate.toLocalDate();
-        LocalDate effectiveEnd = endDate.isAfter(lastDayOfMonth.atStartOfDay()) ? lastDayOfMonth : endDate.toLocalDate();
+        LocalDate effectiveStart = startDate.isBefore(firstDayOfMonth) ? firstDayOfMonth : startDate;
+        LocalDate effectiveEnd = endDate.isAfter(lastDayOfMonth) ? lastDayOfMonth : endDate;
 
         // 포함되는 날짜 수 계산
         return effectiveStart.isAfter(effectiveEnd) ? 0 : (int) (effectiveStart.datesUntil(effectiveEnd.plusDays(1)).count());

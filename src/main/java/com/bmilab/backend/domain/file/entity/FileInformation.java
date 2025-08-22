@@ -48,4 +48,8 @@ public class FileInformation extends BaseTimeEntity {
         this.domainType = domainType;
         this.entityId = entityId;
     }
+
+    public void updateUploadUrl(String newUrl) {
+        this.uploadUrl = newUrl;
+    }
 }

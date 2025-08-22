@@ -29,6 +29,8 @@ spring:
     port: ${MAIL_PORT:587}
     username: ${MAIL_USERNAME}
     password: ${MAIL_PASSWORD}
+    properties:
+      debug: true
 
 cloud:
   aws:
@@ -52,3 +54,11 @@ jwt:
 
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS}
+
+sentry:
+  dsn: ${SENTRY_DSN}
+  send-default-pii: true
+  environment: ${profile}
+
+service:
+  professor-mail-address: ${SERVICE_PROFESSOR_MAIL_ADDRESS}
