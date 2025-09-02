@@ -141,7 +141,6 @@ public interface BoardApi {
             }
     )
     ResponseEntity<BoardDetail> getBoardById(
-            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @PathVariable Long boardId
     );
 }

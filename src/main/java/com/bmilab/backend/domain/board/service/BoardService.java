@@ -12,13 +12,10 @@ import com.bmilab.backend.domain.board.exception.BoardErrorCode;
 import com.bmilab.backend.domain.board.repository.BoardRepository;
 import com.bmilab.backend.domain.file.entity.FileInformation;
 import com.bmilab.backend.domain.file.enums.FileDomainType;
-import com.bmilab.backend.domain.file.exception.FileErrorCode;
-import com.bmilab.backend.domain.file.repository.FileInformationRepository;
 import com.bmilab.backend.domain.file.service.FileService;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.service.UserService;
 import com.bmilab.backend.global.exception.ApiException;
-import com.bmilab.backend.global.external.s3.S3Service;
 import jakarta.persistence.LockTimeoutException;
 import jakarta.persistence.PessimisticLockException;
 import lombok.RequiredArgsConstructor;
@@ -144,12 +141,8 @@ public class BoardService {
                 .build();
     }
 
-    public BoardDetail getBoardDetailById(Long userId, Long boardId) {
-        User user = userService.findUserById(userId);
-
+    public BoardDetail getBoardDetailById(Long boardId) {
         Board board = findBoardById(boardId);
-
-        validateBoardAccessPermission(user, board);
 
         List<FileInformation> files = fileService.findAllByDomainTypeAndEntityId(FileDomainType.BOARD, board.getId());
 
