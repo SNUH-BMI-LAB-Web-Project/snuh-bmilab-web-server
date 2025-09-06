@@ -101,6 +101,7 @@ public class EmailSender {
     public void sendReportEmailAsync(
             String email,
             LocalDate date,
+            String bodyPlain,
             ByteArrayInputStream excelFile,
             ByteArrayInputStream wordFile
     ) throws MessagingException, IOException {
@@ -110,11 +111,12 @@ public class EmailSender {
         sendReportEmail(
                 email,
                 date,
+                bodyPlain,
                 Map.of("일일 업무 보고_" + date + ".xlsx", excelBytes, "일일 업무 보고_" + date + ".docx", wordBytes)
         );
     }
 
-    private void sendReportEmail(String email, LocalDate date, Map<String, byte[]> attachments)
+    private void sendReportEmail(String email, LocalDate date, String bodyPlain, Map<String, byte[]> attachments)
             throws MessagingException, UnsupportedEncodingException {
 
         MimeMessage message = javaMailSender.createMimeMessage();
@@ -123,7 +125,7 @@ public class EmailSender {
         messageHelper.setTo(email);
         messageHelper.setSubject("[SNUH BMI Lab] " + date + " 업무일지 보고드립니다.");
         messageHelper.setReplyTo(mailProperties.getUsername());
-        messageHelper.setText("", false);
+        messageHelper.setText(bodyPlain, false);
 
         for (var entry : attachments.entrySet()) {
             messageHelper.addAttachment(

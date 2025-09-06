@@ -31,4 +31,21 @@ public class ReportExportConverter {
             );
         }).toList();
     }
+
+    public String toMailBodyPlain(List<GetAllReportsQueryResult> results) {
+        StringBuilder sb = new StringBuilder();
+        for (ExcelRow row : toRows(results)) {
+            var d = row.data();
+            sb.append(d.get(0)).append(" / ").append(d.get(1)).append(" / ")
+                    .append(d.get(2)).append(" / ").append(d.get(3)).append("\n")
+                    .append(d.get(4)).append("\n");
+            if (d.size() > 5 && d.get(5) != null && !d.get(5).isEmpty()) {
+                for (String url : d.get(5).split("\\R")) {
+                    if (!url.isBlank()) sb.append("첨부: ").append(url).append("\n");
+                }
+            }
+            sb.append("=====\n");
+        }
+        return sb.toString();
+    }
 }

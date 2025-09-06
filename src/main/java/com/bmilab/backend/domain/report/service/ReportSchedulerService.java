@@ -1,5 +1,7 @@
 package com.bmilab.backend.domain.report.service;
 
+import com.bmilab.backend.domain.report.dto.query.GetAllReportsQueryResult;
+import com.bmilab.backend.domain.report.repository.ReportRepository;
 import com.bmilab.backend.global.email.EmailSender;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @Profile("prod")
@@ -22,6 +25,8 @@ public class ReportSchedulerService {
     private final ReportExcelService reportExcelService;
     private final ReportWordService reportWordService;
     private final EmailSender emailSender;
+    private final ReportRepository reportRepository;
+    private final ReportExportConverter reportExportConverter;
 
     @Value("${service.professor-mail-address}")
     private String professorMailAddress;
@@ -36,10 +41,13 @@ public class ReportSchedulerService {
             reportDay = today.minusDays(3);
         }
 
+        List<GetAllReportsQueryResult> results = reportRepository.findAllByDateWithFiles(reportDay);
+        String bodyPlain = reportExportConverter.toMailBodyPlain(results);
+
         ByteArrayInputStream excelFile = reportExcelService.getReportExcelFileByDateAsBytes(reportDay);
         ByteArrayInputStream wordFile  = reportWordService.getReportWordFileByDateAsBytes(reportDay); // ← 이렇게
 
-        emailSender.sendReportEmailAsync(professorMailAddress, reportDay, excelFile, wordFile);
+        emailSender.sendReportEmailAsync(professorMailAddress, reportDay, bodyPlain, excelFile, wordFile);
 
     }
 
