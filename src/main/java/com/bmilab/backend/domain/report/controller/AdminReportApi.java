@@ -43,4 +43,18 @@ public interface AdminReportApi {
             @RequestParam LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate
     );
+
+    @Operation(summary = "일별 보고 워드파일 다운로드", description = "일별로 업무보고 엑셀파일을 다운로드할 수 있는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "파일 다운로드 성공"
+                    ),
+            }
+    )
+    ResponseEntity<InputStreamResource> getWordFileByCurrentUser(
+            @RequestParam LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate
+    );
 }

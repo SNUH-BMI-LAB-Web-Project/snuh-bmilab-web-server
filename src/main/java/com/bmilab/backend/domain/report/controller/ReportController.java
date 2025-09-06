@@ -4,8 +4,10 @@ import com.bmilab.backend.domain.report.dto.request.ReportRequest;
 import com.bmilab.backend.domain.report.dto.response.ReportFindAllResponse;
 import com.bmilab.backend.domain.report.service.ReportExcelService;
 import com.bmilab.backend.domain.report.service.ReportService;
+import com.bmilab.backend.domain.report.service.ReportWordService;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import com.bmilab.backend.global.utils.ExcelGenerator;
+import com.bmilab.backend.global.utils.WordGenerator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
@@ -32,6 +34,7 @@ public class ReportController implements ReportApi {
 
     private final ReportService reportService;
     private final ReportExcelService reportExcelService;
+    private final ReportWordService reportWordService;
 
     @PostMapping
     public ResponseEntity<Void> createReport(
@@ -95,5 +98,21 @@ public class ReportController implements ReportApi {
                 .header("Content-Disposition", "attachment; filename=report_" + userId + ".xlsx")
                 .contentType(excelMediaType)
                 .body(new InputStreamResource(excel));
+    }
+
+    @GetMapping("/word")
+    public ResponseEntity<InputStreamResource> getWordFileByCurrentUser(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate
+    ){
+        Long userId = userAuthInfo.getUserId();
+        ByteArrayInputStream word = reportWordService.getReportWordFileByUserAsBytes(userId, startDate, endDate);
+        MediaType wordMediaType = MediaType.valueOf(WordGenerator.WORD_MEDIA_TYPE);
+
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=report_" + userId + ".docx")
+                .contentType(wordMediaType)
+                .body(new InputStreamResource(word));
     }
 }
