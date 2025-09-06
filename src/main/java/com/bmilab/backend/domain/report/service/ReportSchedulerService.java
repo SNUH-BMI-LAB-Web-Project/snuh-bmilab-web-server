@@ -1,6 +1,7 @@
 package com.bmilab.backend.domain.report.service;
 
 import com.bmilab.backend.global.email.EmailSender;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -19,13 +20,14 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class ReportSchedulerService {
     private final ReportExcelService reportExcelService;
+    private final ReportWordService reportWordService;
     private final EmailSender emailSender;
 
     @Value("${service.professor-mail-address}")
     private String professorMailAddress;
 
     @Scheduled(cron = "0 0 9 * * MON-FRI", zone = "Asia/Seoul")
-    public void sendReportMail() throws IOException {
+    public void sendReportMail() throws IOException, MessagingException {
         //월요일 -> 금요일꺼 나머지는 전날 꺼
         LocalDate today = LocalDate.now();
         LocalDate reportDay = today.minusDays(1);
@@ -35,6 +37,10 @@ public class ReportSchedulerService {
         }
 
         ByteArrayInputStream excelFile = reportExcelService.getReportExcelFileByDateAsBytes(reportDay);
-        emailSender.sendReportEmailAsync(professorMailAddress, reportDay, excelFile);
+        ByteArrayInputStream wordFile  = reportWordService.getReportWordFileByDateAsBytes(reportDay); // ← 이렇게
+
+        emailSender.sendReportEmailAsync(professorMailAddress, reportDay, excelFile, wordFile);
+
     }
+
 }
