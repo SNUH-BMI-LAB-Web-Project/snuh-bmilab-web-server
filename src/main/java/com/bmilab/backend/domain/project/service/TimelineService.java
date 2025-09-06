@@ -1,27 +1,26 @@
 package com.bmilab.backend.domain.project.service;
 
-import com.bmilab.backend.domain.file.entity.FileInformation;
 import com.bmilab.backend.domain.file.enums.FileDomainType;
-import com.bmilab.backend.domain.file.repository.FileInformationRepository;
 import com.bmilab.backend.domain.file.service.FileService;
 import com.bmilab.backend.domain.project.dto.query.GetAllTimelinesQueryResult;
 import com.bmilab.backend.domain.project.dto.request.TimelineRequest;
 import com.bmilab.backend.domain.project.dto.response.TimelineFindAllResponse;
-import com.bmilab.backend.domain.project.entity.Timeline;
 import com.bmilab.backend.domain.project.entity.Project;
+import com.bmilab.backend.domain.project.entity.Timeline;
 import com.bmilab.backend.domain.project.enums.ProjectAccessPermission;
 import com.bmilab.backend.domain.project.exception.ProjectErrorCode;
 import com.bmilab.backend.domain.project.exception.TimelineErrorCode;
-import com.bmilab.backend.domain.project.repository.TimelineRepository;
 import com.bmilab.backend.domain.project.repository.ProjectRepository;
+import com.bmilab.backend.domain.project.repository.TimelineRepository;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.service.UserService;
 import com.bmilab.backend.global.exception.ApiException;
-import java.util.List;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
