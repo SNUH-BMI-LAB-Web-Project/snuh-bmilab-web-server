@@ -20,12 +20,14 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class EmailSender {
+
     private static final String ORGANIZATION_NAME = "SNUH BMI Lab";
 
     private final MailProperties mailProperties;
@@ -36,6 +38,7 @@ public class EmailSender {
 
     @Async
     public void sendAsyncWithTemplate(String email, String title, String template) {
+
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
 
@@ -57,7 +60,9 @@ public class EmailSender {
     }
 
     @Async
-    public void sendAsyncWithFile(String email, String title, String fileName, ByteArrayInputStream attachment) throws IOException {
+    public void sendAsyncWithFile(String email, String title, String fileName, ByteArrayInputStream attachment)
+            throws IOException {
+
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
 
@@ -68,8 +73,10 @@ public class EmailSender {
             messageHelper.setReplyTo(mailProperties.getUsername());
             messageHelper.setText("", false);
 
-            messageHelper.addAttachment(MimeUtility.encodeText(fileName, "UTF-8", "B"),
-                    new ByteArrayResource(IOUtils.toByteArray(attachment)));
+            messageHelper.addAttachment(
+                    MimeUtility.encodeText(fileName, "UTF-8", "B"),
+                    new ByteArrayResource(IOUtils.toByteArray(attachment))
+            );
             message.addHeader("Precedence", "normal");
             message.addHeader("X-Auto-Response-Suppress", "OOF, AutoReply");
             message.addHeader("Message-ID", generateMessageId());
@@ -81,22 +88,64 @@ public class EmailSender {
     }
 
     public void sendAccountCreateEmailAsync(String email, String username, String password) {
+
         sendAsyncWithTemplate(email, "계정 생성 안내", getAccountCreateTemplate(username, password));
     }
 
     public void sendFindPasswordEmailAsync(String email, String username, String password) {
+
         sendAsyncWithTemplate(email, "비밀번호 재설정 안내", getFindPasswordTemplate(username, password));
     }
 
-    public void sendReportEmailAsync(String email, LocalDate date, ByteArrayInputStream excelFile) throws IOException {
-        sendAsyncWithFile(email, date + " 업무일지 보고드립니다.", "일일 업무 보고_" + date + ".xlsx", excelFile);
+    @Async
+    public void sendReportEmailAsync(
+            String email,
+            LocalDate date,
+            ByteArrayInputStream excelFile,
+            ByteArrayInputStream wordFile
+    ) throws MessagingException, IOException {
+
+        byte[] excelBytes = IOUtils.toByteArray(excelFile);
+        byte[] wordBytes = IOUtils.toByteArray(wordFile);
+        sendReportEmail(
+                email,
+                date,
+                Map.of("일일 업무 보고_" + date + ".xlsx", excelBytes, "일일 업무 보고_" + date + ".docx", wordBytes)
+        );
+    }
+
+    private void sendReportEmail(String email, LocalDate date, Map<String, byte[]> attachments)
+            throws MessagingException, UnsupportedEncodingException {
+
+        MimeMessage message = javaMailSender.createMimeMessage();
+        MimeMessageHelper messageHelper = new MimeMessageHelper(message, true, "UTF-8");
+        messageHelper.setFrom(new InternetAddress(mailProperties.getUsername(), ORGANIZATION_NAME));
+        messageHelper.setTo(email);
+        messageHelper.setSubject("[SNUH BMI Lab] " + date + " 업무일지 보고드립니다.");
+        messageHelper.setReplyTo(mailProperties.getUsername());
+        messageHelper.setText("", false);
+
+        for (var entry : attachments.entrySet()) {
+            messageHelper.addAttachment(
+                    MimeUtility.encodeText(entry.getKey(), "UTF-8", "B"),
+                    new ByteArrayResource(entry.getValue())
+            );
+        }
+
+        message.addHeader("Precedence", "normal");
+        message.addHeader("X-Auto-Response-Suppress", "OOF, AutoReply");
+        message.addHeader("Message-ID", generateMessageId());
+
+        javaMailSender.send(message);
     }
 
     private String generateMessageId() {
+
         return "<" + UUID.randomUUID() + "@%s>".formatted(mailProperties.getUsername().split("@")[1]);
     }
 
     public String getAccountCreateTemplate(String username, String password) {
+
         Context context = new Context();
         context.setVariable("username", username);
         context.setVariable("password", password);
@@ -105,6 +154,7 @@ public class EmailSender {
     }
 
     public String getFindPasswordTemplate(String username, String password) {
+
         Context context = new Context();
         context.setVariable("username", username);
         context.setVariable("password", password);
