@@ -88,9 +88,8 @@ public class BoardController implements BoardApi {
 
     @GetMapping("/{boardId}")
     public ResponseEntity<BoardDetail> getBoardById(
-        @AuthenticationPrincipal UserAuthInfo userAuthInfo,
         @PathVariable Long boardId
     ){
-        return  ResponseEntity.ok(boardService.getBoardDetailById(userAuthInfo.getUserId(), boardId));
+        return  ResponseEntity.ok(boardService.getBoardDetailById(boardId));
     }
 }
