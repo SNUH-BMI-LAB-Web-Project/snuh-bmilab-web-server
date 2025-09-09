@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.cglib.core.Local;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -88,6 +87,21 @@ public interface ReportApi {
             }
     )
     ResponseEntity<InputStreamResource> getExcelFileByCurrentUser(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate
+    );
+
+    @Operation(summary = "내 업무보고 워드파일 다운로드", description = "현재 로그인한 사용자의 업무보고 목록을 엑셀파일로 다운로드할 수 있는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "파일 다운로드 성공"
+                    ),
+            }
+    )
+    ResponseEntity<InputStreamResource> getWordFileByCurrentUser(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate
