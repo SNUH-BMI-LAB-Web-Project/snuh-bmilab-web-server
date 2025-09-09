@@ -7,10 +7,11 @@ import com.bmilab.backend.domain.project.dto.query.GetAllTimelinesQueryResult;
 import com.bmilab.backend.domain.project.entity.QTimeline;
 import com.bmilab.backend.domain.project.entity.Timeline;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.RequiredArgsConstructor;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class TimelineRepositoryCustomImpl implements TimelineRepositoryCustom {
@@ -23,6 +24,7 @@ public class TimelineRepositoryCustomImpl implements TimelineRepositoryCustom {
         List<Timeline> timelines = queryFactory
                 .selectFrom(timeline)
                 .where(timeline.project.id.eq(projectId)) // 필요시 조건
+                .orderBy(timeline.date.desc())
                 .fetch();
 
         Map<Long, List<FileInformation>> fileMap = queryFactory

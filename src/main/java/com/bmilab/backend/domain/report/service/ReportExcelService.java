@@ -1,8 +1,6 @@
 package com.bmilab.backend.domain.report.service;
 
-import com.bmilab.backend.domain.file.entity.FileInformation;
 import com.bmilab.backend.domain.report.dto.query.GetAllReportsQueryResult;
-import com.bmilab.backend.domain.report.entity.Report;
 import com.bmilab.backend.domain.report.repository.ReportRepository;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.utils.ExcelGenerator;
@@ -23,27 +21,13 @@ public class ReportExcelService {
     private final ReportRepository reportRepository;
     private final ExcelGenerator excelGenerator;
     private static final String[] HEADER_TITLES = { "보고 일자", "이름", "이메일", "연구명", "보고 내용", "첨부파일 URL" };
+    private final ReportExportConverter reportExportConverter;
 
-    public List<ExcelRow> generateExcelRows(List<GetAllReportsQueryResult> results) {
-
-        return results.stream().map((result) -> {
-            Report report = result.report();
-            List<FileInformation> files = result.files();
-            String date = report.getDate().toString();
-            String userName = report.getUser().getName();
-            String email = report.getUser().getEmail();
-            String projectTitle = report.getProject().getTitle();
-            String content = report.getContent();
-            List<String> fileUrls = files.stream().map(FileInformation::getUploadUrl).toList();
-
-            return ExcelRow.of(date, userName, email, projectTitle, content, String.join("\n", fileUrls));
-        }).toList();
-    }
 
     public ByteArrayInputStream getReportExcelFileByDateAsBytes(LocalDate date) {
 
         List<GetAllReportsQueryResult> results = reportRepository.findAllByDateWithFiles(date);
-        List<ExcelRow> excelRows = generateExcelRows(results);
+        List<ExcelRow> excelRows = reportExportConverter.toRows(results);
 
         try {
             return excelGenerator.generateBy(HEADER_TITLES, excelRows);
@@ -56,7 +40,7 @@ public class ReportExcelService {
     public File getReportExcelFileByDateAsFile(LocalDate date) {
 
         List<GetAllReportsQueryResult> results = reportRepository.findAllByDateWithFiles(date);
-        List<ExcelRow> excelRows = generateExcelRows(results);
+        List<ExcelRow> excelRows = reportExportConverter.toRows(results);
 
         try {
             return excelGenerator.generateExcelFile(HEADER_TITLES, excelRows, "bmilab-report_" + date + ".xlsx");
@@ -69,7 +53,7 @@ public class ReportExcelService {
     public ByteArrayInputStream getReportExcelFileByUserAsBytes(Long userId, LocalDate startDate, LocalDate endDate) {
 
         List<GetAllReportsQueryResult> results = reportRepository.findReportsByCondition(userId, null, startDate, endDate, null);
-        List<ExcelRow> excelRows = generateExcelRows(results);
+        List<ExcelRow> excelRows = reportExportConverter.toRows(results);
 
         try {
             return excelGenerator.generateBy(HEADER_TITLES, excelRows);
@@ -89,7 +73,7 @@ public class ReportExcelService {
                 null
         );
 
-        List<ExcelRow> excelRows = generateExcelRows(results);
+        List<ExcelRow> excelRows = reportExportConverter.toRows(results);
 
         try {
             return excelGenerator.generateBy(HEADER_TITLES, excelRows);
