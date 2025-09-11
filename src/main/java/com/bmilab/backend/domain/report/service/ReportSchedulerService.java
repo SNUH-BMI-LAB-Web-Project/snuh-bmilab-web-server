@@ -22,8 +22,10 @@ import java.util.List;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ReportSchedulerService {
+
     private final ReportExcelService reportExcelService;
     private final ReportWordService reportWordService;
+    private final TelegramService telegramService;
     private final EmailSender emailSender;
     private final ReportRepository reportRepository;
     private final ReportExportConverter reportExportConverter;
@@ -45,10 +47,14 @@ public class ReportSchedulerService {
         String bodyPlain = reportExportConverter.toMailBodyPlain(results);
 
         ByteArrayInputStream excelFile = reportExcelService.getReportExcelFileByDateAsBytes(reportDay);
-        ByteArrayInputStream wordFile  = reportWordService.getReportWordFileByDateAsBytes(reportDay); // ← 이렇게
+        ByteArrayInputStream wordFile = reportWordService.getReportWordFileByDateAsBytes(reportDay);
 
         emailSender.sendReportEmailAsync(professorMailAddress, reportDay, bodyPlain, excelFile, wordFile);
 
-    }
+        String bodyMarkdown = reportExportConverter.toTelegramBodyMarkdown(results);
 
+        String title = "\\[SNUH BMI Lab\\] `" + reportDay + "` 업무일지 보고드립니다\\.";
+        telegramService.sendMessage(title + "\n\n" + bodyMarkdown);
+
+    }
 }
