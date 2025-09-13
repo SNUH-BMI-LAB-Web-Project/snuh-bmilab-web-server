@@ -60,3 +60,7 @@ sentry:
 
 service:
   professor-mail-address: ${SERVICE_PROFESSOR_MAIL_ADDRESS}
+
+telegram:
+  bot-token: ${TELEGRAM_BOT_TOKEN}
+  chat-id: ${TELEGRAM_CHAT_ID}
