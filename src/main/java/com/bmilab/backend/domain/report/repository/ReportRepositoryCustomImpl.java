@@ -38,6 +38,7 @@ public class ReportRepositoryCustomImpl implements ReportRepositoryCustom {
                         projectFilter,
                         dateBetween
                 ))
+                .orderBy(report.date.desc())
                 .fetch();
 
         Map<Long, List<FileInformation>> fileMap = queryFactory
