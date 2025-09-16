@@ -44,7 +44,10 @@ public class ReportExportConverter {
                     if (!url.isBlank()) sb.append("첨부: ").append(url).append("\n");
                 }
             }
-            sb.append("=====\n");
+            sb.append("\n")
+                    .append("================================\n")
+                    .append("================================\n")
+                    .append("\n");
         }
         return sb.toString();
     }
