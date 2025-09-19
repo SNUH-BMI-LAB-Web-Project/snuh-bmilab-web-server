@@ -66,7 +66,11 @@ public class ReportExportConverter {
                     if (!url.isBlank()) sb.append("첨부: ").append(url).append("\n");
                 }
             }
-            sb.append("\\-\\-\\-\\-\\-\n");
+            sb.append("\n");
+            sb.append("\\=".repeat(20)).append("\n");
+            sb.append("\\=".repeat(20)).append("\n");
+            sb.append("\n");
+
         }
         return sb.toString();
     }
