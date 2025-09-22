@@ -63,7 +63,9 @@ public class ReportExportConverter {
                     .append(escMdV2(d.get(4))).append("\n");
             if (d.size() > 5 && d.get(5) != null && !d.get(5).isEmpty()) {
                 for (String url : d.get(5).split("\\R")) {
-                    if (!url.isBlank()) sb.append("첨부: ").append(url).append("\n");
+                    if (!url.isBlank()) sb.append("첨부: ")
+                            .append("`").append(escCode(url)).append("`")
+                            .append("\n");
                 }
             }
             sb.append("\n");
