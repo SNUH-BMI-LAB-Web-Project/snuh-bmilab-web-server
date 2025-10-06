@@ -89,4 +89,23 @@ public class TaskController implements TaskApi {
         taskService.updateBasicInfo(userAuthInfo.getUserId(), taskId, request);
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/{taskId}/proposal")
+    public ResponseEntity<TaskProposalResponse> getTaskProposal(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    ) {
+        TaskProposalResponse response = taskService.getTaskProposal(userAuthInfo.getUserId(), taskId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{taskId}/proposal")
+    public ResponseEntity<Void> updateProposal(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody @Valid TaskProposalUpdateRequest request
+    ) {
+        taskService.updateProposal(userAuthInfo.getUserId(), taskId, request);
+        return ResponseEntity.ok().build();
+    }
 }

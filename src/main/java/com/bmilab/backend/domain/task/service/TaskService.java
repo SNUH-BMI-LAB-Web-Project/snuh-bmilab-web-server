@@ -25,6 +25,7 @@ import com.bmilab.backend.domain.task.entity.TaskBasicInfo;
 import com.bmilab.backend.domain.task.entity.TaskPeriod;
 import com.bmilab.backend.domain.task.entity.TaskPresentation;
 import com.bmilab.backend.domain.task.entity.TaskProposal;
+import com.bmilab.backend.domain.task.entity.TaskProposalWriter;
 import com.bmilab.backend.domain.task.enums.TaskStatus;
 import com.bmilab.backend.domain.task.exception.TaskErrorCode;
 import com.bmilab.backend.domain.task.repository.*;
@@ -51,6 +52,7 @@ public class TaskService {
     private final TaskPeriodRepository taskPeriodRepository;
     private final TaskBasicInfoRepository taskBasicInfoRepository;
     private final TaskProposalRepository taskProposalRepository;
+    private final TaskProposalWriterRepository taskProposalWriterRepository;
     private final TaskPresentationRepository taskPresentationRepository;
     private final TaskAgreementRepository taskAgreementRepository;
     private final UserService userService;
@@ -218,6 +220,108 @@ public class TaskService {
         }
 
         taskBasicInfoRepository.save(basicInfo);
+    }
+
+    @Transactional
+    public void updateProposal(Long userId, Long taskId, TaskProposalUpdateRequest request) {
+
+        Task task = getTaskById(taskId);
+
+        if (!task.canBeEditedByUser(userId)) {
+            throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
+        }
+
+        TaskProposal proposal = taskProposalRepository.findByTask(task)
+                .orElseGet(() -> TaskProposal.builder().task(task).build());
+
+        proposal.update(
+                request.proposalDeadline(),
+                request.contractorContactName(),
+                request.contractorContactDepartment(),
+                request.contractorContactEmail(),
+                request.contractorContactPhone(),
+                request.internalContactName(),
+                request.internalContactDepartment(),
+                request.internalContactEmail(),
+                request.internalContactPhone()
+        );
+
+        taskProposalRepository.save(proposal);
+
+        taskProposalWriterRepository.deleteByTaskProposal(proposal);
+
+        if (request.proposalWriterIds() != null) {
+            for (Long writerId : request.proposalWriterIds()) {
+                User writer = userService.findUserById(writerId);
+                TaskProposalWriter proposalWriter = TaskProposalWriter.builder()
+                        .taskProposal(proposal)
+                        .user(writer)
+                        .build();
+                taskProposalWriterRepository.save(proposalWriter);
+            }
+        }
+    }
+
+    public TaskProposalResponse getTaskProposal(Long userId, Long taskId) {
+
+        Task task = getTaskById(taskId);
+        TaskProposal proposal = taskProposalRepository.findByTask(task).orElse(null);
+
+        List<TaskProposalResponse.ProposalWriter> writers =
+                proposal != null ? taskProposalWriterRepository.findByTaskProposal(proposal)
+                        .stream()
+                        .map(TaskProposalResponse.ProposalWriter::from)
+                        .collect(Collectors.toList()) : List.of();
+
+        List<FileSummary> finalProposalFiles = fileService.findAllByDomainTypeAndEntityId(
+                        FileDomainType.TASK_FINAL_PROPOSAL,
+                        taskId
+                )
+                .stream()
+                .map(FileSummary::from)
+                .collect(Collectors.toList());
+
+        List<FileSummary> finalSubmissionFiles = fileService.findAllByDomainTypeAndEntityId(
+                        FileDomainType.TASK_FINAL_SUBMISSION,
+                        taskId
+                )
+                .stream()
+                .map(FileSummary::from)
+                .collect(Collectors.toList());
+
+        List<FileSummary> relatedFiles = fileService.findAllByDomainTypeAndEntityId(
+                        FileDomainType.TASK_PROPOSAL_RELATED,
+                        taskId
+                )
+                .stream()
+                .map(FileSummary::from)
+                .collect(Collectors.toList());
+
+        List<FileSummary> meetingNotesFiles = fileService.findAllByDomainTypeAndEntityId(
+                        FileDomainType.TASK_PROPOSAL_MEETING_NOTES,
+                        taskId
+                )
+                .stream()
+                .map(FileSummary::from)
+                .collect(Collectors.toList());
+
+        List<FileSummary> structureDiagramFiles = fileService.findAllByDomainTypeAndEntityId(
+                        FileDomainType.TASK_STRUCTURE_DIAGRAM,
+                        taskId
+                )
+                .stream()
+                .map(FileSummary::from)
+                .collect(Collectors.toList());
+
+        return TaskProposalResponse.from(
+                proposal,
+                writers,
+                finalProposalFiles,
+                finalSubmissionFiles,
+                relatedFiles,
+                meetingNotesFiles,
+                structureDiagramFiles
+        );
     }
 
     private Task getTaskById(Long taskId) {
