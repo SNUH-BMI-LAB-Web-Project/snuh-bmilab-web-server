@@ -13,7 +13,7 @@ public record TaskProposalResponse(
         LocalDateTime proposalDeadline,
 
         @Schema(description = "제안서 작성 연구원 목록")
-        List<ProposalWriter> proposalWriters,
+        List<TaskMemberSummary> proposalWriters,
 
         @Schema(description = "발주처 담당자 이름")
         String contractorContactName,
@@ -57,7 +57,7 @@ public record TaskProposalResponse(
 
     public static TaskProposalResponse from(
             TaskProposal proposal,
-            List<ProposalWriter> writers,
+            List<TaskMemberSummary> writers,
             List<FileSummary> finalProposalFiles,
             List<FileSummary> finalSubmissionFiles,
             List<FileSummary> relatedFiles,
@@ -82,24 +82,5 @@ public record TaskProposalResponse(
                 meetingNotesFiles,
                 structureDiagramFiles
         );
-    }
-
-    public record ProposalWriter(
-            @Schema(description = "작성자 ID")
-            Long userId,
-
-            @Schema(description = "작성자 이름")
-            String name,
-
-            @Schema(description = "작성자 이메일")
-            String email
-    ) {
-        public static ProposalWriter from(TaskProposalWriter writer) {
-            return new ProposalWriter(
-                    writer.getUser().getId(),
-                    writer.getUser().getName(),
-                    writer.getUser().getEmail()
-            );
-        }
     }
 }
