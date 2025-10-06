@@ -169,7 +169,7 @@ public interface TaskApi {
             @PathVariable Long taskId
     );
 
-    @Operation(summary = "제안서 정보 수정", description = "제안서 작성 관련 정보를 수정하는 PATCH API")
+    @Operation(summary = "과제 제안서 정보 수정", description = "제안서 작성 관련 정보를 수정하는 PATCH API")
     @ApiResponses(
             value = {
                     @ApiResponse(
@@ -187,5 +187,44 @@ public interface TaskApi {
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @PathVariable Long taskId,
             @RequestBody TaskProposalUpdateRequest request
+    );
+
+    @Operation(summary = "과제 발표 정보 조회", description = "과제 ID로 발표 정보를 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "발표 정보 조회 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<TaskPresentationResponse> getTaskPresentation(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    );
+
+    @Operation(summary = "과제 발표 정보 수정", description = "발표 준비 관련 정보를 수정하는 PATCH API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "발표 정보 수정 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> updatePresentation(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody TaskPresentationUpdateRequest request
     );
 }

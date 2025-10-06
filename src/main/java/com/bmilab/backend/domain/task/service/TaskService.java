@@ -14,6 +14,7 @@ import com.bmilab.backend.domain.task.dto.request.TaskRequest;
 import com.bmilab.backend.domain.task.dto.response.TaskAgreementResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskBasicInfoResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskBasicResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskMemberSummary;
 import com.bmilab.backend.domain.task.dto.response.TaskPeriodResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskPresentationResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskProposalResponse;
@@ -25,6 +26,7 @@ import com.bmilab.backend.domain.task.entity.TaskBasicInfo;
 import com.bmilab.backend.domain.task.entity.TaskPeriod;
 import com.bmilab.backend.domain.task.entity.TaskPresentation;
 import com.bmilab.backend.domain.task.entity.TaskProposal;
+import com.bmilab.backend.domain.task.entity.TaskPresentationMaker;
 import com.bmilab.backend.domain.task.entity.TaskProposalWriter;
 import com.bmilab.backend.domain.task.enums.TaskStatus;
 import com.bmilab.backend.domain.task.exception.TaskErrorCode;
@@ -54,6 +56,7 @@ public class TaskService {
     private final TaskProposalRepository taskProposalRepository;
     private final TaskProposalWriterRepository taskProposalWriterRepository;
     private final TaskPresentationRepository taskPresentationRepository;
+    private final TaskPresentationMakerRepository taskPresentationMakerRepository;
     private final TaskAgreementRepository taskAgreementRepository;
     private final UserService userService;
     private final FileService fileService;
@@ -267,10 +270,10 @@ public class TaskService {
         Task task = getTaskById(taskId);
         TaskProposal proposal = taskProposalRepository.findByTask(task).orElse(null);
 
-        List<TaskProposalResponse.ProposalWriter> writers =
+        List<TaskMemberSummary> writers =
                 proposal != null ? taskProposalWriterRepository.findByTaskProposal(proposal)
                         .stream()
-                        .map(TaskProposalResponse.ProposalWriter::from)
+                        .map(TaskMemberSummary::fromProposalWriter)
                         .collect(Collectors.toList()) : List.of();
 
         List<FileSummary> finalProposalFiles = fileService.findAllByDomainTypeAndEntityId(
@@ -322,6 +325,78 @@ public class TaskService {
                 meetingNotesFiles,
                 structureDiagramFiles
         );
+    }
+
+    public TaskPresentationResponse getTaskPresentation(Long userId, Long taskId) {
+
+        Task task = getTaskById(taskId);
+        TaskPresentation presentation = taskPresentationRepository.findByTask(task).orElse(null);
+
+        List<TaskMemberSummary> makers =
+                presentation != null ? taskPresentationMakerRepository.findByTaskPresentation(presentation)
+                        .stream()
+                        .map(TaskMemberSummary::fromPresentationMaker)
+                        .collect(Collectors.toList()) : List.of();
+
+        List<FileSummary> finalPresentationFiles = fileService.findAllByDomainTypeAndEntityId(
+                        FileDomainType.TASK_FINAL_PRESENTATION,
+                        taskId
+                )
+                .stream()
+                .map(FileSummary::from)
+                .collect(Collectors.toList());
+
+        List<FileSummary> draftPresentationFiles = fileService.findAllByDomainTypeAndEntityId(
+                        FileDomainType.TASK_DRAFT_PRESENTATION,
+                        taskId
+                )
+                .stream()
+                .map(FileSummary::from)
+                .collect(Collectors.toList());
+
+        return TaskPresentationResponse.from(
+                presentation,
+                makers,
+                finalPresentationFiles,
+                draftPresentationFiles
+        );
+    }
+
+    @Transactional
+    public void updatePresentation(Long userId, Long taskId, TaskPresentationUpdateRequest request) {
+
+        Task task = getTaskById(taskId);
+
+        if (!task.canBeEditedByUser(userId)) {
+            throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
+        }
+
+        TaskPresentation presentation = taskPresentationRepository.findByTask(task)
+                .orElseGet(() -> TaskPresentation.builder().task(task).build());
+
+        presentation.update(
+                request.presentationDeadline(),
+                request.presentationDate(),
+                request.presentationLocation(),
+                request.presenter(),
+                request.attendeeLimit(),
+                request.attendees()
+        );
+
+        taskPresentationRepository.save(presentation);
+
+        taskPresentationMakerRepository.deleteByTaskPresentation(presentation);
+
+        if (request.presentationMakerIds() != null) {
+            for (Long makerId : request.presentationMakerIds()) {
+                User maker = userService.findUserById(makerId);
+                TaskPresentationMaker presentationMaker = TaskPresentationMaker.builder()
+                        .taskPresentation(presentation)
+                        .user(maker)
+                        .build();
+                taskPresentationMakerRepository.save(presentationMaker);
+            }
+        }
     }
 
     private Task getTaskById(Long taskId) {
