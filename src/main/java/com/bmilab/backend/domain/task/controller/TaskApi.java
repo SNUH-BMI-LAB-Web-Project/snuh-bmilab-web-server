@@ -1,6 +1,16 @@
 package com.bmilab.backend.domain.task.controller;
 
+import com.bmilab.backend.domain.task.dto.request.TaskAgreementUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.TaskBasicInfoUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.TaskPeriodUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.TaskPresentationUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.TaskProposalUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskRequest;
+import com.bmilab.backend.domain.task.dto.response.TaskAgreementResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskBasicInfoResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskBasicResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskPresentationResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskProposalResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskStatsResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskSummaryResponse;
 import com.bmilab.backend.domain.task.enums.TaskStatus;
@@ -98,5 +108,45 @@ public interface TaskApi {
             @RequestParam(required = false) TaskStatus status,
             @RequestParam(required = false) String keyword,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) @ParameterObject Pageable pageable
+    );
+
+    @Operation(summary = "과제 기본정보 조회", description = "과제 ID로 기본정보를 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "기본정보 조회 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<TaskBasicInfoResponse> getTaskBasicInfo(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    );
+
+
+    @Operation(summary = "과제 기본정보 수정", description = "과제의 기본 정보(소관부처, 전문기관 등)를 수정하는 PATCH API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "과제 기본 정보 수정 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> updateBasicInfo(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody TaskBasicInfoUpdateRequest request
     );
 }

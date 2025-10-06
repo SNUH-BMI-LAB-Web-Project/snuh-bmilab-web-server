@@ -1,6 +1,16 @@
 package com.bmilab.backend.domain.task.controller;
 
+import com.bmilab.backend.domain.task.dto.request.TaskAgreementUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.TaskBasicInfoUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.TaskPeriodUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.TaskPresentationUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.TaskProposalUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskRequest;
+import com.bmilab.backend.domain.task.dto.response.TaskAgreementResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskBasicInfoResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskBasicResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskPresentationResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskProposalResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskStatsResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskSummaryResponse;
 import com.bmilab.backend.domain.task.enums.TaskStatus;
@@ -59,5 +69,24 @@ public class TaskController implements TaskApi {
     ) {
         Page<TaskSummaryResponse> responses = taskService.getAllTasks(userAuthInfo.getUserId(), status, keyword, pageable);
         return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/{taskId}/basic-info")
+    public ResponseEntity<TaskBasicInfoResponse> getTaskBasicInfo(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    ) {
+        TaskBasicInfoResponse response = taskService.getTaskBasicInfo(userAuthInfo.getUserId(), taskId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{taskId}/basic-info")
+    public ResponseEntity<Void> updateBasicInfo(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody @Valid TaskBasicInfoUpdateRequest request
+    ) {
+        taskService.updateBasicInfo(userAuthInfo.getUserId(), taskId, request);
+        return ResponseEntity.ok().build();
     }
 }
