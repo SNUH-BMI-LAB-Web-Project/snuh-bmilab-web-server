@@ -259,7 +259,8 @@ public class ProjectService {
                 practicalProfessors.isEmpty() ? null : practicalProfessors,
                 category,
                 status,
-                request.isPrivate()
+                request.isPrivate(),
+                project.getTask()
         );
 
         List<Long> updatedParticipantIds = request.participantIds();
