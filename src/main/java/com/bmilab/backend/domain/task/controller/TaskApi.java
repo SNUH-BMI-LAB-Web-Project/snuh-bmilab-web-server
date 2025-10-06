@@ -227,4 +227,44 @@ public interface TaskApi {
             @PathVariable Long taskId,
             @RequestBody TaskPresentationUpdateRequest request
     );
+
+    @Operation(summary = "과제 협약 정보 조회", description = "과제 ID로 협약 정보를 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "협약 정보 조회 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<TaskAgreementResponse> getTaskAgreement(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    );
+
+
+    @Operation(summary = "과제 협약 정보 수정", description = "협약 관련 정보를 수정하는 PATCH API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "협약 정보 수정 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> updateAgreement(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody TaskAgreementUpdateRequest request
+    );
 }

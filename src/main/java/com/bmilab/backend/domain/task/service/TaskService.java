@@ -399,6 +399,51 @@ public class TaskService {
         }
     }
 
+    public TaskAgreementResponse getTaskAgreement(Long userId, Long taskId) {
+
+        Task task = getTaskById(taskId);
+        TaskAgreement agreement = taskAgreementRepository.findByTask(task).orElse(null);
+
+        List<FileSummary> agreementFinalProposalFiles = fileService.findAllByDomainTypeAndEntityId(
+                        FileDomainType.TASK_AGREEMENT_FINAL_PROPOSAL,
+                        taskId
+                )
+                .stream()
+                .map(FileSummary::from)
+                .collect(Collectors.toList());
+
+        List<FileSummary> agreementFinalSubmissionFiles = fileService.findAllByDomainTypeAndEntityId(
+                        FileDomainType.TASK_AGREEMENT_FINAL_SUBMISSION,
+                        taskId
+                )
+                .stream()
+                .map(FileSummary::from)
+                .collect(Collectors.toList());
+
+        return TaskAgreementResponse.from(
+                agreement,
+                agreementFinalProposalFiles,
+                agreementFinalSubmissionFiles
+        );
+    }
+
+    @Transactional
+    public void updateAgreement(Long userId, Long taskId, TaskAgreementUpdateRequest request) {
+
+        Task task = getTaskById(taskId);
+
+        if (!task.canBeEditedByUser(userId)) {
+            throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
+        }
+
+        TaskAgreement agreement = taskAgreementRepository.findByTask(task)
+                .orElseGet(() -> TaskAgreement.builder().task(task).build());
+
+        agreement.update(request.agreementDate());
+
+        taskAgreementRepository.save(agreement);
+    }
+
     private Task getTaskById(Long taskId) {
 
         return taskRepository.findById(taskId).orElseThrow(() -> new ApiException(TaskErrorCode.TASK_NOT_FOUND));
