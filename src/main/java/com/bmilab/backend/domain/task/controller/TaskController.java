@@ -8,7 +8,7 @@ import com.bmilab.backend.domain.task.dto.request.TaskProposalUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskRequest;
 import com.bmilab.backend.domain.task.dto.response.TaskAgreementResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskBasicInfoResponse;
-import com.bmilab.backend.domain.task.dto.response.TaskBasicResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskPeriodResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskPresentationResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskProposalResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskStatsResponse;
@@ -144,6 +144,27 @@ public class TaskController implements TaskApi {
             @RequestBody @Valid TaskAgreementUpdateRequest request
     ) {
         taskService.updateAgreement(userAuthInfo.getUserId(), taskId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{taskId}/periods/{periodId}")
+    public ResponseEntity<TaskPeriodResponse> getTaskPeriod(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @PathVariable Long periodId
+    ) {
+        TaskPeriodResponse response = taskService.getTaskPeriod(userAuthInfo.getUserId(), taskId, periodId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{taskId}/periods/{periodId}")
+    public ResponseEntity<Void> updateTaskPeriod(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @PathVariable Long periodId,
+            @RequestBody @Valid TaskPeriodUpdateRequest request
+    ) {
+        taskService.updateTaskPeriod(userAuthInfo.getUserId(), taskId, periodId, request);
         return ResponseEntity.ok().build();
     }
 }

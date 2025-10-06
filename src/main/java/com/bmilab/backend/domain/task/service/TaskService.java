@@ -1,19 +1,16 @@
 package com.bmilab.backend.domain.task.service;
 
 import com.bmilab.backend.domain.file.dto.response.FileSummary;
-import com.bmilab.backend.domain.file.entity.FileInformation;
 import com.bmilab.backend.domain.file.enums.FileDomainType;
 import com.bmilab.backend.domain.file.service.FileService;
 import com.bmilab.backend.domain.task.dto.request.TaskAgreementUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskBasicInfoUpdateRequest;
-import com.bmilab.backend.domain.task.dto.request.TaskPeriodRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskPeriodUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskPresentationUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskProposalUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskRequest;
 import com.bmilab.backend.domain.task.dto.response.TaskAgreementResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskBasicInfoResponse;
-import com.bmilab.backend.domain.task.dto.response.TaskBasicResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskMemberSummary;
 import com.bmilab.backend.domain.task.dto.response.TaskPeriodResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskPresentationResponse;
@@ -442,6 +439,44 @@ public class TaskService {
         agreement.update(request.agreementDate());
 
         taskAgreementRepository.save(agreement);
+    }
+
+    public TaskPeriodResponse getTaskPeriod(Long userId, Long taskId, Long periodId) {
+
+        Task task = getTaskById(taskId);
+
+        TaskPeriod period = taskPeriodRepository.findById(periodId)
+                .orElseThrow(() -> new ApiException(TaskErrorCode.TASK_NOT_FOUND));
+
+        return TaskPeriodResponse.from(period);
+    }
+
+    @Transactional
+    public void updateTaskPeriod(Long userId, Long taskId, Long periodId, TaskPeriodUpdateRequest request) {
+
+        Task task = getTaskById(taskId);
+
+        if (!task.canBeEditedByUser(userId)) {
+            throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
+        }
+
+        TaskPeriod period = taskPeriodRepository.findById(periodId)
+                .orElseThrow(() -> new ApiException(TaskErrorCode.TASK_NOT_FOUND));
+
+        User manager = request.managerId() != null
+                ? userService.findUserById(request.managerId())
+                : null;
+
+        List<User> members = request.memberIds() != null
+                ? request.memberIds().stream()
+                        .map(userService::findUserById)
+                        .toList()
+                : List.of();
+
+        period.getMembers().clear();
+        period.getMembers().addAll(members);
+
+        taskPeriodRepository.save(period);
     }
 
     private Task getTaskById(Long taskId) {

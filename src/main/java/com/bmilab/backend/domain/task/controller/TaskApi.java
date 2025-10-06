@@ -8,11 +8,13 @@ import com.bmilab.backend.domain.task.dto.request.TaskProposalUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskRequest;
 import com.bmilab.backend.domain.task.dto.response.TaskAgreementResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskBasicInfoResponse;
-import com.bmilab.backend.domain.task.dto.response.TaskBasicResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskPeriodResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskPresentationResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskProposalResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskStatsResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskSummaryResponse;
+
+import java.util.List;
 import com.bmilab.backend.domain.task.enums.TaskStatus;
 import com.bmilab.backend.global.exception.ErrorResponse;
 import com.bmilab.backend.global.security.UserAuthInfo;
@@ -32,8 +34,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.List;
 
 @Tag(name = "Task", description = "과제 관리 API")
 public interface TaskApi {
@@ -266,5 +266,51 @@ public interface TaskApi {
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @PathVariable Long taskId,
             @RequestBody TaskAgreementUpdateRequest request
+    );
+
+    @Operation(summary = "과제 특정 연차 정보 조회", description = "과제 ID와 연차 ID로 특정 연차 정보를 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "연차 정보 조회 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<TaskPeriodResponse> getTaskPeriod(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @PathVariable Long periodId
+    );
+
+    @Operation(summary = "과제 연차별 정보 수정", description = "연차별 담당자 및 참여자 정보를 수정하는 PATCH API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "연차별 정보 수정 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "수정할 수 없는 상태입니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> updateTaskPeriod(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @PathVariable Long periodId,
+            @RequestBody TaskPeriodUpdateRequest request
     );
 }
