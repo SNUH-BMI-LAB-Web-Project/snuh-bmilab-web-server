@@ -28,6 +28,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/tasks")
 @RequiredArgsConstructor
@@ -165,6 +167,25 @@ public class TaskController implements TaskApi {
             @RequestBody @Valid TaskPeriodUpdateRequest request
     ) {
         taskService.updateTaskPeriod(userAuthInfo.getUserId(), taskId, periodId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{taskId}")
+    public ResponseEntity<Void> deleteTask(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    ) {
+        taskService.deleteTask(userAuthInfo.getUserId(), taskId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{taskId}/files/{fileId}")
+    public ResponseEntity<Void> deleteTaskFile(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @PathVariable UUID fileId
+    ) {
+        taskService.deleteTaskFile(userAuthInfo.getUserId(), taskId, fileId);
         return ResponseEntity.ok().build();
     }
 }

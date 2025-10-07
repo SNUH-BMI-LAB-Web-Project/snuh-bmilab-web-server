@@ -13,8 +13,6 @@ import com.bmilab.backend.domain.task.dto.response.TaskPresentationResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskProposalResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskStatsResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskSummaryResponse;
-
-import java.util.List;
 import com.bmilab.backend.domain.task.enums.TaskStatus;
 import com.bmilab.backend.global.exception.ErrorResponse;
 import com.bmilab.backend.global.security.UserAuthInfo;
@@ -312,5 +310,49 @@ public interface TaskApi {
             @PathVariable Long taskId,
             @PathVariable Long periodId,
             @RequestBody TaskPeriodUpdateRequest request
+    );
+
+    @Operation(summary = "과제 삭제", description = "과제를 삭제하는 DELETE API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "과제 삭제 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "삭제할 수 없는 상태입니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> deleteTask(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    );
+
+    @Operation(summary = "과제 첨부파일 삭제", description = "과제 첨부파일을 삭제하는 DELETE API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "첨부파일 삭제 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "파일 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> deleteTaskFile(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @PathVariable java.util.UUID fileId
     );
 }

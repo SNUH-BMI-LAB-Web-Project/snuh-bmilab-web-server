@@ -3,12 +3,14 @@ package com.bmilab.backend.domain.task.service;
 import com.bmilab.backend.domain.file.dto.response.FileSummary;
 import com.bmilab.backend.domain.file.enums.FileDomainType;
 import com.bmilab.backend.domain.file.service.FileService;
+import com.bmilab.backend.domain.task.dto.request.AcknowledgementUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskAgreementUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskBasicInfoUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskPeriodUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskPresentationUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskProposalUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskRequest;
+import com.bmilab.backend.domain.task.dto.response.AcknowledgementResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskAgreementResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskBasicInfoResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskMemberSummary;
@@ -17,14 +19,7 @@ import com.bmilab.backend.domain.task.dto.response.TaskPresentationResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskProposalResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskStatsResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskSummaryResponse;
-import com.bmilab.backend.domain.task.entity.Task;
-import com.bmilab.backend.domain.task.entity.TaskAgreement;
-import com.bmilab.backend.domain.task.entity.TaskBasicInfo;
-import com.bmilab.backend.domain.task.entity.TaskPeriod;
-import com.bmilab.backend.domain.task.entity.TaskPresentation;
-import com.bmilab.backend.domain.task.entity.TaskProposal;
-import com.bmilab.backend.domain.task.entity.TaskPresentationMaker;
-import com.bmilab.backend.domain.task.entity.TaskProposalWriter;
+import com.bmilab.backend.domain.task.entity.*;
 import com.bmilab.backend.domain.task.enums.TaskStatus;
 import com.bmilab.backend.domain.task.exception.TaskErrorCode;
 import com.bmilab.backend.domain.task.repository.*;
@@ -55,6 +50,7 @@ public class TaskService {
     private final TaskPresentationRepository taskPresentationRepository;
     private final TaskPresentationMakerRepository taskPresentationMakerRepository;
     private final TaskAgreementRepository taskAgreementRepository;
+    private final AcknowledgementRepository acknowledgementRepository;
     private final UserService userService;
     private final FileService fileService;
 
@@ -477,6 +473,30 @@ public class TaskService {
         period.getMembers().addAll(members);
 
         taskPeriodRepository.save(period);
+    }
+
+    @Transactional
+    public void deleteTask(Long userId, Long taskId) {
+
+        Task task = getTaskById(taskId);
+
+        if (!task.canBeEditedByUser(userId)) {
+            throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
+        }
+
+        taskRepository.delete(task);
+    }
+
+    @Transactional
+    public void deleteTaskFile(Long userId, Long taskId, java.util.UUID fileId) {
+
+        Task task = getTaskById(taskId);
+
+        if (!task.canBeEditedByUser(userId)) {
+            throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
+        }
+
+        fileService.deleteFile(fileId);
     }
 
     private Task getTaskById(Long taskId) {
