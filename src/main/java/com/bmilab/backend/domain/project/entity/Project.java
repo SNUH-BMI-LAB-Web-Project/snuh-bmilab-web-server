@@ -2,6 +2,7 @@ package com.bmilab.backend.domain.project.entity;
 
 import com.bmilab.backend.domain.project.enums.ProjectStatus;
 import com.bmilab.backend.domain.projectcategory.entity.ProjectCategory;
+import com.bmilab.backend.domain.task.entity.Task;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.enums.Role;
 import com.bmilab.backend.global.entity.BaseTimeEntity;
@@ -85,6 +86,11 @@ public class Project extends BaseTimeEntity {
     @Column(name = "is_pinned", columnDefinition = "TINYINT(1)")
     private boolean isPinned = false;
 
+    @ManyToOne
+    @JoinColumn(name = "task_id")
+    @OnDelete(action = OnDeleteAction.SET_NULL)
+    private Task task;
+
     public boolean canBeEditedBy(User user) {
         return author.getId().equals(user.getId()) || user.getRole() == Role.ADMIN;
     }
@@ -98,7 +104,8 @@ public class Project extends BaseTimeEntity {
             List<String> practicalProfessorList,
             ProjectCategory category,
             ProjectStatus status,
-            boolean isPrivate
+            boolean isPrivate,
+            Task task
     ) {
         this.title = title;
         this.content = content;
@@ -110,6 +117,7 @@ public class Project extends BaseTimeEntity {
         this.category = category;
         this.status = status;
         this.isPrivate = isPrivate;
+        this.task = task;
     }
 
     public void complete(LocalDate endDate) {

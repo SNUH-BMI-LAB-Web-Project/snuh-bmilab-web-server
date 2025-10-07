@@ -41,12 +41,19 @@ public class FileInformation extends BaseTimeEntity {
     @Column(name = "entity_id")
     private Long entityId;
 
+    @Column(name = "category")
+    private String category;
+
     @Column(name = "upload_url", nullable = false, columnDefinition = "TEXT")
     private String uploadUrl;
 
     public void updateDomain(FileDomainType domainType, Long entityId) {
         this.domainType = domainType;
         this.entityId = entityId;
+    }
+
+    public void updateCategory(String category) {
+        this.category = category;
     }
 
     public void updateUploadUrl(String newUrl) {
