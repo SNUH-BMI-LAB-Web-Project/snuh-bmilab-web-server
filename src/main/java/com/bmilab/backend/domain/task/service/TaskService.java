@@ -7,6 +7,7 @@ import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.project.repository.ProjectRepository;
 import com.bmilab.backend.domain.task.dto.request.AcknowledgementUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.ConferenceRequest;
+import com.bmilab.backend.domain.task.dto.request.PatentRequest;
 import com.bmilab.backend.domain.task.dto.request.PublicationUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskAgreementUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskBasicInfoUpdateRequest;
@@ -16,6 +17,7 @@ import com.bmilab.backend.domain.task.dto.request.TaskProposalUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskRequest;
 import com.bmilab.backend.domain.task.dto.response.AcknowledgementResponse;
 import com.bmilab.backend.domain.task.dto.response.ConferenceResponse;
+import com.bmilab.backend.domain.task.dto.response.PatentResponse;
 import com.bmilab.backend.domain.task.dto.response.PublicationResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskAgreementResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskBasicInfoResponse;
@@ -60,6 +62,7 @@ public class TaskService {
     private final AcknowledgementRepository acknowledgementRepository;
     private final PublicationRepository publicationRepository;
     private final ConferenceRepository conferenceRepository;
+    private final PatentRepository patentRepository;
     private final ProjectRepository projectRepository;
     private final UserService userService;
     private final FileService fileService;
@@ -587,6 +590,35 @@ public class TaskService {
         );
 
         conferenceRepository.save(conference);
+    }
+
+    public PatentResponse getPatent(Long userId, Long taskId) {
+
+        Task task = getTaskById(taskId);
+        Patent patent = patentRepository.findByTask(task).orElse(null);
+
+        return PatentResponse.from(patent);
+    }
+
+    @Transactional
+    public void savePatent(Long userId, Long taskId, PatentRequest request) {
+
+        Task task = getTaskById(taskId);
+
+        if (!task.canBeEditedByUser(userId)) {
+            throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
+        }
+
+        Patent patent = patentRepository.findByTask(task)
+                .orElseGet(() -> Patent.builder().task(task).build());
+
+        patent.update(
+                request.patentTitle(),
+                request.patentNumber(),
+                request.applicationDate()
+        );
+
+        patentRepository.save(patent);
     }
 
     private Task getTaskById(Long taskId) {

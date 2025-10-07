@@ -2,6 +2,7 @@ package com.bmilab.backend.domain.task.controller;
 
 import com.bmilab.backend.domain.task.dto.request.AcknowledgementUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.ConferenceRequest;
+import com.bmilab.backend.domain.task.dto.request.PatentRequest;
 import com.bmilab.backend.domain.task.dto.request.PublicationUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskAgreementUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskBasicInfoUpdateRequest;
@@ -11,6 +12,7 @@ import com.bmilab.backend.domain.task.dto.request.TaskProposalUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskRequest;
 import com.bmilab.backend.domain.task.dto.response.AcknowledgementResponse;
 import com.bmilab.backend.domain.task.dto.response.ConferenceResponse;
+import com.bmilab.backend.domain.task.dto.response.PatentResponse;
 import com.bmilab.backend.domain.task.dto.response.PublicationResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskAgreementResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskBasicInfoResponse;
@@ -260,6 +262,25 @@ public class TaskController implements TaskApi {
             @RequestBody @Valid ConferenceRequest request
     ) {
         taskService.saveConference(userAuthInfo.getUserId(), taskId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{taskId}/patent")
+    public ResponseEntity<PatentResponse> getPatent(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    ) {
+        PatentResponse response = taskService.getPatent(userAuthInfo.getUserId(), taskId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{taskId}/patent")
+    public ResponseEntity<Void> savePatent(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody @Valid PatentRequest request
+    ) {
+        taskService.savePatent(userAuthInfo.getUserId(), taskId, request);
         return ResponseEntity.ok().build();
     }
 }
