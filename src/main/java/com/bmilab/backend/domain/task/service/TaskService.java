@@ -6,6 +6,7 @@ import com.bmilab.backend.domain.file.service.FileService;
 import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.project.repository.ProjectRepository;
 import com.bmilab.backend.domain.task.dto.request.AcknowledgementUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.ConferenceRequest;
 import com.bmilab.backend.domain.task.dto.request.PublicationUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskAgreementUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskBasicInfoUpdateRequest;
@@ -14,6 +15,7 @@ import com.bmilab.backend.domain.task.dto.request.TaskPresentationUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskProposalUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskRequest;
 import com.bmilab.backend.domain.task.dto.response.AcknowledgementResponse;
+import com.bmilab.backend.domain.task.dto.response.ConferenceResponse;
 import com.bmilab.backend.domain.task.dto.response.PublicationResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskAgreementResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskBasicInfoResponse;
@@ -57,6 +59,7 @@ public class TaskService {
     private final TaskAgreementRepository taskAgreementRepository;
     private final AcknowledgementRepository acknowledgementRepository;
     private final PublicationRepository publicationRepository;
+    private final ConferenceRepository conferenceRepository;
     private final ProjectRepository projectRepository;
     private final UserService userService;
     private final FileService fileService;
@@ -554,6 +557,36 @@ public class TaskService {
         );
 
         publicationRepository.save(publication);
+    }
+
+    public ConferenceResponse getConference(Long userId, Long taskId) {
+
+        Task task = getTaskById(taskId);
+        Conference conference = conferenceRepository.findByTask(task).orElse(null);
+
+        return ConferenceResponse.from(conference);
+    }
+
+    @Transactional
+    public void saveConference(Long userId, Long taskId, ConferenceRequest request) {
+
+        Task task = getTaskById(taskId);
+
+        if (!task.canBeEditedByUser(userId)) {
+            throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
+        }
+
+        Conference conference = conferenceRepository.findByTask(task)
+                .orElseGet(() -> Conference.builder().task(task).build());
+
+        conference.update(
+                request.presentationTitle(),
+                request.conferenceName(),
+                request.presenter(),
+                request.presentationDate()
+        );
+
+        conferenceRepository.save(conference);
     }
 
     private Task getTaskById(Long taskId) {
