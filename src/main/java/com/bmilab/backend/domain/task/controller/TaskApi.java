@@ -1,6 +1,7 @@
 package com.bmilab.backend.domain.task.controller;
 
 import com.bmilab.backend.domain.task.dto.request.AcknowledgementUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.PublicationUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskAgreementUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskBasicInfoUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskPeriodUpdateRequest;
@@ -8,6 +9,7 @@ import com.bmilab.backend.domain.task.dto.request.TaskPresentationUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskProposalUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskRequest;
 import com.bmilab.backend.domain.task.dto.response.AcknowledgementResponse;
+import com.bmilab.backend.domain.task.dto.response.PublicationResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskAgreementResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskBasicInfoResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskPeriodResponse;
@@ -422,5 +424,49 @@ public interface TaskApi {
     ResponseEntity<List<TaskProjectSummary>> getTaskProjects(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @PathVariable Long taskId
+    );
+
+    @Operation(summary = "논문 정보 조회", description = "과제별 논문 정보를 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "논문 정보 조회 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<PublicationResponse> getPublication(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    );
+
+    @Operation(summary = "논문 정보 저장", description = "논문 정보를 저장하는 PUT API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "논문 정보 저장 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "저장할 수 없는 상태입니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> savePublication(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody PublicationUpdateRequest request
     );
 }

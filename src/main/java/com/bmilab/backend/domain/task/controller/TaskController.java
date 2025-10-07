@@ -1,6 +1,7 @@
 package com.bmilab.backend.domain.task.controller;
 
 import com.bmilab.backend.domain.task.dto.request.AcknowledgementUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.PublicationUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskAgreementUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskBasicInfoUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskPeriodUpdateRequest;
@@ -8,6 +9,7 @@ import com.bmilab.backend.domain.task.dto.request.TaskPresentationUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskProposalUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskRequest;
 import com.bmilab.backend.domain.task.dto.response.AcknowledgementResponse;
+import com.bmilab.backend.domain.task.dto.response.PublicationResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskAgreementResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskBasicInfoResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskPeriodResponse;
@@ -219,5 +221,24 @@ public class TaskController implements TaskApi {
     ) {
         List<TaskProjectSummary> response = taskService.getTaskProjects(userAuthInfo.getUserId(), taskId);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{taskId}/publication")
+    public ResponseEntity<PublicationResponse> getPublication(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    ) {
+        PublicationResponse response = taskService.getPublication(userAuthInfo.getUserId(), taskId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{taskId}/publication")
+    public ResponseEntity<Void> savePublication(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody @Valid PublicationUpdateRequest request
+    ) {
+        taskService.savePublication(userAuthInfo.getUserId(), taskId, request);
+        return ResponseEntity.ok().build();
     }
 }

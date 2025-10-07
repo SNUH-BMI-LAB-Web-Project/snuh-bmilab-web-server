@@ -6,6 +6,7 @@ import com.bmilab.backend.domain.file.service.FileService;
 import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.project.repository.ProjectRepository;
 import com.bmilab.backend.domain.task.dto.request.AcknowledgementUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.PublicationUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskAgreementUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskBasicInfoUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskPeriodUpdateRequest;
@@ -13,6 +14,7 @@ import com.bmilab.backend.domain.task.dto.request.TaskPresentationUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskProposalUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskRequest;
 import com.bmilab.backend.domain.task.dto.response.AcknowledgementResponse;
+import com.bmilab.backend.domain.task.dto.response.PublicationResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskAgreementResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskBasicInfoResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskMemberSummary;
@@ -54,6 +56,7 @@ public class TaskService {
     private final TaskPresentationMakerRepository taskPresentationMakerRepository;
     private final TaskAgreementRepository taskAgreementRepository;
     private final AcknowledgementRepository acknowledgementRepository;
+    private final PublicationRepository publicationRepository;
     private final ProjectRepository projectRepository;
     private final UserService userService;
     private final FileService fileService;
@@ -267,11 +270,10 @@ public class TaskService {
         Task task = getTaskById(taskId);
         TaskProposal proposal = taskProposalRepository.findByTask(task).orElse(null);
 
-        List<TaskMemberSummary> writers =
-                proposal != null ? taskProposalWriterRepository.findByTaskProposal(proposal)
-                        .stream()
-                        .map(TaskMemberSummary::fromProposalWriter)
-                        .collect(Collectors.toList()) : List.of();
+        List<TaskMemberSummary> writers = proposal != null ? taskProposalWriterRepository.findByTaskProposal(proposal)
+                .stream()
+                .map(TaskMemberSummary::fromProposalWriter)
+                .collect(Collectors.toList()) : List.of();
 
         List<FileSummary> finalProposalFiles = fileService.findAllByDomainTypeAndEntityId(
                         FileDomainType.TASK_FINAL_PROPOSAL,
@@ -351,12 +353,7 @@ public class TaskService {
                 .map(FileSummary::from)
                 .collect(Collectors.toList());
 
-        return TaskPresentationResponse.from(
-                presentation,
-                makers,
-                finalPresentationFiles,
-                draftPresentationFiles
-        );
+        return TaskPresentationResponse.from(presentation, makers, finalPresentationFiles, draftPresentationFiles);
     }
 
     @Transactional
@@ -417,11 +414,7 @@ public class TaskService {
                 .map(FileSummary::from)
                 .collect(Collectors.toList());
 
-        return TaskAgreementResponse.from(
-                agreement,
-                agreementFinalProposalFiles,
-                agreementFinalSubmissionFiles
-        );
+        return TaskAgreementResponse.from(agreement, agreementFinalProposalFiles, agreementFinalSubmissionFiles);
     }
 
     @Transactional
@@ -463,14 +456,10 @@ public class TaskService {
         TaskPeriod period = taskPeriodRepository.findById(periodId)
                 .orElseThrow(() -> new ApiException(TaskErrorCode.TASK_NOT_FOUND));
 
-        User manager = request.managerId() != null
-                ? userService.findUserById(request.managerId())
-                : null;
+        User manager = request.managerId() != null ? userService.findUserById(request.managerId()) : null;
 
         List<User> members = request.memberIds() != null
-                ? request.memberIds().stream()
-                        .map(userService::findUserById)
-                        .toList()
+                ? request.memberIds().stream().map(userService::findUserById).toList()
                 : List.of();
 
         period.getMembers().clear();
@@ -523,11 +512,7 @@ public class TaskService {
         Acknowledgement acknowledgement = acknowledgementRepository.findByTask(task)
                 .orElseGet(() -> Acknowledgement.builder().task(task).build());
 
-        acknowledgement.update(
-                request.acknowledgementText(),
-                request.relatedInfo(),
-                request.relatedLink()
-        );
+        acknowledgement.update(request.acknowledgementText(), request.relatedInfo(), request.relatedLink());
 
         acknowledgementRepository.save(acknowledgement);
     }
@@ -537,9 +522,38 @@ public class TaskService {
         Task task = getTaskById(taskId);
         List<Project> projects = projectRepository.findByTask(task);
 
-        return projects.stream()
-                .map(TaskProjectSummary::from)
-                .collect(Collectors.toList());
+        return projects.stream().map(TaskProjectSummary::from).collect(Collectors.toList());
+    }
+
+    public PublicationResponse getPublication(Long userId, Long taskId) {
+
+        Task task = getTaskById(taskId);
+        Publication publication = publicationRepository.findByTask(task).orElse(null);
+
+        return PublicationResponse.from(publication);
+    }
+
+    @Transactional
+    public void savePublication(Long userId, Long taskId, PublicationUpdateRequest request) {
+
+        Task task = getTaskById(taskId);
+
+        if (!task.canBeEditedByUser(userId)) {
+            throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
+        }
+
+        Publication publication = publicationRepository.findByTask(task)
+                .orElseGet(() -> Publication.builder().task(task).build());
+
+        publication.update(
+                request.title(),
+                request.authors(),
+                request.journal(),
+                request.publicationDate(),
+                request.doi()
+        );
+
+        publicationRepository.save(publication);
     }
 
     private Task getTaskById(Long taskId) {
