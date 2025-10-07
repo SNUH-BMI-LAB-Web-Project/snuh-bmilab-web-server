@@ -3,6 +3,8 @@ package com.bmilab.backend.domain.task.service;
 import com.bmilab.backend.domain.file.dto.response.FileSummary;
 import com.bmilab.backend.domain.file.enums.FileDomainType;
 import com.bmilab.backend.domain.file.service.FileService;
+import com.bmilab.backend.domain.project.entity.Project;
+import com.bmilab.backend.domain.project.repository.ProjectRepository;
 import com.bmilab.backend.domain.task.dto.request.AcknowledgementUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskAgreementUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskBasicInfoUpdateRequest;
@@ -16,6 +18,7 @@ import com.bmilab.backend.domain.task.dto.response.TaskBasicInfoResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskMemberSummary;
 import com.bmilab.backend.domain.task.dto.response.TaskPeriodResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskPresentationResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskProjectSummary;
 import com.bmilab.backend.domain.task.dto.response.TaskProposalResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskStatsResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskSummaryResponse;
@@ -51,6 +54,7 @@ public class TaskService {
     private final TaskPresentationMakerRepository taskPresentationMakerRepository;
     private final TaskAgreementRepository taskAgreementRepository;
     private final AcknowledgementRepository acknowledgementRepository;
+    private final ProjectRepository projectRepository;
     private final UserService userService;
     private final FileService fileService;
 
@@ -526,6 +530,16 @@ public class TaskService {
         );
 
         acknowledgementRepository.save(acknowledgement);
+    }
+
+    public List<TaskProjectSummary> getTaskProjects(Long userId, Long taskId) {
+
+        Task task = getTaskById(taskId);
+        List<Project> projects = projectRepository.findByTask(task);
+
+        return projects.stream()
+                .map(TaskProjectSummary::from)
+                .collect(Collectors.toList());
     }
 
     private Task getTaskById(Long taskId) {

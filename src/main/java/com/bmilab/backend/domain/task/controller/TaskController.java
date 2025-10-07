@@ -12,6 +12,7 @@ import com.bmilab.backend.domain.task.dto.response.TaskAgreementResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskBasicInfoResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskPeriodResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskPresentationResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskProjectSummary;
 import com.bmilab.backend.domain.task.dto.response.TaskProposalResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskStatsResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskSummaryResponse;
@@ -30,6 +31,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -208,5 +210,14 @@ public class TaskController implements TaskApi {
     ) {
         taskService.saveAcknowledgement(userAuthInfo.getUserId(), taskId, request);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{taskId}/projects")
+    public ResponseEntity<List<TaskProjectSummary>> getTaskProjects(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    ) {
+        List<TaskProjectSummary> response = taskService.getTaskProjects(userAuthInfo.getUserId(), taskId);
+        return ResponseEntity.ok(response);
     }
 }

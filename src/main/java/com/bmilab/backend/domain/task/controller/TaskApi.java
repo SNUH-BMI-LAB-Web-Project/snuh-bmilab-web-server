@@ -12,6 +12,7 @@ import com.bmilab.backend.domain.task.dto.response.TaskAgreementResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskBasicInfoResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskPeriodResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskPresentationResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskProjectSummary;
 import com.bmilab.backend.domain.task.dto.response.TaskProposalResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskStatsResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskSummaryResponse;
@@ -34,6 +35,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 @Tag(name = "Task", description = "과제 관리 API")
 public interface TaskApi {
@@ -400,5 +403,24 @@ public interface TaskApi {
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @PathVariable Long taskId,
             @RequestBody AcknowledgementUpdateRequest request
+    );
+
+    @Operation(summary = "과제 관련 연구프로젝트 목록 조회", description = "과제와 연결된 연구프로젝트 목록을 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "연구프로젝트 목록 조회 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<List<TaskProjectSummary>> getTaskProjects(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
     );
 }
