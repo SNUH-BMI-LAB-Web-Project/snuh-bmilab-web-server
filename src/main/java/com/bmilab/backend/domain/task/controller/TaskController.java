@@ -1,11 +1,13 @@
 package com.bmilab.backend.domain.task.controller;
 
+import com.bmilab.backend.domain.task.dto.request.AcknowledgementUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskAgreementUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskBasicInfoUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskPeriodUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskPresentationUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskProposalUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskRequest;
+import com.bmilab.backend.domain.task.dto.response.AcknowledgementResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskAgreementResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskBasicInfoResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskPeriodResponse;
@@ -186,6 +188,25 @@ public class TaskController implements TaskApi {
             @PathVariable UUID fileId
     ) {
         taskService.deleteTaskFile(userAuthInfo.getUserId(), taskId, fileId);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{taskId}/acknowledgement")
+    public ResponseEntity<AcknowledgementResponse> getAcknowledgement(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    ) {
+        AcknowledgementResponse response = taskService.getAcknowledgement(userAuthInfo.getUserId(), taskId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{taskId}/acknowledgement")
+    public ResponseEntity<Void> saveAcknowledgement(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody @Valid AcknowledgementUpdateRequest request
+    ) {
+        taskService.saveAcknowledgement(userAuthInfo.getUserId(), taskId, request);
         return ResponseEntity.ok().build();
     }
 }

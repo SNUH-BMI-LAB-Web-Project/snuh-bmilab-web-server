@@ -499,6 +499,35 @@ public class TaskService {
         fileService.deleteFile(fileId);
     }
 
+    public AcknowledgementResponse getAcknowledgement(Long userId, Long taskId) {
+
+        Task task = getTaskById(taskId);
+        Acknowledgement acknowledgement = acknowledgementRepository.findByTask(task).orElse(null);
+
+        return AcknowledgementResponse.from(acknowledgement);
+    }
+
+    @Transactional
+    public void saveAcknowledgement(Long userId, Long taskId, AcknowledgementUpdateRequest request) {
+
+        Task task = getTaskById(taskId);
+
+        if (!task.canBeEditedByUser(userId)) {
+            throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
+        }
+
+        Acknowledgement acknowledgement = acknowledgementRepository.findByTask(task)
+                .orElseGet(() -> Acknowledgement.builder().task(task).build());
+
+        acknowledgement.update(
+                request.acknowledgementText(),
+                request.relatedInfo(),
+                request.relatedLink()
+        );
+
+        acknowledgementRepository.save(acknowledgement);
+    }
+
     private Task getTaskById(Long taskId) {
 
         return taskRepository.findById(taskId).orElseThrow(() -> new ApiException(TaskErrorCode.TASK_NOT_FOUND));
