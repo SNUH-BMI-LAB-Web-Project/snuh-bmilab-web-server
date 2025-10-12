@@ -102,6 +102,14 @@ public class TaskService {
                 .build();
 
         taskRepository.save(task);
+
+        for (int i = 1; i <= request.totalYears(); i++) {
+            TaskPeriod period = TaskPeriod.builder()
+                    .task(task)
+                    .yearNumber(i)
+                    .build();
+            taskPeriodRepository.save(period);
+        }
     }
 
     @Transactional
