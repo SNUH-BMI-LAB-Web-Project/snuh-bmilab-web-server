@@ -243,6 +243,14 @@ public class TaskService {
         }
 
         taskBasicInfoRepository.save(basicInfo);
+
+        if (request.rfpFileIds() != null) {
+            fileService.syncFiles(request.rfpFileIds(), FileDomainType.TASK_RFP, taskId);
+        }
+
+        if (request.announcementFileIds() != null) {
+            fileService.syncFiles(request.announcementFileIds(), FileDomainType.TASK_ANNOUNCEMENT, taskId);
+        }
     }
 
     @Transactional
@@ -482,8 +490,7 @@ public class TaskService {
                 ? request.memberIds().stream().map(userService::findUserById).toList()
                 : List.of();
 
-        period.getMembers().clear();
-        period.getMembers().addAll(members);
+        period.update(manager, members);
 
         taskPeriodRepository.save(period);
     }
