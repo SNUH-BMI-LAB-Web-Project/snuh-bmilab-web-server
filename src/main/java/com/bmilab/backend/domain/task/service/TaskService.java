@@ -170,13 +170,19 @@ public class TaskService {
                 taskId
         ).stream().map(FileSummary::from).collect(Collectors.toList());
 
+        List<TaskPeriodResponse> periods = taskPeriodRepository.findByTaskOrderByYearNumberAsc(task)
+                .stream()
+                .map(TaskPeriodResponse::from)
+                .collect(Collectors.toList());
+
         return TaskBasicInfoResponse.from(
                 basicInfo,
                 task.getStartDate(),
                 task.getEndDate(),
                 task.getThreeFiveRule(),
                 rfpFiles,
-                announcementFiles
+                announcementFiles,
+                periods
         );
     }
 
