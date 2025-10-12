@@ -243,6 +243,14 @@ public class TaskService {
         }
 
         taskBasicInfoRepository.save(basicInfo);
+
+        if (request.rfpFileIds() != null) {
+            fileService.syncFiles(request.rfpFileIds(), FileDomainType.TASK_RFP, taskId);
+        }
+
+        if (request.announcementFileIds() != null) {
+            fileService.syncFiles(request.announcementFileIds(), FileDomainType.TASK_ANNOUNCEMENT, taskId);
+        }
     }
 
     @Transactional

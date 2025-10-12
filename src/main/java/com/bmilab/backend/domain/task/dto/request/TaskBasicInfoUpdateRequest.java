@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 
 public record TaskBasicInfoUpdateRequest(
 
@@ -40,6 +42,12 @@ public record TaskBasicInfoUpdateRequest(
         String businessContactPhone,
 
         @Schema(description = "공고 링크", example = "https://example.or.kr/announcement/2025-001")
-        String announcementLink
+        String announcementLink,
+
+        @Schema(description = "RFP 파일 ID 목록")
+        List<UUID> rfpFileIds,
+
+        @Schema(description = "공고서류 파일 ID 목록")
+        List<UUID> announcementFileIds
 ) {
 }
