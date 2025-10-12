@@ -45,9 +45,12 @@ public record TaskBasicInfoResponse(
         List<FileSummary> rfpFiles,
 
         @Schema(description = "공고서류 전체 정보 파일")
-        List<FileSummary> announcementFiles
+        List<FileSummary> announcementFiles,
+
+        @Schema(description = "연차별 목록")
+        List<TaskPeriodResponse> periods
 ) {
-    public static TaskBasicInfoResponse from(TaskBasicInfo basicInfo, LocalDate announcementStartDate, LocalDate announcementEndDate, Boolean threeFiveRule, List<FileSummary> rfpFiles, List<FileSummary> announcementFiles) {
+    public static TaskBasicInfoResponse from(TaskBasicInfo basicInfo, LocalDate announcementStartDate, LocalDate announcementEndDate, Boolean threeFiveRule, List<FileSummary> rfpFiles, List<FileSummary> announcementFiles, List<TaskPeriodResponse> periods) {
         return new TaskBasicInfoResponse(
                 basicInfo != null ? basicInfo.getMinistry() : null,
                 basicInfo != null ? basicInfo.getSpecializedAgency() : null,
@@ -61,7 +64,8 @@ public record TaskBasicInfoResponse(
                 basicInfo != null ? basicInfo.getAnnouncementLink() : null,
                 threeFiveRule,
                 rfpFiles,
-                announcementFiles
+                announcementFiles,
+                periods
         );
     }
 }
