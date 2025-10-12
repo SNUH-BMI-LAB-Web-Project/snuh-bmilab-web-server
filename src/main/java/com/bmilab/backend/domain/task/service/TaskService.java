@@ -11,6 +11,7 @@ import com.bmilab.backend.domain.task.dto.request.PatentRequest;
 import com.bmilab.backend.domain.task.dto.request.PublicationUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskAgreementUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskBasicInfoUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.TaskPeriodRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskPeriodUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskPresentationUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskProposalUpdateRequest;
@@ -42,6 +43,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -79,6 +81,14 @@ public class TaskService {
         User practicalManager =
                 request.practicalManagerId() != null ? userService.findUserById(request.practicalManagerId()) : null;
 
+        LocalDate taskStartDate = null;
+        LocalDate taskEndDate = null;
+
+        if (request.periods() != null && !request.periods().isEmpty()) {
+            taskStartDate = request.periods().get(0).startDate();
+            taskEndDate = request.periods().get(request.periods().size() - 1).endDate();
+        }
+
         Task task = Task.builder()
                 .researchTaskNumber(request.researchTaskNumber())
                 .title(request.title())
@@ -94,8 +104,8 @@ public class TaskService {
                 .practicalManager(practicalManager)
                 .participatingInstitutions(request.participatingInstitutions())
                 .threeFiveRule(request.threeFiveRule())
-                .startDate(request.startDate())
-                .endDate(request.endDate())
+                .startDate(taskStartDate)
+                .endDate(taskEndDate)
                 .totalYears(request.totalYears())
                 .currentYear(request.currentYear())
                 .status(request.status() != null ? request.status() : TaskStatus.PROPOSAL_WRITING)
@@ -103,12 +113,24 @@ public class TaskService {
 
         taskRepository.save(task);
 
-        for (int i = 1; i <= request.totalYears(); i++) {
-            TaskPeriod period = TaskPeriod.builder()
-                    .task(task)
-                    .yearNumber(i)
-                    .build();
-            taskPeriodRepository.save(period);
+        if (request.periods() != null && !request.periods().isEmpty()) {
+            for (TaskPeriodRequest periodRequest : request.periods()) {
+                TaskPeriod period = TaskPeriod.builder()
+                        .task(task)
+                        .yearNumber(periodRequest.yearNumber())
+                        .startDate(periodRequest.startDate())
+                        .endDate(periodRequest.endDate())
+                        .build();
+                taskPeriodRepository.save(period);
+            }
+        } else {
+            for (int i = 1; i <= request.totalYears(); i++) {
+                TaskPeriod period = TaskPeriod.builder()
+                        .task(task)
+                        .yearNumber(i)
+                        .build();
+                taskPeriodRepository.save(period);
+            }
         }
     }
 
@@ -124,6 +146,14 @@ public class TaskService {
         User practicalManager =
                 request.practicalManagerId() != null ? userService.findUserById(request.practicalManagerId()) : null;
 
+        LocalDate taskStartDate = null;
+        LocalDate taskEndDate = null;
+
+        if (request.periods() != null && !request.periods().isEmpty()) {
+            taskStartDate = request.periods().get(0).startDate();
+            taskEndDate = request.periods().get(request.periods().size() - 1).endDate();
+        }
+
         task.update(
                 request.researchTaskNumber(),
                 request.title(),
@@ -134,8 +164,8 @@ public class TaskService {
                 request.issuingAgency(),
                 request.supportType(),
                 request.threeFiveRule(),
-                request.startDate(),
-                request.endDate(),
+                taskStartDate,
+                taskEndDate,
                 request.totalYears(),
                 request.currentYear(),
                 request.leadInstitution(),
@@ -490,7 +520,7 @@ public class TaskService {
                 ? request.memberIds().stream().map(userService::findUserById).toList()
                 : List.of();
 
-        period.update(manager, members);
+        period.update(manager, members, request.startDate(), request.endDate());
 
         taskPeriodRepository.save(period);
     }

@@ -4,11 +4,11 @@ import com.bmilab.backend.domain.task.enums.TaskProfessorRole;
 import com.bmilab.backend.domain.task.enums.TaskStatus;
 import com.bmilab.backend.domain.task.enums.TaskSupportType;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.format.annotation.DateTimeFormat;
 
-import java.time.LocalDate;
+import java.util.List;
 
 public record TaskRequest(
         @Schema(description = "연구과제번호", example = "RS-2025-0000001")
@@ -43,16 +43,6 @@ public record TaskRequest(
         @NotNull(message = "3책5공 포함 여부는 필수입니다.")
         Boolean threeFiveRule,
 
-        @Schema(description = "과제 시작일", example = "2025-03-01")
-        @NotNull(message = "과제 시작일은 필수입니다.")
-        @DateTimeFormat(pattern = "yyyy-MM-dd")
-        LocalDate startDate,
-
-        @Schema(description = "과제 종료일", example = "2026-02-28")
-        @NotNull(message = "과제 종료일은 필수입니다.")
-        @DateTimeFormat(pattern = "yyyy-MM-dd")
-        LocalDate endDate,
-
         @Schema(description = "총 연차", example = "3")
         @NotNull(message = "총 연차는 필수입니다.")
         Integer totalYears,
@@ -60,6 +50,9 @@ public record TaskRequest(
         @Schema(description = "현재 연차", example = "1")
         @NotNull(message = "현재 연차는 필수입니다.")
         Integer currentYear,
+
+        @Schema(description = "과제 연차별 기간 목록")
+        List<TaskPeriodRequest> periods,
 
         @Schema(description = "주관기관", example = "한국과학기술원")
         @NotBlank(message = "주관기관은 필수입니다.")
