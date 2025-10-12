@@ -43,6 +43,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -80,6 +81,14 @@ public class TaskService {
         User practicalManager =
                 request.practicalManagerId() != null ? userService.findUserById(request.practicalManagerId()) : null;
 
+        LocalDate taskStartDate = null;
+        LocalDate taskEndDate = null;
+
+        if (request.periods() != null && !request.periods().isEmpty()) {
+            taskStartDate = request.periods().get(0).startDate();
+            taskEndDate = request.periods().get(request.periods().size() - 1).endDate();
+        }
+
         Task task = Task.builder()
                 .researchTaskNumber(request.researchTaskNumber())
                 .title(request.title())
@@ -95,8 +104,8 @@ public class TaskService {
                 .practicalManager(practicalManager)
                 .participatingInstitutions(request.participatingInstitutions())
                 .threeFiveRule(request.threeFiveRule())
-                .startDate(request.startDate())
-                .endDate(request.endDate())
+                .startDate(taskStartDate)
+                .endDate(taskEndDate)
                 .totalYears(request.totalYears())
                 .currentYear(request.currentYear())
                 .status(request.status() != null ? request.status() : TaskStatus.PROPOSAL_WRITING)
@@ -137,6 +146,14 @@ public class TaskService {
         User practicalManager =
                 request.practicalManagerId() != null ? userService.findUserById(request.practicalManagerId()) : null;
 
+        LocalDate taskStartDate = null;
+        LocalDate taskEndDate = null;
+
+        if (request.periods() != null && !request.periods().isEmpty()) {
+            taskStartDate = request.periods().get(0).startDate();
+            taskEndDate = request.periods().get(request.periods().size() - 1).endDate();
+        }
+
         task.update(
                 request.researchTaskNumber(),
                 request.title(),
@@ -147,8 +164,8 @@ public class TaskService {
                 request.issuingAgency(),
                 request.supportType(),
                 request.threeFiveRule(),
-                request.startDate(),
-                request.endDate(),
+                taskStartDate,
+                taskEndDate,
                 request.totalYears(),
                 request.currentYear(),
                 request.leadInstitution(),
