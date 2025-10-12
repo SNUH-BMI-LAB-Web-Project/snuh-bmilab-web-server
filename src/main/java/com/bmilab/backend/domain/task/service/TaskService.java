@@ -11,6 +11,7 @@ import com.bmilab.backend.domain.task.dto.request.PatentRequest;
 import com.bmilab.backend.domain.task.dto.request.PublicationUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskAgreementUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskBasicInfoUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.TaskPeriodRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskPeriodUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskPresentationUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskProposalUpdateRequest;
@@ -103,12 +104,24 @@ public class TaskService {
 
         taskRepository.save(task);
 
-        for (int i = 1; i <= request.totalYears(); i++) {
-            TaskPeriod period = TaskPeriod.builder()
-                    .task(task)
-                    .yearNumber(i)
-                    .build();
-            taskPeriodRepository.save(period);
+        if (request.periods() != null && !request.periods().isEmpty()) {
+            for (TaskPeriodRequest periodRequest : request.periods()) {
+                TaskPeriod period = TaskPeriod.builder()
+                        .task(task)
+                        .yearNumber(periodRequest.yearNumber())
+                        .startDate(periodRequest.startDate())
+                        .endDate(periodRequest.endDate())
+                        .build();
+                taskPeriodRepository.save(period);
+            }
+        } else {
+            for (int i = 1; i <= request.totalYears(); i++) {
+                TaskPeriod period = TaskPeriod.builder()
+                        .task(task)
+                        .yearNumber(i)
+                        .build();
+                taskPeriodRepository.save(period);
+            }
         }
     }
 
@@ -490,7 +503,7 @@ public class TaskService {
                 ? request.memberIds().stream().map(userService::findUserById).toList()
                 : List.of();
 
-        period.update(manager, members);
+        period.update(manager, members, request.startDate(), request.endDate());
 
         taskPeriodRepository.save(period);
     }

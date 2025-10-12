@@ -4,11 +4,13 @@ import com.bmilab.backend.domain.task.enums.TaskProfessorRole;
 import com.bmilab.backend.domain.task.enums.TaskStatus;
 import com.bmilab.backend.domain.task.enums.TaskSupportType;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public record TaskRequest(
         @Schema(description = "연구과제번호", example = "RS-2025-0000001")
@@ -86,6 +88,10 @@ public record TaskRequest(
         String participatingInstitutions,
 
         @Schema(description = "진행 상태", example = "PROPOSAL_WRITING(제안서 준비중)")
-        TaskStatus status
+        TaskStatus status,
+
+        @Schema(description = "과제 연차별 기간 목록")
+        @Valid
+        List<TaskPeriodRequest> periods
 ) {
 }

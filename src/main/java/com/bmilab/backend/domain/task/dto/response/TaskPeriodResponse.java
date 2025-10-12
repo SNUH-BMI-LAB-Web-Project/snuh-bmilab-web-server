@@ -3,6 +3,7 @@ package com.bmilab.backend.domain.task.dto.response;
 import com.bmilab.backend.domain.task.entity.TaskPeriod;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,6 +13,12 @@ public record TaskPeriodResponse(
 
         @Schema(description = "년차")
         Integer yearNumber,
+
+        @Schema(description = "시작일", example = "2025-03-01")
+        LocalDate startDate,
+
+        @Schema(description = "종료일", example = "2026-02-28")
+        LocalDate endDate,
 
         @Schema(description = "과제 담당자 ID")
         Long managerId,
@@ -30,6 +37,8 @@ public record TaskPeriodResponse(
         return new TaskPeriodResponse(
                 period.getId(),
                 period.getYearNumber(),
+                period.getStartDate(),
+                period.getEndDate(),
                 period.getManager() != null ? period.getManager().getId() : null,
                 period.getManager() != null ? period.getManager().getName() : null,
                 members

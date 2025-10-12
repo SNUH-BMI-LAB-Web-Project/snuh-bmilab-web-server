@@ -7,6 +7,7 @@ import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +32,12 @@ public class TaskPeriod extends BaseTimeEntity {
     @Column(name = "year_number", nullable = false)
     private Integer yearNumber;
 
+    @Column(name = "start_date")
+    private LocalDate startDate;
+
+    @Column(name = "end_date")
+    private LocalDate endDate;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "manager_id")
     @OnDelete(action = OnDeleteAction.SET_NULL)
@@ -45,9 +52,11 @@ public class TaskPeriod extends BaseTimeEntity {
     @Builder.Default
     private List<User> members = new ArrayList<>();
 
-    public void update(User manager, List<User> members) {
+    public void update(User manager, List<User> members, LocalDate startDate, LocalDate endDate) {
         this.manager = manager;
         this.members.clear();
         this.members.addAll(members);
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 }
