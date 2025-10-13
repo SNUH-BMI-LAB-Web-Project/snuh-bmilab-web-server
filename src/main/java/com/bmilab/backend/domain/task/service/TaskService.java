@@ -190,7 +190,13 @@ public class TaskService {
     public Page<TaskSummaryResponse> getAllTasks(Long userId, TaskStatus status, String keyword, Pageable pageable) {
 
         Page<Task> tasks = taskRepository.findTasksForList(status, keyword, pageable);
-        return tasks.map(TaskSummaryResponse::from);
+        return tasks.map(task -> {
+            List<TaskPeriodResponse> periods = taskPeriodRepository.findByTaskOrderByYearNumberAsc(task)
+                    .stream()
+                    .map(TaskPeriodResponse::from)
+                    .collect(Collectors.toList());
+            return TaskSummaryResponse.from(task, periods);
+        });
     }
 
     public TaskBasicInfoResponse getTaskBasicInfo(Long userId, Long taskId) {
