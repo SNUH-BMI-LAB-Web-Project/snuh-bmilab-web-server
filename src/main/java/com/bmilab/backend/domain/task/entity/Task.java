@@ -94,7 +94,7 @@ public class Task extends BaseTimeEntity {
 
     @ManyToOne
     @JoinColumn(name = "practical_manager_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.SET_NULL)
+    @OnDelete(action = OnDeleteAction.RESTRICT)
     private User practicalManager;
 
     @Column(name = "participating_institutions", columnDefinition = "TEXT", nullable = false)
