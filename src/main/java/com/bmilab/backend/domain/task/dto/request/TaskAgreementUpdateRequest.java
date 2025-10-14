@@ -4,10 +4,18 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 
 public record TaskAgreementUpdateRequest(
         @Schema(description = "협약 체결일", example = "2025-10-01")
         @DateTimeFormat(pattern = "yyyy-MM-dd")
-        LocalDate agreementDate
+        LocalDate agreementDate,
+
+        @Schema(description = "협약 최종 제안서 파일 ID 목록")
+        List<UUID> agreementFinalProposalFileIds,
+
+        @Schema(description = "협약 최종 제출본 파일 ID 목록")
+        List<UUID> agreementFinalSubmissionFileIds
 ) {
 }
