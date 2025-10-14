@@ -5,6 +5,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 public record TaskProposalUpdateRequest(
 
@@ -37,7 +38,22 @@ public record TaskProposalUpdateRequest(
         String internalContactEmail,
 
         @Schema(description = "원내 담당자 전화번호", example = "010-9876-5432")
-        String internalContactPhone
+        String internalContactPhone,
+
+        @Schema(description = "최종 제안서 파일 ID 목록")
+        List<UUID> finalProposalFileIds,
+
+        @Schema(description = "최종 제출본 파일 ID 목록")
+        List<UUID> finalSubmissionFileIds,
+
+        @Schema(description = "관련자료 파일 ID 목록")
+        List<UUID> relatedFileIds,
+
+        @Schema(description = "회의록 파일 ID 목록")
+        List<UUID> meetingNotesFileIds,
+
+        @Schema(description = "참여 기관 구조도 파일 ID 목록")
+        List<UUID> structureDiagramFileIds
 ) {
 
 }
