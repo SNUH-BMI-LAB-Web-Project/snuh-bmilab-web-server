@@ -5,6 +5,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 public record TaskPeriodUpdateRequest(
         @Schema(description = "시작일", example = "2025-03-01")
@@ -19,6 +20,9 @@ public record TaskPeriodUpdateRequest(
         Long managerId,
 
         @Schema(description = "과제 참여자 ID 목록")
-        List<Long> memberIds
+        List<Long> memberIds,
+
+        @Schema(description = "연차별 첨부파일 ID 목록")
+        List<UUID> fileIds
 ) {
 }

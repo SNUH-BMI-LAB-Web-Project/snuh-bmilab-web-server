@@ -1,5 +1,6 @@
 package com.bmilab.backend.domain.task.dto.response;
 
+import com.bmilab.backend.domain.file.dto.response.FileSummary;
 import com.bmilab.backend.domain.task.entity.TaskPeriod;
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -27,7 +28,10 @@ public record TaskPeriodResponse(
         String managerName,
 
         @Schema(description = "과제 참여자 목록")
-        List<TaskMemberSummary> members
+        List<TaskMemberSummary> members,
+
+        @Schema(description = "연차별 첨부파일 목록")
+        List<FileSummary> files
 ) {
     public static TaskPeriodResponse from(TaskPeriod period) {
         List<TaskMemberSummary> members = period.getMembers().stream()
@@ -41,7 +45,25 @@ public record TaskPeriodResponse(
                 period.getEndDate(),
                 period.getManager() != null ? period.getManager().getId() : null,
                 period.getManager() != null ? period.getManager().getName() : null,
-                members
+                members,
+                List.of()
+        );
+    }
+
+    public static TaskPeriodResponse from(TaskPeriod period, List<FileSummary> files) {
+        List<TaskMemberSummary> members = period.getMembers().stream()
+                .map(user -> new TaskMemberSummary(user.getId(), user.getName(), user.getEmail()))
+                .collect(Collectors.toList());
+
+        return new TaskPeriodResponse(
+                period.getId(),
+                period.getYearNumber(),
+                period.getStartDate(),
+                period.getEndDate(),
+                period.getManager() != null ? period.getManager().getId() : null,
+                period.getManager() != null ? period.getManager().getName() : null,
+                members,
+                files
         );
     }
 }
