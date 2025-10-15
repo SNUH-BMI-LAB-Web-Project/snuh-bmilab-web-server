@@ -541,7 +541,12 @@ public class TaskService {
         TaskPeriod period = taskPeriodRepository.findById(periodId)
                 .orElseThrow(() -> new ApiException(TaskErrorCode.TASK_NOT_FOUND));
 
-        return TaskPeriodResponse.from(period);
+        List<FileSummary> files = fileService.findAllByDomainTypeAndEntityId(FileDomainType.TASK_PERIOD, periodId)
+                .stream()
+                .map(FileSummary::from)
+                .collect(Collectors.toList());
+
+        return TaskPeriodResponse.from(period, files);
     }
 
     @Transactional
@@ -565,6 +570,10 @@ public class TaskService {
         period.update(manager, members, request.startDate(), request.endDate());
 
         taskPeriodRepository.save(period);
+
+        if (request.fileIds() != null) {
+            fileService.syncFiles(request.fileIds(), FileDomainType.TASK_PERIOD, periodId);
+        }
     }
 
     @Transactional
