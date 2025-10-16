@@ -541,12 +541,22 @@ public class TaskService {
         TaskPeriod period = taskPeriodRepository.findById(periodId)
                 .orElseThrow(() -> new ApiException(TaskErrorCode.TASK_NOT_FOUND));
 
-        List<FileSummary> files = fileService.findAllByDomainTypeAndEntityId(FileDomainType.TASK_PERIOD, periodId)
+        List<FileSummary> periodFiles = fileService.findAllByDomainTypeAndEntityId(FileDomainType.TASK_PERIOD_FILES, periodId)
                 .stream()
                 .map(FileSummary::from)
                 .collect(Collectors.toList());
 
-        return TaskPeriodResponse.from(period, files);
+        List<FileSummary> interimReportFiles = fileService.findAllByDomainTypeAndEntityId(FileDomainType.TASK_PERIOD_INTERIM_REPORT, periodId)
+                .stream()
+                .map(FileSummary::from)
+                .collect(Collectors.toList());
+
+        List<FileSummary> annualReportFiles = fileService.findAllByDomainTypeAndEntityId(FileDomainType.TASK_PERIOD_ANNUAL_REPORT, periodId)
+                .stream()
+                .map(FileSummary::from)
+                .collect(Collectors.toList());
+
+        return TaskPeriodResponse.from(period, periodFiles, interimReportFiles, annualReportFiles);
     }
 
     @Transactional
@@ -571,8 +581,14 @@ public class TaskService {
 
         taskPeriodRepository.save(period);
 
-        if (request.fileIds() != null) {
-            fileService.syncFiles(request.fileIds(), FileDomainType.TASK_PERIOD, periodId);
+        if (request.periodFileIds() != null) {
+            fileService.syncFiles(request.periodFileIds(), FileDomainType.TASK_PERIOD_FILES, periodId);
+        }
+        if (request.interimReportFileIds() != null) {
+            fileService.syncFiles(request.interimReportFileIds(), FileDomainType.TASK_PERIOD_INTERIM_REPORT, periodId);
+        }
+        if (request.annualReportFileIds() != null) {
+            fileService.syncFiles(request.annualReportFileIds(), FileDomainType.TASK_PERIOD_ANNUAL_REPORT, periodId);
         }
     }
 

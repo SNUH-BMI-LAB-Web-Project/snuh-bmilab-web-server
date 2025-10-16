@@ -30,8 +30,14 @@ public record TaskPeriodResponse(
         @Schema(description = "과제 참여자 목록")
         List<TaskMemberSummary> members,
 
-        @Schema(description = "연차별 첨부파일 목록")
-        List<FileSummary> files
+        @Schema(description = "연차별 관련 파일 목록")
+        List<FileSummary> periodFiles,
+
+        @Schema(description = "중간보고 파일 목록")
+        List<FileSummary> interimReportFiles,
+
+        @Schema(description = "연차보고 파일 목록")
+        List<FileSummary> annualReportFiles
 ) {
     public static TaskPeriodResponse from(TaskPeriod period) {
         List<TaskMemberSummary> members = period.getMembers().stream()
@@ -46,11 +52,18 @@ public record TaskPeriodResponse(
                 period.getManager() != null ? period.getManager().getId() : null,
                 period.getManager() != null ? period.getManager().getName() : null,
                 members,
+                List.of(),
+                List.of(),
                 List.of()
         );
     }
 
-    public static TaskPeriodResponse from(TaskPeriod period, List<FileSummary> files) {
+    public static TaskPeriodResponse from(
+            TaskPeriod period,
+            List<FileSummary> periodFiles,
+            List<FileSummary> interimReportFiles,
+            List<FileSummary> annualReportFiles
+    ) {
         List<TaskMemberSummary> members = period.getMembers().stream()
                 .map(user -> new TaskMemberSummary(user.getId(), user.getName(), user.getEmail()))
                 .collect(Collectors.toList());
@@ -63,7 +76,9 @@ public record TaskPeriodResponse(
                 period.getManager() != null ? period.getManager().getId() : null,
                 period.getManager() != null ? period.getManager().getName() : null,
                 members,
-                files
+                periodFiles,
+                interimReportFiles,
+                annualReportFiles
         );
     }
 }
