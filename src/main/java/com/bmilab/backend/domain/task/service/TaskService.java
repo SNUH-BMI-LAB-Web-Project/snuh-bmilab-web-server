@@ -280,13 +280,8 @@ public class TaskService {
 
         taskBasicInfoRepository.save(basicInfo);
 
-        if (request.rfpFileIds() != null) {
-            fileService.syncFiles(request.rfpFileIds(), FileDomainType.TASK_RFP, taskId);
-        }
-
-        if (request.announcementFileIds() != null) {
-            fileService.syncFiles(request.announcementFileIds(), FileDomainType.TASK_ANNOUNCEMENT, taskId);
-        }
+        syncFiles(taskId, request.rfpFileIds(), FileDomainType.TASK_RFP);
+        syncFiles(taskId, request.announcementFileIds(), FileDomainType.TASK_ANNOUNCEMENT);
     }
 
     @Transactional
@@ -315,25 +310,11 @@ public class TaskService {
 
         taskProposalRepository.save(proposal);
 
-        if (request.finalProposalFileIds() != null) {
-            fileService.syncFiles(request.finalProposalFileIds(), FileDomainType.TASK_FINAL_PROPOSAL, taskId);
-        }
-
-        if (request.finalSubmissionFileIds() != null) {
-            fileService.syncFiles(request.finalSubmissionFileIds(), FileDomainType.TASK_FINAL_SUBMISSION, taskId);
-        }
-
-        if (request.relatedFileIds() != null) {
-            fileService.syncFiles(request.relatedFileIds(), FileDomainType.TASK_PROPOSAL_RELATED, taskId);
-        }
-
-        if (request.meetingNotesFileIds() != null) {
-            fileService.syncFiles(request.meetingNotesFileIds(), FileDomainType.TASK_PROPOSAL_MEETING_NOTES, taskId);
-        }
-
-        if (request.structureDiagramFileIds() != null) {
-            fileService.syncFiles(request.structureDiagramFileIds(), FileDomainType.TASK_STRUCTURE_DIAGRAM, taskId);
-        }
+        syncFiles(taskId, request.finalProposalFileIds(), FileDomainType.TASK_FINAL_PROPOSAL);
+        syncFiles(taskId, request.finalSubmissionFileIds(), FileDomainType.TASK_FINAL_SUBMISSION);
+        syncFiles(taskId, request.relatedFileIds(), FileDomainType.TASK_PROPOSAL_RELATED);
+        syncFiles(taskId, request.meetingNotesFileIds(), FileDomainType.TASK_PROPOSAL_MEETING_NOTES);
+        syncFiles(taskId, request.structureDiagramFileIds(), FileDomainType.TASK_STRUCTURE_DIAGRAM);
 
         taskProposalWriterRepository.deleteByTaskProposal(proposal);
 
@@ -463,13 +444,8 @@ public class TaskService {
 
         taskPresentationRepository.save(presentation);
 
-        if (request.finalPresentationFileIds() != null) {
-            fileService.syncFiles(request.finalPresentationFileIds(), FileDomainType.TASK_FINAL_PRESENTATION, taskId);
-        }
-
-        if (request.draftPresentationFileIds() != null) {
-            fileService.syncFiles(request.draftPresentationFileIds(), FileDomainType.TASK_DRAFT_PRESENTATION, taskId);
-        }
+        syncFiles(taskId, request.finalPresentationFileIds(), FileDomainType.TASK_FINAL_PRESENTATION);
+        syncFiles(taskId, request.draftPresentationFileIds(), FileDomainType.TASK_DRAFT_PRESENTATION);
 
         taskPresentationMakerRepository.deleteByTaskPresentation(presentation);
 
@@ -525,13 +501,8 @@ public class TaskService {
 
         taskAgreementRepository.save(agreement);
 
-        if (request.agreementFinalProposalFileIds() != null) {
-            fileService.syncFiles(request.agreementFinalProposalFileIds(), FileDomainType.TASK_AGREEMENT_FINAL_PROPOSAL, taskId);
-        }
-
-        if (request.agreementFinalSubmissionFileIds() != null) {
-            fileService.syncFiles(request.agreementFinalSubmissionFileIds(), FileDomainType.TASK_AGREEMENT_FINAL_SUBMISSION, taskId);
-        }
+        syncFiles(taskId, request.agreementFinalProposalFileIds(), FileDomainType.TASK_AGREEMENT_FINAL_PROPOSAL);
+        syncFiles(taskId, request.agreementFinalSubmissionFileIds(), FileDomainType.TASK_AGREEMENT_FINAL_SUBMISSION);
     }
 
     public TaskPeriodResponse getTaskPeriod(Long userId, Long taskId, Long periodId) {
@@ -581,15 +552,9 @@ public class TaskService {
 
         taskPeriodRepository.save(period);
 
-        if (request.periodFileIds() != null) {
-            fileService.syncFiles(request.periodFileIds(), FileDomainType.TASK_PERIOD_FILES, periodId);
-        }
-        if (request.interimReportFileIds() != null) {
-            fileService.syncFiles(request.interimReportFileIds(), FileDomainType.TASK_PERIOD_INTERIM_REPORT, periodId);
-        }
-        if (request.annualReportFileIds() != null) {
-            fileService.syncFiles(request.annualReportFileIds(), FileDomainType.TASK_PERIOD_ANNUAL_REPORT, periodId);
-        }
+        syncFiles(periodId, request.periodFileIds(), FileDomainType.TASK_PERIOD_FILES);
+        syncFiles(periodId, request.interimReportFileIds(), FileDomainType.TASK_PERIOD_INTERIM_REPORT);
+        syncFiles(periodId, request.annualReportFileIds(), FileDomainType.TASK_PERIOD_ANNUAL_REPORT);
     }
 
     @Transactional
@@ -742,5 +707,11 @@ public class TaskService {
     private Task getTaskById(Long taskId) {
 
         return taskRepository.findById(taskId).orElseThrow(() -> new ApiException(TaskErrorCode.TASK_NOT_FOUND));
+    }
+
+    private void syncFiles(Long entityId, List<java.util.UUID> fileIds, FileDomainType domainType) {
+        if (fileIds != null && !fileIds.isEmpty()) {
+            fileService.syncFiles(fileIds, domainType, entityId);
+        }
     }
 }
