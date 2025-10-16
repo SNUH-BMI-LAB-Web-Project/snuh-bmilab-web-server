@@ -22,7 +22,13 @@ public record TaskPeriodUpdateRequest(
         @Schema(description = "과제 참여자 ID 목록")
         List<Long> memberIds,
 
-        @Schema(description = "연차별 첨부파일 ID 목록")
-        List<UUID> fileIds
+        @Schema(description = "연차별 관련 파일 ID 목록")
+        List<UUID> periodFileIds,
+
+        @Schema(description = "중간보고 파일 ID 목록")
+        List<UUID> interimReportFileIds,
+
+        @Schema(description = "연차보고 파일 ID 목록")
+        List<UUID> annualReportFileIds
 ) {
 }
