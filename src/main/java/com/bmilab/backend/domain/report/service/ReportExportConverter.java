@@ -1,8 +1,10 @@
 package com.bmilab.backend.domain.report.service;
 
 import com.bmilab.backend.domain.file.entity.FileInformation;
+import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.report.dto.query.GetAllReportsQueryResult;
 import com.bmilab.backend.domain.report.entity.Report;
+import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.global.utils.ExcelRow;
 import org.springframework.stereotype.Component;
 
@@ -74,6 +76,39 @@ public class ReportExportConverter {
             sb.append("\n");
 
         }
+        return sb.toString();
+    }
+
+    public String toWeeklyMissingReports(
+            List<Project> projectsWithoutReports,
+            List<User> usersWithoutReports
+    ) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("\\[보고 안된 프로젝트\\]\n");
+        if (projectsWithoutReports.isEmpty()) {
+            sb.append("    \\-    없음\n");
+        } else {
+            for (Project project : projectsWithoutReports) {
+                sb.append("    •    ");
+                sb.append(escMdV2(project.getTitle()));
+                sb.append("\n");
+            }
+        }
+
+        sb.append("\n\\[보고 안한 유저\\]\n");
+        if (usersWithoutReports.isEmpty()) {
+            sb.append("    \\-    없음\n");
+        } else {
+            for (User user : usersWithoutReports) {
+                sb.append("    •    ");
+                sb.append(escMdV2(user.getName()));
+                sb.append(" \\(");
+                sb.append(escMdV2(user.getEmail()));
+                sb.append("\\)\n");
+            }
+        }
+
         return sb.toString();
     }
 

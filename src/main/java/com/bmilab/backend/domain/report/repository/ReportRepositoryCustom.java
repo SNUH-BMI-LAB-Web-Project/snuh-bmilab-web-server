@@ -25,4 +25,8 @@ public interface ReportRepositoryCustom {
     List<GetAllReportsQueryResult> findAllByDateWithFiles(LocalDate date);
 
     List<GetAllReportsQueryResult> findAllByUser(Long userId);
+
+    List<Long> findProjectIdsWithoutReports(LocalDate startDate, LocalDate endDate);
+
+    List<Long> findUserIdsWithoutReports(LocalDate startDate, LocalDate endDate);
 }

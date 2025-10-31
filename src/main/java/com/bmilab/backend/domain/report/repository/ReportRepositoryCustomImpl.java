@@ -169,4 +169,31 @@ public class ReportRepositoryCustomImpl implements ReportRepositoryCustom {
             return null;
         }
     }
+
+    @Override
+    public List<Long> findProjectIdsWithoutReports(LocalDate startDate, LocalDate endDate) {
+        QReport report = QReport.report;
+
+        return queryFactory
+                .select(report.project.id)
+                .from(report)
+                .where(
+                        report.project.id.isNotNull(),
+                        report.date.between(startDate, endDate)
+                )
+                .distinct()
+                .fetch();
+    }
+
+    @Override
+    public List<Long> findUserIdsWithoutReports(LocalDate startDate, LocalDate endDate) {
+        QReport report = QReport.report;
+
+        return queryFactory
+                .select(report.user.id)
+                .from(report)
+                .where(report.date.between(startDate, endDate))
+                .distinct()
+                .fetch();
+    }
 }
