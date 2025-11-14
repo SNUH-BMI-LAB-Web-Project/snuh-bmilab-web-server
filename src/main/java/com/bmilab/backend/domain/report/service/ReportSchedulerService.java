@@ -65,7 +65,7 @@ public class ReportSchedulerService {
 
     }
 
-    @Scheduled(cron = "0 20 13 * * MON-FRI", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 30 13 * * MON-FRI", zone = "Asia/Seoul")
     public void checkBiWeeklyReportStatus() {
         LocalDate end = LocalDate.now().minusDays(1);
         LocalDate start = end.minusDays(13);
