@@ -89,11 +89,11 @@ public class ReportExportConverter {
     ) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append("*\\[프로젝트 중심 미보고 현황\\]*\n");
-        sb.append("_2주 동안 해당 프로젝트에 대한 보고가 하나도 없음_\n\n");
+        sb.append("*\\[프로젝트 별 미보고 현황\\]*\n");
+        sb.append("_최근 2주 동안 한 번도 보고되지 않은 프로젝트입니다._\n\n");
 
         if (projectsMissingReports.isEmpty()) {
-            sb.append("    없음 ✅\n");
+            sb.append("    해당 없음\n");
         } else {
             // 실무책임자별로 그룹핑 (가나다순)
             Map<String, List<ProjectMissingReportInfo>> groupedByLeader = projectsMissingReports.stream()
@@ -109,7 +109,7 @@ public class ReportExportConverter {
                         String leaderName = entry.getKey();
                         List<ProjectMissingReportInfo> projects = entry.getValue();
 
-                        sb.append("*\\[리더: ").append(escMdV2(leaderName)).append("\\]*\n");
+                        sb.append("*\\[실무책임자: ").append(escMdV2(leaderName)).append("\\]*\n");
 
                         for (ProjectMissingReportInfo project : projects) {
                             sb.append("  • *프로젝트*: ").append(escMdV2(project.projectTitle())).append("\n");
@@ -117,7 +117,7 @@ public class ReportExportConverter {
                             if (project.lastReportDate() != null) {
                                 sb.append("`").append(escCode(project.lastReportDate().toString())).append("`");
                             } else {
-                                sb.append("Never");
+                                sb.append("보고 이력 없음");
                             }
                             sb.append("\n\n");
                         }
@@ -127,10 +127,10 @@ public class ReportExportConverter {
         sb.append("\\-".repeat(30)).append("\n\n");
 
         sb.append("*\\[개인별 미보고 현황\\]*\n");
-        sb.append("_개인이 참여하는 프로젝트에 2주 동안 보고하지 않음_\n\n");
+        sb.append("_최근 2주 동안 개인이 참여 프로젝트에 보고하지 않은 경우입니다._\n\n");
 
         if (userProjectsMissingReports.isEmpty()) {
-            sb.append("    없음 ✅\n");
+            sb.append("    해당 없음\n");
         } else {
             // 유저별로 그룹핑 (유저 이름 가나다순)
             Map<Long, List<UserProjectMissingReportInfo>> groupedByUser = userProjectsMissingReports.stream()
@@ -150,7 +150,7 @@ public class ReportExportConverter {
                             if (info.lastReportDate() != null) {
                                 sb.append("`").append(escCode(info.lastReportDate().toString())).append("`");
                             } else {
-                                sb.append("Never");
+                                sb.append("보고 이력 없음");
                             }
                             sb.append("\n\n");
                         }
