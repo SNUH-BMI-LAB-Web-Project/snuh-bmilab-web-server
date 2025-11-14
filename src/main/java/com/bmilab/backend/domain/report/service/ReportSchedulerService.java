@@ -9,8 +9,8 @@ import com.bmilab.backend.domain.user.repository.UserRepository;
 import com.bmilab.backend.global.email.EmailSender;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +21,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
+@Slf4j
 @Service
 //@Profile("prod")
 @Transactional(readOnly = true)
@@ -64,25 +65,24 @@ public class ReportSchedulerService {
 
     }
 
-    @Scheduled(cron = "0 45 14 * * MON-FRI", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 20 10 * * MON-FRI", zone = "Asia/Seoul")
     public void checkBiWeeklyReportStatus() {
         LocalDate end = LocalDate.now().minusDays(1);
         LocalDate start = end.minusDays(13);
 
-        List<Long> projectIdsWithReports = reportRepository.findProjectIdsWithoutReports(start, end);
-        List<Project> allProjects = projectRepository.findAll();
-        List<Project> projectsWithoutReports = allProjects.stream()
-                .filter(p -> !projectIdsWithReports.contains(p.getId()))
-                .toList();
+        log.info("[2주 미제출 체크] 조회 기간: {} ~ {}", start, end);
 
-        List<Long> userIdsWithReports = reportRepository.findUserIdsWithoutReports(start, end);
-        List<User> allUsers = userRepository.findAll();
-        List<User> usersWithoutReports = allUsers.stream()
-                .filter(u -> !userIdsWithReports.contains(u.getId()))
-                .toList();
+        // 프로젝트 중심 미보고 현황 조회
+        var projectsMissingReports = reportRepository.findProjectsMissingReportsInPeriod(start, end);
+        log.info("[2주 미제출 체크] 미보고 프로젝트 수: {}", projectsMissingReports.size());
 
+        // 유저별 미보고 현황 조회
+        var userProjectsMissingReports = reportRepository.findUserProjectsMissingReportsInPeriod(start, end);
+        log.info("[2주 미제출 체크] 유저-프로젝트 미보고 조합 수: {}", userProjectsMissingReports.size());
+
+        // 텔레그램 메시지 생성 및 전송
         String title = "\\[SNUH BMI Lab\\] 2주 보고 미제출 현황 \\(`" + start + "` \\~ `" + end + "`\\)";
-        String body = reportExportConverter.toWeeklyMissingReports(projectsWithoutReports, usersWithoutReports);
+        String body = reportExportConverter.toBiWeeklyMissingReports(projectsMissingReports, userProjectsMissingReports);
         telegramService.sendMessage(title + "\n\n" + body);
     }
 }
