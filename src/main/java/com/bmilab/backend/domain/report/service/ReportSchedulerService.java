@@ -1,16 +1,15 @@
 package com.bmilab.backend.domain.report.service;
 
-import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.project.repository.ProjectRepository;
 import com.bmilab.backend.domain.report.dto.query.GetAllReportsQueryResult;
 import com.bmilab.backend.domain.report.repository.ReportRepository;
-import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.repository.UserRepository;
 import com.bmilab.backend.global.email.EmailSender;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +22,7 @@ import java.util.List;
 
 @Slf4j
 @Service
-//@Profile("prod")
+@Profile("prod")
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ReportSchedulerService {
@@ -65,7 +64,7 @@ public class ReportSchedulerService {
 
     }
 
-    @Scheduled(cron = "0 30 13 * * MON-FRI", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 10 9 * * MON-FRI", zone = "Asia/Seoul")
     public void checkBiWeeklyReportStatus() {
         LocalDate end = LocalDate.now().minusDays(1);
         LocalDate start = end.minusDays(13);
