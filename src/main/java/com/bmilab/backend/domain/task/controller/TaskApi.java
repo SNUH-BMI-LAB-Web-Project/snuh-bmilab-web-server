@@ -580,4 +580,44 @@ public interface TaskApi {
             @PathVariable Long taskId,
             @RequestBody PatentRequest request
     );
+
+    @Operation(summary = "과제에 연구프로젝트 추가", description = "과제와 연구프로젝트를 연결하는 POST API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "연구프로젝트 추가 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 또는 연구프로젝트 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> addProjectToTask(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @PathVariable Long projectId
+    );
+
+    @Operation(summary = "과제에서 연구프로젝트 제거", description = "과제와 연구프로젝트 연결을 해제하는 DELETE API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "연구프로젝트 제거 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 또는 연구프로젝트 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> removeProjectFromTask(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @PathVariable Long projectId
+    );
 }

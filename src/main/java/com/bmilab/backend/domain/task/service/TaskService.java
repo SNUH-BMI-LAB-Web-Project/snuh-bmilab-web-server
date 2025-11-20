@@ -4,6 +4,7 @@ import com.bmilab.backend.domain.file.dto.response.FileSummary;
 import com.bmilab.backend.domain.file.enums.FileDomainType;
 import com.bmilab.backend.domain.file.service.FileService;
 import com.bmilab.backend.domain.project.entity.Project;
+import com.bmilab.backend.domain.project.exception.ProjectErrorCode;
 import com.bmilab.backend.domain.project.repository.ProjectRepository;
 import com.bmilab.backend.domain.task.dto.request.AcknowledgementUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.ConferenceRequest;
@@ -721,6 +722,28 @@ public class TaskService {
         );
 
         patentRepository.save(patent);
+    }
+
+    @Transactional
+    public void addProjectToTask(Long userId, Long taskId, Long projectId) {
+        Task task = getTaskById(taskId);
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
+
+        // Project의 task 필드를 설정하여 연결
+        project.setTask(task);
+        projectRepository.save(project);
+    }
+
+    @Transactional
+    public void removeProjectFromTask(Long userId, Long taskId, Long projectId) {
+        Task task = getTaskById(taskId);
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ApiException(ProjectErrorCode.PROJECT_NOT_FOUND));
+
+        // Project의 task 필드를 null로 설정하여 연결 해제
+        project.setTask(null);
+        projectRepository.save(project);
     }
 
     private Task getTaskById(Long taskId) {
