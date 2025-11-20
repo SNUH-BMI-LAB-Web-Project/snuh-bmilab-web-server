@@ -1,6 +1,6 @@
 # Dockerfile
 
-# jdk17 Image Start
+# eclipse-temurin:17-jdk Image Start
 FROM eclipse-temurin:17-jdk
 
 # jar 파일 복제
