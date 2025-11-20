@@ -292,4 +292,24 @@ public class TaskController implements TaskApi {
         taskService.savePatent(userAuthInfo.getUserId(), taskId, request);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/{taskId}/projects/{projectId}")
+    public ResponseEntity<Void> addProjectToTask(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @PathVariable Long projectId
+    ) {
+        taskService.addProjectToTask(userAuthInfo.getUserId(), taskId, projectId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{taskId}/projects/{projectId}")
+    public ResponseEntity<Void> removeProjectFromTask(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @PathVariable Long projectId
+    ) {
+        taskService.removeProjectFromTask(userAuthInfo.getUserId(), taskId, projectId);
+        return ResponseEntity.ok().build();
+    }
 }

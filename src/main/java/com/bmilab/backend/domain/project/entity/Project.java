@@ -132,4 +132,8 @@ public class Project extends BaseTimeEntity {
     public List<String> getPracticalProfessorList() {
         return List.of(practicalProfessor.split(","));
     }
+
+    public void setTask(Task task) {
+        this.task = task;
+    }
 }
