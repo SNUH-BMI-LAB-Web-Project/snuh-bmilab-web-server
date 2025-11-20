@@ -90,7 +90,7 @@ public class ReportExportConverter {
         StringBuilder sb = new StringBuilder();
 
         sb.append("*\\[프로젝트 별 미보고 현황\\]*\n");
-        sb.append("_최근 2주 동안 한 번도 보고되지 않은 프로젝트입니다._\n\n");
+        sb.append("_최근 2주 동안 한 번도 보고되지 않은 프로젝트입니다\\._\n\n");
 
         if (projectsMissingReports.isEmpty()) {
             sb.append("    해당 없음\n");
@@ -121,13 +121,16 @@ public class ReportExportConverter {
                             }
                             sb.append("\n\n");
                         }
+
+                        sb.append("\n");
+                        sb.append("\\=".repeat(30)).append("\n");
+                        sb.append("\\=".repeat(30)).append("\n");
+                        sb.append("\n");
                     });
         }
 
-        sb.append("\\-".repeat(30)).append("\n\n");
-
         sb.append("*\\[개인별 미보고 현황\\]*\n");
-        sb.append("_최근 2주 동안 개인이 참여 프로젝트에 보고하지 않은 경우입니다._\n\n");
+        sb.append("_최근 2주 동안 개인이 참여 프로젝트에 보고하지 않은 경우입니다\\._\n\n");
 
         if (userProjectsMissingReports.isEmpty()) {
             sb.append("    해당 없음\n");
@@ -154,6 +157,11 @@ public class ReportExportConverter {
                             }
                             sb.append("\n\n");
                         }
+
+                        sb.append("\n");
+                        sb.append("\\=".repeat(30)).append("\n");
+                        sb.append("\\=".repeat(30)).append("\n");
+                        sb.append("\n");
                     });
         }
 
