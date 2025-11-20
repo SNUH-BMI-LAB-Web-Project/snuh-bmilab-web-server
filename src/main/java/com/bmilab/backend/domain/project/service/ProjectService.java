@@ -39,6 +39,9 @@ import com.bmilab.backend.domain.project.repository.TimelineRepository;
 import com.bmilab.backend.domain.projectcategory.entity.ProjectCategory;
 import com.bmilab.backend.domain.projectcategory.service.ProjectCategoryService;
 import com.bmilab.backend.domain.report.dto.query.GetAllReportsQueryResult;
+import com.bmilab.backend.domain.task.entity.Task;
+import com.bmilab.backend.domain.task.exception.TaskErrorCode;
+import com.bmilab.backend.domain.task.repository.TaskRepository;
 import com.bmilab.backend.domain.report.dto.response.ReportFindAllResponse;
 import com.bmilab.backend.domain.report.repository.ReportRepository;
 import com.bmilab.backend.domain.user.entity.User;
@@ -85,6 +88,7 @@ public class ProjectService {
     private final UserService userService;
     private final ProjectCategoryService projectCategoryService;
     private final ExternalProfessorRepository externalProfessorRepository;
+    private final TaskRepository taskRepository;
     private final PlatformTransactionManager txManager;
 
     public Project findProjectById(Long projectId) {
@@ -110,6 +114,12 @@ public class ProjectService {
                 .map(this::convertToExProfessorString)
                 .toList();
 
+        Task task = null;
+        if (request.taskId() != null) {
+            task = taskRepository.findById(request.taskId())
+                    .orElseThrow(() -> new ApiException(TaskErrorCode.TASK_NOT_FOUND));
+        }
+
         Project project = Project.builder()
                 .title(request.title())
                 .content(request.content())
@@ -123,6 +133,7 @@ public class ProjectService {
                 .drbId(request.drbId())
                 .category(category)
                 .isPrivate(request.isPrivate())
+                .task(task)
                 .build();
 
         projectRepository.save(project);
@@ -250,6 +261,12 @@ public class ProjectService {
                 .map(this::convertToExProfessorString)
                 .toList();
 
+        Task task = null;
+        if (request.taskId() != null) {
+            task = taskRepository.findById(request.taskId())
+                    .orElseThrow(() -> new ApiException(TaskErrorCode.TASK_NOT_FOUND));
+        }
+
         project.update(
                 request.title(),
                 request.content(),
@@ -259,7 +276,8 @@ public class ProjectService {
                 practicalProfessors.isEmpty() ? null : practicalProfessors,
                 category,
                 status,
-                request.isPrivate()
+                request.isPrivate(),
+                task
         );
 
         List<Long> updatedParticipantIds = request.participantIds();

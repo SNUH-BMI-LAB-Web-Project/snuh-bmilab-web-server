@@ -1,6 +1,8 @@
 package com.bmilab.backend.domain.report.repository;
 
 import com.bmilab.backend.domain.report.dto.query.GetAllReportsQueryResult;
+import com.bmilab.backend.domain.report.dto.query.ProjectMissingReportInfo;
+import com.bmilab.backend.domain.report.dto.query.UserProjectMissingReportInfo;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -25,4 +27,8 @@ public interface ReportRepositoryCustom {
     List<GetAllReportsQueryResult> findAllByDateWithFiles(LocalDate date);
 
     List<GetAllReportsQueryResult> findAllByUser(Long userId);
+
+    List<ProjectMissingReportInfo> findProjectsMissingReportsInPeriod(LocalDate startDate, LocalDate endDate);
+
+    List<UserProjectMissingReportInfo> findUserProjectsMissingReportsInPeriod(LocalDate startDate, LocalDate endDate);
 }

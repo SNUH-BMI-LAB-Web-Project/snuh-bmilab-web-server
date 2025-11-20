@@ -1,0 +1,315 @@
+package com.bmilab.backend.domain.task.controller;
+
+import com.bmilab.backend.domain.task.dto.request.AcknowledgementUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.ConferenceRequest;
+import com.bmilab.backend.domain.task.dto.request.PatentRequest;
+import com.bmilab.backend.domain.task.dto.request.PublicationUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.TaskAgreementUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.TaskBasicInfoUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.TaskPeriodUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.TaskPresentationUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.TaskProposalUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.TaskRequest;
+import com.bmilab.backend.domain.task.dto.response.AcknowledgementResponse;
+import com.bmilab.backend.domain.task.dto.response.ConferenceResponse;
+import com.bmilab.backend.domain.task.dto.response.PatentResponse;
+import com.bmilab.backend.domain.task.dto.response.PublicationResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskAgreementResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskBasicInfoResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskPeriodResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskPresentationResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskProjectSummary;
+import com.bmilab.backend.domain.task.dto.response.TaskProposalResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskStatsResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskSummaryResponse;
+import com.bmilab.backend.domain.task.enums.TaskStatus;
+import com.bmilab.backend.domain.task.service.TaskService;
+import com.bmilab.backend.global.security.UserAuthInfo;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/tasks")
+@RequiredArgsConstructor
+public class TaskController implements TaskApi {
+
+    private final TaskService taskService;
+
+    @PostMapping
+    public ResponseEntity<Void> createTask(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @RequestBody @Valid TaskRequest request
+    ) {
+        taskService.createTask(userAuthInfo.getUserId(), request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PutMapping("/{taskId}")
+    public ResponseEntity<Void> updateTask(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody @Valid TaskRequest request
+    ) {
+        taskService.updateTask(userAuthInfo.getUserId(), taskId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<TaskStatsResponse> getTaskStats(@AuthenticationPrincipal UserAuthInfo userAuthInfo) {
+        TaskStatsResponse response = taskService.getTaskStats(userAuthInfo.getUserId());
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<TaskSummaryResponse>> getAllTasks(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @RequestParam(required = false) TaskStatus status,
+            @RequestParam(required = false) String keyword,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) @ParameterObject Pageable pageable
+    ) {
+        Page<TaskSummaryResponse> responses = taskService.getAllTasks(userAuthInfo.getUserId(), status, keyword, pageable);
+        return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/{taskId}")
+    public ResponseEntity<TaskSummaryResponse> getTask(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    ) {
+        TaskSummaryResponse response = taskService.getTask(userAuthInfo.getUserId(), taskId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{taskId}/basic-info")
+    public ResponseEntity<TaskBasicInfoResponse> getTaskBasicInfo(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    ) {
+        TaskBasicInfoResponse response = taskService.getTaskBasicInfo(userAuthInfo.getUserId(), taskId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{taskId}/basic-info")
+    public ResponseEntity<Void> updateBasicInfo(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody @Valid TaskBasicInfoUpdateRequest request
+    ) {
+        taskService.updateBasicInfo(userAuthInfo.getUserId(), taskId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{taskId}/proposal")
+    public ResponseEntity<TaskProposalResponse> getTaskProposal(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    ) {
+        TaskProposalResponse response = taskService.getTaskProposal(userAuthInfo.getUserId(), taskId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{taskId}/proposal")
+    public ResponseEntity<Void> updateProposal(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody @Valid TaskProposalUpdateRequest request
+    ) {
+        taskService.updateProposal(userAuthInfo.getUserId(), taskId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{taskId}/presentation")
+    public ResponseEntity<TaskPresentationResponse> getTaskPresentation(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    ) {
+        TaskPresentationResponse response = taskService.getTaskPresentation(userAuthInfo.getUserId(), taskId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{taskId}/presentation")
+    public ResponseEntity<Void> updatePresentation(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody @Valid TaskPresentationUpdateRequest request
+    ) {
+        taskService.updatePresentation(userAuthInfo.getUserId(), taskId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{taskId}/agreement")
+    public ResponseEntity<TaskAgreementResponse> getTaskAgreement(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    ) {
+        TaskAgreementResponse response = taskService.getTaskAgreement(userAuthInfo.getUserId(), taskId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{taskId}/agreement")
+    public ResponseEntity<Void> updateAgreement(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody @Valid TaskAgreementUpdateRequest request
+    ) {
+        taskService.updateAgreement(userAuthInfo.getUserId(), taskId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{taskId}/periods/{periodId}")
+    public ResponseEntity<TaskPeriodResponse> getTaskPeriod(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @PathVariable Long periodId
+    ) {
+        TaskPeriodResponse response = taskService.getTaskPeriod(userAuthInfo.getUserId(), taskId, periodId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{taskId}/periods/{periodId}")
+    public ResponseEntity<Void> updateTaskPeriod(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @PathVariable Long periodId,
+            @RequestBody @Valid TaskPeriodUpdateRequest request
+    ) {
+        taskService.updateTaskPeriod(userAuthInfo.getUserId(), taskId, periodId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{taskId}")
+    public ResponseEntity<Void> deleteTask(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    ) {
+        taskService.deleteTask(userAuthInfo.getUserId(), taskId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{taskId}/files/{fileId}")
+    public ResponseEntity<Void> deleteTaskFile(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @PathVariable UUID fileId
+    ) {
+        taskService.deleteTaskFile(userAuthInfo.getUserId(), taskId, fileId);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{taskId}/acknowledgement")
+    public ResponseEntity<AcknowledgementResponse> getAcknowledgement(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    ) {
+        AcknowledgementResponse response = taskService.getAcknowledgement(userAuthInfo.getUserId(), taskId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{taskId}/acknowledgement")
+    public ResponseEntity<Void> saveAcknowledgement(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody @Valid AcknowledgementUpdateRequest request
+    ) {
+        taskService.saveAcknowledgement(userAuthInfo.getUserId(), taskId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{taskId}/projects")
+    public ResponseEntity<List<TaskProjectSummary>> getTaskProjects(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    ) {
+        List<TaskProjectSummary> response = taskService.getTaskProjects(userAuthInfo.getUserId(), taskId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{taskId}/publication")
+    public ResponseEntity<PublicationResponse> getPublication(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    ) {
+        PublicationResponse response = taskService.getPublication(userAuthInfo.getUserId(), taskId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{taskId}/publication")
+    public ResponseEntity<Void> savePublication(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody @Valid PublicationUpdateRequest request
+    ) {
+        taskService.savePublication(userAuthInfo.getUserId(), taskId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{taskId}/conference")
+    public ResponseEntity<ConferenceResponse> getConference(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    ) {
+        ConferenceResponse response = taskService.getConference(userAuthInfo.getUserId(), taskId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{taskId}/conference")
+    public ResponseEntity<Void> saveConference(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody @Valid ConferenceRequest request
+    ) {
+        taskService.saveConference(userAuthInfo.getUserId(), taskId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{taskId}/patent")
+    public ResponseEntity<PatentResponse> getPatent(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    ) {
+        PatentResponse response = taskService.getPatent(userAuthInfo.getUserId(), taskId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{taskId}/patent")
+    public ResponseEntity<Void> savePatent(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody @Valid PatentRequest request
+    ) {
+        taskService.savePatent(userAuthInfo.getUserId(), taskId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{taskId}/projects/{projectId}")
+    public ResponseEntity<Void> addProjectToTask(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @PathVariable Long projectId
+    ) {
+        taskService.addProjectToTask(userAuthInfo.getUserId(), taskId, projectId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{taskId}/projects/{projectId}")
+    public ResponseEntity<Void> removeProjectFromTask(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @PathVariable Long projectId
+    ) {
+        taskService.removeProjectFromTask(userAuthInfo.getUserId(), taskId, projectId);
+        return ResponseEntity.ok().build();
+    }
+}

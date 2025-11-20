@@ -1,6 +1,7 @@
 package com.bmilab.backend.domain.project.repository;
 
 import com.bmilab.backend.domain.project.entity.Project;
+import com.bmilab.backend.domain.task.entity.Task;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -18,4 +19,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, Project
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT p FROM Project p WHERE p.isPinned = true ORDER BY p.id ASC")
     List<Project> findAllPinnedForUpdate();
+
+    List<Project> findByTask(Task task);
 }

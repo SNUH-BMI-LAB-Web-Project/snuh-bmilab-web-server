@@ -1,12 +1,18 @@
 package com.bmilab.backend.domain.report.service;
 
 import com.bmilab.backend.domain.file.entity.FileInformation;
+import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.report.dto.query.GetAllReportsQueryResult;
+import com.bmilab.backend.domain.report.dto.query.ProjectMissingReportInfo;
+import com.bmilab.backend.domain.report.dto.query.UserProjectMissingReportInfo;
 import com.bmilab.backend.domain.report.entity.Report;
+import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.global.utils.ExcelRow;
 import org.springframework.stereotype.Component;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -74,6 +80,91 @@ public class ReportExportConverter {
             sb.append("\n");
 
         }
+        return sb.toString();
+    }
+
+    public String toBiWeeklyMissingReports(
+            List<ProjectMissingReportInfo> projectsMissingReports,
+            List<UserProjectMissingReportInfo> userProjectsMissingReports
+    ) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("*\\[프로젝트 별 미보고 현황\\]*\n");
+        sb.append("_최근 2주 동안 한 번도 보고되지 않은 프로젝트입니다\\._\n\n");
+
+        if (projectsMissingReports.isEmpty()) {
+            sb.append("    해당 없음\n");
+        } else {
+            // 실무책임자별로 그룹핑 (가나다순)
+            Map<String, List<ProjectMissingReportInfo>> groupedByLeader = projectsMissingReports.stream()
+                    .collect(Collectors.groupingBy(
+                            p -> p.firstLeaderName() != null ? p.firstLeaderName() : "리더 미지정",
+                            Collectors.toList()
+                    ));
+
+            // 실무책임자 가나다순 정렬
+            groupedByLeader.entrySet().stream()
+                    .sorted(Map.Entry.comparingByKey())
+                    .forEach(entry -> {
+                        String leaderName = entry.getKey();
+                        List<ProjectMissingReportInfo> projects = entry.getValue();
+
+                        sb.append("*\\[실무책임자: ").append(escMdV2(leaderName)).append("\\]*\n");
+
+                        for (ProjectMissingReportInfo project : projects) {
+                            sb.append("  • *프로젝트*: ").append(escMdV2(project.projectTitle())).append("\n");
+                            sb.append("    _마지막 보고_: ");
+                            if (project.lastReportDate() != null) {
+                                sb.append("`").append(escCode(project.lastReportDate().toString())).append("`");
+                            } else {
+                                sb.append("보고 이력 없음");
+                            }
+                            sb.append("\n\n");
+                        }
+
+                        sb.append("\n");
+                        sb.append("\\=".repeat(30)).append("\n");
+                        sb.append("\\=".repeat(30)).append("\n");
+                        sb.append("\n");
+                    });
+        }
+
+        sb.append("*\\[개인별 미보고 현황\\]*\n");
+        sb.append("_최근 2주 동안 개인이 참여 프로젝트에 보고하지 않은 경우입니다\\._\n\n");
+
+        if (userProjectsMissingReports.isEmpty()) {
+            sb.append("    해당 없음\n");
+        } else {
+            // 유저별로 그룹핑 (유저 이름 가나다순)
+            Map<Long, List<UserProjectMissingReportInfo>> groupedByUser = userProjectsMissingReports.stream()
+                    .collect(Collectors.groupingBy(UserProjectMissingReportInfo::userId));
+
+            groupedByUser.values().stream()
+                    .sorted(Comparator.comparing(list -> list.get(0).userName()))
+                    .forEach(userProjects -> {
+                        UserProjectMissingReportInfo firstInfo = userProjects.get(0);
+                        sb.append("*\\[이름: ").append(escMdV2(firstInfo.userName()))
+                                .append(" \\| 이메일: ").append(escMdV2(firstInfo.userEmail()))
+                                .append("\\]*\n");
+
+                        for (UserProjectMissingReportInfo info : userProjects) {
+                            sb.append("  • *미보고 프로젝트*: ").append(escMdV2(info.projectTitle())).append("\n");
+                            sb.append("    _마지막 보고_: ");
+                            if (info.lastReportDate() != null) {
+                                sb.append("`").append(escCode(info.lastReportDate().toString())).append("`");
+                            } else {
+                                sb.append("보고 이력 없음");
+                            }
+                            sb.append("\n\n");
+                        }
+
+                        sb.append("\n");
+                        sb.append("\\=".repeat(30)).append("\n");
+                        sb.append("\\=".repeat(30)).append("\n");
+                        sb.append("\n");
+                    });
+        }
+
         return sb.toString();
     }
 

@@ -1,0 +1,623 @@
+package com.bmilab.backend.domain.task.controller;
+
+import com.bmilab.backend.domain.task.dto.request.AcknowledgementUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.ConferenceRequest;
+import com.bmilab.backend.domain.task.dto.request.PatentRequest;
+import com.bmilab.backend.domain.task.dto.request.PublicationUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.TaskAgreementUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.TaskBasicInfoUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.TaskPeriodUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.TaskPresentationUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.TaskProposalUpdateRequest;
+import com.bmilab.backend.domain.task.dto.request.TaskRequest;
+import com.bmilab.backend.domain.task.dto.response.AcknowledgementResponse;
+import com.bmilab.backend.domain.task.dto.response.ConferenceResponse;
+import com.bmilab.backend.domain.task.dto.response.PatentResponse;
+import com.bmilab.backend.domain.task.dto.response.PublicationResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskAgreementResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskBasicInfoResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskPeriodResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskPresentationResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskProjectSummary;
+import com.bmilab.backend.domain.task.dto.response.TaskProposalResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskStatsResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskSummaryResponse;
+import com.bmilab.backend.domain.task.enums.TaskStatus;
+import com.bmilab.backend.global.exception.ErrorResponse;
+import com.bmilab.backend.global.security.UserAuthInfo;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
+
+@Tag(name = "Task", description = "과제 관리 API")
+public interface TaskApi {
+
+    @Operation(summary = "과제 생성", description = "새로운 과제를 생성하는 POST API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "201",
+                            description = "과제 생성 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "409",
+                            description = "중복된 연구과제번호입니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> createTask(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @RequestBody TaskRequest request
+    );
+
+    @Operation(summary = "과제 수정", description = "과제 전체 정보를 수정하는 PUT API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "과제 수정 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "수정할 수 없는 상태입니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+
+    ResponseEntity<Void> updateTask(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody TaskRequest request
+    );
+
+    @Operation(summary = "과제 통계 조회", description = "과제 통계 정보를 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "과제 통계 조회 성공"
+                    )
+            }
+    )
+    ResponseEntity<TaskStatsResponse> getTaskStats(@AuthenticationPrincipal UserAuthInfo userAuthInfo);
+
+    @Operation(summary = "과제 목록 조회", description = "과제 목록을 페이징으로 조회하는 GET API. 필터링 및 검색 가능")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "과제 목록 조회 성공"
+                    )
+            }
+    )
+    ResponseEntity<Page<TaskSummaryResponse>> getAllTasks(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @RequestParam(required = false) TaskStatus status,
+            @RequestParam(required = false) String keyword,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) @ParameterObject Pageable pageable
+    );
+
+    @Operation(summary = "과제 상세 조회", description = "과제 ID로 과제 요약 정보를 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "과제 조회 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<TaskSummaryResponse> getTask(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    );
+
+    @Operation(summary = "과제 기본정보 조회", description = "과제 ID로 기본정보를 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "기본정보 조회 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<TaskBasicInfoResponse> getTaskBasicInfo(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    );
+
+
+    @Operation(summary = "과제 기본정보 수정", description = "과제의 기본 정보(소관부처, 전문기관 등)를 수정하는 PATCH API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "과제 기본 정보 수정 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> updateBasicInfo(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody TaskBasicInfoUpdateRequest request
+    );
+
+    @Operation(summary = "과제 제안서 정보 조회", description = "과제 ID로 제안서 정보를 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "제안서 정보 조회 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<TaskProposalResponse> getTaskProposal(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    );
+
+    @Operation(summary = "과제 제안서 정보 수정", description = "제안서 작성 관련 정보를 수정하는 PATCH API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "제안서 정보 수정 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> updateProposal(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody TaskProposalUpdateRequest request
+    );
+
+    @Operation(summary = "과제 발표 정보 조회", description = "과제 ID로 발표 정보를 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "발표 정보 조회 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<TaskPresentationResponse> getTaskPresentation(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    );
+
+    @Operation(summary = "과제 발표 정보 수정", description = "발표 준비 관련 정보를 수정하는 PATCH API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "발표 정보 수정 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> updatePresentation(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody TaskPresentationUpdateRequest request
+    );
+
+    @Operation(summary = "과제 협약 정보 조회", description = "과제 ID로 협약 정보를 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "협약 정보 조회 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<TaskAgreementResponse> getTaskAgreement(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    );
+
+
+    @Operation(summary = "과제 협약 정보 수정", description = "협약 관련 정보를 수정하는 PATCH API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "협약 정보 수정 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> updateAgreement(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody TaskAgreementUpdateRequest request
+    );
+
+    @Operation(summary = "과제 특정 연차 정보 조회", description = "과제 ID와 연차 ID로 특정 연차 정보를 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "연차 정보 조회 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<TaskPeriodResponse> getTaskPeriod(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @PathVariable Long periodId
+    );
+
+    @Operation(summary = "과제 연차별 정보 수정", description = "연차별 담당자 및 참여자 정보를 수정하는 PATCH API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "연차별 정보 수정 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "수정할 수 없는 상태입니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> updateTaskPeriod(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @PathVariable Long periodId,
+            @RequestBody TaskPeriodUpdateRequest request
+    );
+
+    @Operation(summary = "과제 삭제", description = "과제를 삭제하는 DELETE API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "과제 삭제 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "삭제할 수 없는 상태입니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> deleteTask(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    );
+
+    @Operation(summary = "과제 첨부파일 삭제", description = "과제 첨부파일을 삭제하는 DELETE API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "첨부파일 삭제 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "파일 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> deleteTaskFile(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @PathVariable java.util.UUID fileId
+    );
+
+    @Operation(summary = "사사표기 조회", description = "과제별 사사표기 정보를 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "사사표기 조회 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<AcknowledgementResponse> getAcknowledgement(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    );
+
+    @Operation(summary = "사사표기 저장", description = "사사표기 정보를 저장하는 PUT API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "사사표기 저장 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "저장할 수 없는 상태입니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> saveAcknowledgement(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody AcknowledgementUpdateRequest request
+    );
+
+    @Operation(summary = "과제 관련 연구프로젝트 목록 조회", description = "과제와 연결된 연구프로젝트 목록을 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "연구프로젝트 목록 조회 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<List<TaskProjectSummary>> getTaskProjects(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    );
+
+    @Operation(summary = "논문 정보 조회", description = "과제별 논문 정보를 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "논문 정보 조회 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<PublicationResponse> getPublication(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    );
+
+    @Operation(summary = "논문 정보 저장", description = "논문 정보를 저장하는 PUT API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "논문 정보 저장 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "저장할 수 없는 상태입니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> savePublication(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody PublicationUpdateRequest request
+    );
+
+    @Operation(summary = "학회발표 정보 조회", description = "과제별 학회발표 정보를 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "학회발표 정보 조회 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<ConferenceResponse> getConference(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    );
+
+    @Operation(summary = "학회발표 정보 저장", description = "학회발표 정보를 저장하는 PUT API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "학회발표 정보 저장 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "저장할 수 없는 상태입니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> saveConference(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody ConferenceRequest request
+    );
+
+    @Operation(summary = "특허 정보 조회", description = "과제별 특허 정보를 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "특허 정보 조회 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<PatentResponse> getPatent(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    );
+
+    @Operation(summary = "특허 정보 저장", description = "특허 정보를 저장하는 PUT API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "특허 정보 저장 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "저장할 수 없는 상태입니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> savePatent(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @RequestBody PatentRequest request
+    );
+
+    @Operation(summary = "과제에 연구프로젝트 추가", description = "과제와 연구프로젝트를 연결하는 POST API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "연구프로젝트 추가 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 또는 연구프로젝트 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> addProjectToTask(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @PathVariable Long projectId
+    );
+
+    @Operation(summary = "과제에서 연구프로젝트 제거", description = "과제와 연구프로젝트 연결을 해제하는 DELETE API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "연구프로젝트 제거 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 또는 연구프로젝트 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> removeProjectFromTask(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId,
+            @PathVariable Long projectId
+    );
+}
