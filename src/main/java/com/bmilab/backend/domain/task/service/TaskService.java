@@ -24,6 +24,7 @@ import com.bmilab.backend.domain.task.dto.response.TaskAgreementResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskBasicInfoResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskMemberSummary;
 import com.bmilab.backend.domain.task.dto.response.TaskPeriodResponse;
+import com.bmilab.backend.domain.task.dto.response.TaskPeriodSummaryResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskPresentationResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskProjectSummary;
 import com.bmilab.backend.domain.task.dto.response.TaskProposalResponse;
@@ -76,6 +77,10 @@ public class TaskService {
         if (request.researchTaskNumber() != null &&
                 taskRepository.existsByResearchTaskNumber(request.researchTaskNumber())) {
             throw new ApiException(TaskErrorCode.TASK_DUPLICATE_RESEARCH_NUMBER);
+        }
+
+        if (request.currentYear() > request.totalYears()) {
+            throw new ApiException(TaskErrorCode.TASK_INVALID_YEAR);
         }
 
         User practicalManager =
@@ -143,6 +148,10 @@ public class TaskService {
             throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
         }
 
+        if (request.currentYear() > request.totalYears()) {
+            throw new ApiException(TaskErrorCode.TASK_INVALID_YEAR);
+        }
+
         User practicalManager =
                 request.practicalManagerId() != null ? userService.findUserById(request.practicalManagerId()) : null;
 
@@ -191,12 +200,22 @@ public class TaskService {
 
         Page<Task> tasks = taskRepository.findTasksForList(status, keyword, pageable);
         return tasks.map(task -> {
-            List<TaskPeriodResponse> periods = taskPeriodRepository.findByTaskOrderByYearNumberAsc(task)
+            List<TaskPeriodSummaryResponse> periods = taskPeriodRepository.findByTaskOrderByYearNumberAsc(task)
                     .stream()
-                    .map(TaskPeriodResponse::from)
+                    .map(TaskPeriodSummaryResponse::from)
                     .collect(Collectors.toList());
             return TaskSummaryResponse.from(task, periods);
         });
+    }
+
+    public TaskSummaryResponse getTask(Long userId, Long taskId) {
+
+        Task task = getTaskById(taskId);
+        List<TaskPeriodSummaryResponse> periods = taskPeriodRepository.findByTaskOrderByYearNumberAsc(task)
+                .stream()
+                .map(TaskPeriodSummaryResponse::from)
+                .collect(Collectors.toList());
+        return TaskSummaryResponse.from(task, periods);
     }
 
     public TaskBasicInfoResponse getTaskBasicInfo(Long userId, Long taskId) {
