@@ -83,6 +83,15 @@ public class TaskController implements TaskApi {
         return ResponseEntity.ok(responses);
     }
 
+    @GetMapping("/{taskId}")
+    public ResponseEntity<TaskSummaryResponse> getTask(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    ) {
+        TaskSummaryResponse response = taskService.getTask(userAuthInfo.getUserId(), taskId);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{taskId}/basic-info")
     public ResponseEntity<TaskBasicInfoResponse> getTaskBasicInfo(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,

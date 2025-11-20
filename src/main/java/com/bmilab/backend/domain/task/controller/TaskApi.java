@@ -119,6 +119,25 @@ public interface TaskApi {
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) @ParameterObject Pageable pageable
     );
 
+    @Operation(summary = "과제 상세 조회", description = "과제 ID로 과제 요약 정보를 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "과제 조회 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<TaskSummaryResponse> getTask(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    );
+
     @Operation(summary = "과제 기본정보 조회", description = "과제 ID로 기본정보를 조회하는 GET API")
     @ApiResponses(
             value = {
