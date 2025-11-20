@@ -53,7 +53,7 @@ public record TaskSummaryResponse(
         LocalDate taskEndDate,
 
         @Schema(description = "과제 연차별 기간 목록")
-        List<TaskPeriodResponse> periods,
+        List<TaskPeriodSummaryResponse> periods,
 
         @Schema(description = "주관기관")
         String leadInstitution,
@@ -73,7 +73,7 @@ public record TaskSummaryResponse(
         @Schema(description = "참여기관")
         String participatingInstitutions
 ) {
-    public static TaskSummaryResponse from(Task task, List<TaskPeriodResponse> periods) {
+    public static TaskSummaryResponse from(Task task, List<TaskPeriodSummaryResponse> periods) {
         LocalDate calculatedStartDate = null;
         LocalDate calculatedEndDate = null;
 
