@@ -185,6 +185,29 @@ public class TaskService {
                 practicalManager,
                 request.participatingInstitutions()
         );
+
+        List<TaskPeriod> existingPeriods = taskPeriodRepository.findByTaskOrderByYearNumberAsc(task);
+        taskPeriodRepository.deleteAll(existingPeriods);
+
+        if (request.periods() != null && !request.periods().isEmpty()) {
+            for (TaskPeriodRequest periodRequest : request.periods()) {
+                TaskPeriod period = TaskPeriod.builder()
+                        .task(task)
+                        .yearNumber(periodRequest.yearNumber())
+                        .startDate(periodRequest.startDate())
+                        .endDate(periodRequest.endDate())
+                        .build();
+                taskPeriodRepository.save(period);
+            }
+        } else {
+            for (int i = 1; i <= request.totalYears(); i++) {
+                TaskPeriod period = TaskPeriod.builder()
+                        .task(task)
+                        .yearNumber(i)
+                        .build();
+                taskPeriodRepository.save(period);
+            }
+        }
     }
 
     public TaskStatsResponse getTaskStats(Long userId) {
@@ -236,7 +259,27 @@ public class TaskService {
 
         List<TaskPeriodResponse> periods = taskPeriodRepository.findByTaskOrderByYearNumberAsc(task)
                 .stream()
-                .map(TaskPeriodResponse::from)
+                .map(period -> {
+                    List<FileSummary> periodFiles = fileService.findAllByDomainTypeAndEntityId(
+                                    FileDomainType.TASK_PERIOD_FILES, period.getId())
+                            .stream()
+                            .map(FileSummary::from)
+                            .collect(Collectors.toList());
+
+                    List<FileSummary> interimReportFiles = fileService.findAllByDomainTypeAndEntityId(
+                                    FileDomainType.TASK_PERIOD_INTERIM_REPORT, period.getId())
+                            .stream()
+                            .map(FileSummary::from)
+                            .collect(Collectors.toList());
+
+                    List<FileSummary> annualReportFiles = fileService.findAllByDomainTypeAndEntityId(
+                                    FileDomainType.TASK_PERIOD_ANNUAL_REPORT, period.getId())
+                            .stream()
+                            .map(FileSummary::from)
+                            .collect(Collectors.toList());
+
+                    return TaskPeriodResponse.from(period, periodFiles, interimReportFiles, annualReportFiles);
+                })
                 .collect(Collectors.toList());
 
         return TaskBasicInfoResponse.from(
