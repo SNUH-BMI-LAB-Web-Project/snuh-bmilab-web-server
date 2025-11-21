@@ -259,7 +259,27 @@ public class TaskService {
 
         List<TaskPeriodResponse> periods = taskPeriodRepository.findByTaskOrderByYearNumberAsc(task)
                 .stream()
-                .map(TaskPeriodResponse::from)
+                .map(period -> {
+                    List<FileSummary> periodFiles = fileService.findAllByDomainTypeAndEntityId(
+                                    FileDomainType.TASK_PERIOD_FILES, period.getId())
+                            .stream()
+                            .map(FileSummary::from)
+                            .collect(Collectors.toList());
+
+                    List<FileSummary> interimReportFiles = fileService.findAllByDomainTypeAndEntityId(
+                                    FileDomainType.TASK_PERIOD_INTERIM_REPORT, period.getId())
+                            .stream()
+                            .map(FileSummary::from)
+                            .collect(Collectors.toList());
+
+                    List<FileSummary> annualReportFiles = fileService.findAllByDomainTypeAndEntityId(
+                                    FileDomainType.TASK_PERIOD_ANNUAL_REPORT, period.getId())
+                            .stream()
+                            .map(FileSummary::from)
+                            .collect(Collectors.toList());
+
+                    return TaskPeriodResponse.from(period, periodFiles, interimReportFiles, annualReportFiles);
+                })
                 .collect(Collectors.toList());
 
         return TaskBasicInfoResponse.from(
