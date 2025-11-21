@@ -185,6 +185,29 @@ public class TaskService {
                 practicalManager,
                 request.participatingInstitutions()
         );
+
+        List<TaskPeriod> existingPeriods = taskPeriodRepository.findByTaskOrderByYearNumberAsc(task);
+        taskPeriodRepository.deleteAll(existingPeriods);
+
+        if (request.periods() != null && !request.periods().isEmpty()) {
+            for (TaskPeriodRequest periodRequest : request.periods()) {
+                TaskPeriod period = TaskPeriod.builder()
+                        .task(task)
+                        .yearNumber(periodRequest.yearNumber())
+                        .startDate(periodRequest.startDate())
+                        .endDate(periodRequest.endDate())
+                        .build();
+                taskPeriodRepository.save(period);
+            }
+        } else {
+            for (int i = 1; i <= request.totalYears(); i++) {
+                TaskPeriod period = TaskPeriod.builder()
+                        .task(task)
+                        .yearNumber(i)
+                        .build();
+                taskPeriodRepository.save(period);
+            }
+        }
     }
 
     public TaskStatsResponse getTaskStats(Long userId) {
