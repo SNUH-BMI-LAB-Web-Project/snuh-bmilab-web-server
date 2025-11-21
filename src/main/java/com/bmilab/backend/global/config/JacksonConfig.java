@@ -1,7 +1,6 @@
 package com.bmilab.backend.global.config;
 
 import com.bmilab.backend.global.utils.LocalTimeJsonHandler;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
@@ -25,11 +24,9 @@ public class JacksonConfig {
     @Bean
     public Jackson2ObjectMapperBuilderCustomizer jsonCustomizer() {
         return builder -> {
-            // LocalDate 직렬화/역직렬화 (타임존 무시)
+            // LocalDate 직렬화만 설정 (역직렬화는 기본 설정 사용 - ISO 8601 포함 여러 형식 지원)
             builder.serializerByType(LocalDate.class,
                 new LocalDateSerializer(DateTimeFormatter.ofPattern(DATE_FORMAT)));
-            builder.deserializerByType(LocalDate.class,
-                new LocalDateDeserializer(DateTimeFormatter.ofPattern(DATE_FORMAT)));
 
             // LocalDateTime 직렬화/역직렬화 (타임존 무시)
             builder.serializerByType(LocalDateTime.class,
