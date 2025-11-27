@@ -141,11 +141,11 @@ public class TaskService {
     }
 
     @Transactional
-    public void updateTask(Long userId, Long taskId, TaskRequest request) {
+    public void updateTask(Long userId, boolean isAdmin, Long taskId, TaskRequest request) {
 
         Task task = getTaskById(taskId);
 
-        if (!task.canBeEditedByUser(userId)) {
+        if (!task.canBeEditedByUser(userId, isAdmin)) {
             throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
         }
 
@@ -294,11 +294,11 @@ public class TaskService {
     }
 
     @Transactional
-    public void updateBasicInfo(Long userId, Long taskId, TaskBasicInfoUpdateRequest request) {
+    public void updateBasicInfo(Long userId, boolean isAdmin, Long taskId, TaskBasicInfoUpdateRequest request) {
 
         Task task = getTaskById(taskId);
 
-        if (!task.canBeEditedByUser(userId)) {
+        if (!task.canBeEditedByUser(userId, isAdmin)) {
             throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
         }
 
@@ -348,11 +348,11 @@ public class TaskService {
     }
 
     @Transactional
-    public void updateProposal(Long userId, Long taskId, TaskProposalUpdateRequest request) {
+    public void updateProposal(Long userId, boolean isAdmin, Long taskId, TaskProposalUpdateRequest request) {
 
         Task task = getTaskById(taskId);
 
-        if (!task.canBeEditedByUser(userId)) {
+        if (!task.canBeEditedByUser(userId, isAdmin)) {
             throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
         }
 
@@ -485,11 +485,11 @@ public class TaskService {
     }
 
     @Transactional
-    public void updatePresentation(Long userId, Long taskId, TaskPresentationUpdateRequest request) {
+    public void updatePresentation(Long userId, boolean isAdmin, Long taskId, TaskPresentationUpdateRequest request) {
 
         Task task = getTaskById(taskId);
 
-        if (!task.canBeEditedByUser(userId)) {
+        if (!task.canBeEditedByUser(userId, isAdmin)) {
             throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
         }
 
@@ -549,11 +549,11 @@ public class TaskService {
     }
 
     @Transactional
-    public void updateAgreement(Long userId, Long taskId, TaskAgreementUpdateRequest request) {
+    public void updateAgreement(Long userId, boolean isAdmin, Long taskId, TaskAgreementUpdateRequest request) {
 
         Task task = getTaskById(taskId);
 
-        if (!task.canBeEditedByUser(userId)) {
+        if (!task.canBeEditedByUser(userId, isAdmin)) {
             throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
         }
 
@@ -594,11 +594,11 @@ public class TaskService {
     }
 
     @Transactional
-    public void updateTaskPeriod(Long userId, Long taskId, Long periodId, TaskPeriodUpdateRequest request) {
+    public void updateTaskPeriod(Long userId, boolean isAdmin, Long taskId, Long periodId, TaskPeriodUpdateRequest request) {
 
         Task task = getTaskById(taskId);
 
-        if (!task.canBeEditedByUser(userId)) {
+        if (!task.canBeEditedByUser(userId, isAdmin)) {
             throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
         }
 
@@ -621,11 +621,11 @@ public class TaskService {
     }
 
     @Transactional
-    public void deleteTask(Long userId, Long taskId) {
+    public void deleteTask(Long userId, boolean isAdmin, Long taskId) {
 
         Task task = getTaskById(taskId);
 
-        if (!task.canBeEditedByUser(userId)) {
+        if (!task.canBeEditedByUser(userId, isAdmin)) {
             throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
         }
 
@@ -633,11 +633,11 @@ public class TaskService {
     }
 
     @Transactional
-    public void deleteTaskFile(Long userId, Long taskId, java.util.UUID fileId) {
+    public void deleteTaskFile(Long userId, boolean isAdmin, Long taskId, java.util.UUID fileId) {
 
         Task task = getTaskById(taskId);
 
-        if (!task.canBeEditedByUser(userId)) {
+        if (!task.canBeEditedByUser(userId, isAdmin)) {
             throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
         }
 
@@ -653,11 +653,11 @@ public class TaskService {
     }
 
     @Transactional
-    public void saveAcknowledgement(Long userId, Long taskId, AcknowledgementUpdateRequest request) {
+    public void saveAcknowledgement(Long userId, boolean isAdmin, Long taskId, AcknowledgementUpdateRequest request) {
 
         Task task = getTaskById(taskId);
 
-        if (!task.canBeEditedByUser(userId)) {
+        if (!task.canBeEditedByUser(userId, isAdmin)) {
             throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
         }
 
@@ -686,11 +686,11 @@ public class TaskService {
     }
 
     @Transactional
-    public void savePublication(Long userId, Long taskId, PublicationUpdateRequest request) {
+    public void savePublication(Long userId, boolean isAdmin, Long taskId, PublicationUpdateRequest request) {
 
         Task task = getTaskById(taskId);
 
-        if (!task.canBeEditedByUser(userId)) {
+        if (!task.canBeEditedByUser(userId, isAdmin)) {
             throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
         }
 
@@ -717,11 +717,11 @@ public class TaskService {
     }
 
     @Transactional
-    public void saveConference(Long userId, Long taskId, ConferenceRequest request) {
+    public void saveConference(Long userId, boolean isAdmin, Long taskId, ConferenceRequest request) {
 
         Task task = getTaskById(taskId);
 
-        if (!task.canBeEditedByUser(userId)) {
+        if (!task.canBeEditedByUser(userId, isAdmin)) {
             throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
         }
 
@@ -747,11 +747,11 @@ public class TaskService {
     }
 
     @Transactional
-    public void savePatent(Long userId, Long taskId, PatentRequest request) {
+    public void savePatent(Long userId, boolean isAdmin, Long taskId, PatentRequest request) {
 
         Task task = getTaskById(taskId);
 
-        if (!task.canBeEditedByUser(userId)) {
+        if (!task.canBeEditedByUser(userId, isAdmin)) {
             throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
         }
 
