@@ -142,13 +142,15 @@ public class Task extends BaseTimeEntity {
         this.participatingInstitutions = participatingInstitutions;
     }
 
-    public boolean canBeEditedByUser(Long userId) {
+    // 제안서 탈락, 발표 탈락, 과제 종료 상태에서는 실무책임자 또는 어드민만 수정 가능
+    public boolean canBeEditedByUser(Long userId, boolean isAdmin) {
         if (this.status != TaskStatus.PROPOSAL_REJECTED
                 && this.status != TaskStatus.PRESENTATION_REJECTED
                 && this.status != TaskStatus.COMPLETED) {
             return true;
         }
 
-        return this.practicalManager != null && this.practicalManager.getId().equals(userId);
+        // 어드민이거나 실무책임자인 경우 수정 가능
+        return isAdmin || (this.practicalManager != null && this.practicalManager.getId().equals(userId));
     }
 }
