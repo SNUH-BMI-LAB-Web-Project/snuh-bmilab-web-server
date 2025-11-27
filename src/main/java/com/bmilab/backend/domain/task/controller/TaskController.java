@@ -24,6 +24,7 @@ import com.bmilab.backend.domain.task.dto.response.TaskStatsResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskSummaryResponse;
 import com.bmilab.backend.domain.task.enums.TaskStatus;
 import com.bmilab.backend.domain.task.service.TaskService;
+import com.bmilab.backend.domain.user.enums.Role;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -62,7 +63,8 @@ public class TaskController implements TaskApi {
             @PathVariable Long taskId,
             @RequestBody @Valid TaskRequest request
     ) {
-        taskService.updateTask(userAuthInfo.getUserId(), taskId, request);
+        boolean isAdmin = userAuthInfo.getUser().getRole() == Role.ADMIN;
+        taskService.updateTask(userAuthInfo.getUserId(), isAdmin, taskId, request);
         return ResponseEntity.ok().build();
     }
 
@@ -107,7 +109,8 @@ public class TaskController implements TaskApi {
             @PathVariable Long taskId,
             @RequestBody @Valid TaskBasicInfoUpdateRequest request
     ) {
-        taskService.updateBasicInfo(userAuthInfo.getUserId(), taskId, request);
+        boolean isAdmin = userAuthInfo.getUser().getRole() == Role.ADMIN;
+        taskService.updateBasicInfo(userAuthInfo.getUserId(), isAdmin, taskId, request);
         return ResponseEntity.ok().build();
     }
 
@@ -126,7 +129,8 @@ public class TaskController implements TaskApi {
             @PathVariable Long taskId,
             @RequestBody @Valid TaskProposalUpdateRequest request
     ) {
-        taskService.updateProposal(userAuthInfo.getUserId(), taskId, request);
+        boolean isAdmin = userAuthInfo.getUser().getRole() == Role.ADMIN;
+        taskService.updateProposal(userAuthInfo.getUserId(), isAdmin, taskId, request);
         return ResponseEntity.ok().build();
     }
 
@@ -145,7 +149,8 @@ public class TaskController implements TaskApi {
             @PathVariable Long taskId,
             @RequestBody @Valid TaskPresentationUpdateRequest request
     ) {
-        taskService.updatePresentation(userAuthInfo.getUserId(), taskId, request);
+        boolean isAdmin = userAuthInfo.getUser().getRole() == Role.ADMIN;
+        taskService.updatePresentation(userAuthInfo.getUserId(), isAdmin, taskId, request);
         return ResponseEntity.ok().build();
     }
 
@@ -164,7 +169,8 @@ public class TaskController implements TaskApi {
             @PathVariable Long taskId,
             @RequestBody @Valid TaskAgreementUpdateRequest request
     ) {
-        taskService.updateAgreement(userAuthInfo.getUserId(), taskId, request);
+        boolean isAdmin = userAuthInfo.getUser().getRole() == Role.ADMIN;
+        taskService.updateAgreement(userAuthInfo.getUserId(), isAdmin, taskId, request);
         return ResponseEntity.ok().build();
     }
 
@@ -185,7 +191,8 @@ public class TaskController implements TaskApi {
             @PathVariable Long periodId,
             @RequestBody @Valid TaskPeriodUpdateRequest request
     ) {
-        taskService.updateTaskPeriod(userAuthInfo.getUserId(), taskId, periodId, request);
+        boolean isAdmin = userAuthInfo.getUser().getRole() == Role.ADMIN;
+        taskService.updateTaskPeriod(userAuthInfo.getUserId(), isAdmin, taskId, periodId, request);
         return ResponseEntity.ok().build();
     }
 
@@ -194,7 +201,8 @@ public class TaskController implements TaskApi {
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @PathVariable Long taskId
     ) {
-        taskService.deleteTask(userAuthInfo.getUserId(), taskId);
+        boolean isAdmin = userAuthInfo.getUser().getRole() == Role.ADMIN;
+        taskService.deleteTask(userAuthInfo.getUserId(), isAdmin, taskId);
         return ResponseEntity.ok().build();
     }
 
@@ -204,7 +212,8 @@ public class TaskController implements TaskApi {
             @PathVariable Long taskId,
             @PathVariable UUID fileId
     ) {
-        taskService.deleteTaskFile(userAuthInfo.getUserId(), taskId, fileId);
+        boolean isAdmin = userAuthInfo.getUser().getRole() == Role.ADMIN;
+        taskService.deleteTaskFile(userAuthInfo.getUserId(), isAdmin, taskId, fileId);
         return ResponseEntity.ok().build();
     }
 
@@ -223,7 +232,8 @@ public class TaskController implements TaskApi {
             @PathVariable Long taskId,
             @RequestBody @Valid AcknowledgementUpdateRequest request
     ) {
-        taskService.saveAcknowledgement(userAuthInfo.getUserId(), taskId, request);
+        boolean isAdmin = userAuthInfo.getUser().getRole() == Role.ADMIN;
+        taskService.saveAcknowledgement(userAuthInfo.getUserId(), isAdmin, taskId, request);
         return ResponseEntity.ok().build();
     }
 
@@ -251,7 +261,8 @@ public class TaskController implements TaskApi {
             @PathVariable Long taskId,
             @RequestBody @Valid PublicationUpdateRequest request
     ) {
-        taskService.savePublication(userAuthInfo.getUserId(), taskId, request);
+        boolean isAdmin = userAuthInfo.getUser().getRole() == Role.ADMIN;
+        taskService.savePublication(userAuthInfo.getUserId(), isAdmin, taskId, request);
         return ResponseEntity.ok().build();
     }
 
@@ -270,7 +281,8 @@ public class TaskController implements TaskApi {
             @PathVariable Long taskId,
             @RequestBody @Valid ConferenceRequest request
     ) {
-        taskService.saveConference(userAuthInfo.getUserId(), taskId, request);
+        boolean isAdmin = userAuthInfo.getUser().getRole() == Role.ADMIN;
+        taskService.saveConference(userAuthInfo.getUserId(), isAdmin, taskId, request);
         return ResponseEntity.ok().build();
     }
 
@@ -289,7 +301,8 @@ public class TaskController implements TaskApi {
             @PathVariable Long taskId,
             @RequestBody @Valid PatentRequest request
     ) {
-        taskService.savePatent(userAuthInfo.getUserId(), taskId, request);
+        boolean isAdmin = userAuthInfo.getUser().getRole() == Role.ADMIN;
+        taskService.savePatent(userAuthInfo.getUserId(), isAdmin, taskId, request);
         return ResponseEntity.ok().build();
     }
 
