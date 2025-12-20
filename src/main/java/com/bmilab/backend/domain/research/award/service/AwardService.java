@@ -11,9 +11,9 @@ import com.bmilab.backend.domain.research.award.entity.AwardRecipient;
 import com.bmilab.backend.domain.research.award.repository.AwardRecipientRepository;
 import com.bmilab.backend.domain.research.award.repository.AwardRepository;
 import com.bmilab.backend.domain.research.award.exception.AwardErrorCode;
+import com.bmilab.backend.domain.research.service.AuthorSyncService;
 import com.bmilab.backend.domain.task.entity.Task;
 import com.bmilab.backend.domain.task.repository.TaskRepository;
-import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.exception.GlobalErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -34,7 +33,7 @@ public class AwardService {
     private final AwardRecipientRepository awardRecipientRepository;
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
-    private final com.bmilab.backend.domain.user.repository.UserRepository userRepository;
+    private final AuthorSyncService authorSyncService;
 
     public AwardResponse createAward(CreateAwardRequest dto) {
         Project project = projectRepository.findById(dto.projectId())
@@ -55,27 +54,17 @@ public class AwardService {
         awardRepository.save(newAward);
 
         // Handle AwardRecipient linking
-        if (dto.awardRecipients() != null && !dto.awardRecipients().isEmpty()) {
-            List<Long> userIds = dto.awardRecipients().stream()
-                    .map(CreateAwardRequest.AwardRecipientRequest::userId)
-                    .collect(Collectors.toList());
-            List<User> users = userRepository.findAllById(userIds);
-            if (users.size() != userIds.size()) {
-                throw new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND);
-            }
-            java.util.Map<Long, User> userMap = users.stream()
-                    .collect(Collectors.toMap(User::getId, user -> user));
-
-            for (CreateAwardRequest.AwardRecipientRequest recipientRequest : dto.awardRecipients()) {
-                User user = userMap.get(recipientRequest.userId());
-                AwardRecipient recipient = AwardRecipient.builder()
+        List<AwardRecipient> recipients = authorSyncService.syncAuthors(
+                dto.awardRecipients(),
+                CreateAwardRequest.AwardRecipientRequest::userId,
+                CreateAwardRequest.AwardRecipientRequest::role,
+                (user, role) -> AwardRecipient.builder()
                         .award(newAward)
                         .user(user)
-                        .role(recipientRequest.role())
-                        .build();
-                awardRecipientRepository.save(recipient);
-            }
-        }
+                        .role(role)
+                        .build()
+        );
+        recipients.forEach(awardRecipientRepository::save);
 
         return new AwardResponse(newAward);
     }
@@ -106,27 +95,17 @@ public class AwardService {
 
         // Handle AwardRecipient linking
         awardRecipientRepository.deleteAllByAwardId(awardId);
-        if (dto.awardRecipients() != null && !dto.awardRecipients().isEmpty()) {
-            List<Long> userIds = dto.awardRecipients().stream()
-                    .map(UpdateAwardRequest.AwardRecipientRequest::userId)
-                    .collect(Collectors.toList());
-            List<User> users = userRepository.findAllById(userIds);
-            if (users.size() != userIds.size()) {
-                throw new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND);
-            }
-            java.util.Map<Long, User> userMap = users.stream()
-                    .collect(Collectors.toMap(User::getId, user -> user));
-
-            for (UpdateAwardRequest.AwardRecipientRequest recipientRequest : dto.awardRecipients()) {
-                User user = userMap.get(recipientRequest.userId());
-                AwardRecipient recipient = AwardRecipient.builder()
+        List<AwardRecipient> recipients = authorSyncService.syncAuthors(
+                dto.awardRecipients(),
+                UpdateAwardRequest.AwardRecipientRequest::userId,
+                UpdateAwardRequest.AwardRecipientRequest::role,
+                (user, role) -> AwardRecipient.builder()
                         .award(award)
                         .user(user)
-                        .role(recipientRequest.role())
-                        .build();
-                awardRecipientRepository.save(recipient);
-            }
-        }
+                        .role(role)
+                        .build()
+        );
+        recipients.forEach(awardRecipientRepository::save);
 
         return new AwardResponse(award);
     }

@@ -18,6 +18,7 @@ import com.bmilab.backend.domain.research.paper.repository.JournalRepository;
 import com.bmilab.backend.domain.research.paper.repository.PaperAuthorRepository;
 import com.bmilab.backend.domain.research.paper.repository.PaperCorrespondingAuthorRepository;
 import com.bmilab.backend.domain.research.paper.repository.PaperRepository;
+import com.bmilab.backend.domain.research.service.AuthorSyncService;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.exception.GlobalErrorCode;
@@ -42,7 +43,7 @@ public class PaperService {
     private final JournalRepository journalRepository;
     private final ExternalProfessorRepository externalProfessorRepository;
     private final FileService fileService;
-    private final com.bmilab.backend.domain.user.repository.UserRepository userRepository;
+    private final AuthorSyncService authorSyncService;
 
     public PaperResponse createPaper(CreatePaperRequest dto) {
         Journal journal = journalRepository.findById(dto.journalId())
@@ -74,28 +75,17 @@ public class PaperService {
                 .map(FileSummary::from)
                 .toList();
 
-        List<PaperAuthor> paperAuthors = new ArrayList<>();
-        if (dto.paperAuthors() != null && !dto.paperAuthors().isEmpty()) {
-            List<Long> userIds = dto.paperAuthors().stream()
-                    .map(CreatePaperRequest.PaperAuthorRequest::userId)
-                    .collect(Collectors.toList());
-            List<User> users = userRepository.findAllById(userIds);
-            if (users.size() != userIds.size()) {
-                throw new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND);
-            }
-            java.util.Map<Long, User> userMap = users.stream()
-                    .collect(Collectors.toMap(User::getId, user -> user));
-
-            for (CreatePaperRequest.PaperAuthorRequest authorRequest : dto.paperAuthors()) {
-                User user = userMap.get(authorRequest.userId());
-                PaperAuthor paperAuthor = PaperAuthor.builder()
+        List<PaperAuthor> paperAuthors = authorSyncService.syncAuthors(
+                dto.paperAuthors(),
+                CreatePaperRequest.PaperAuthorRequest::userId,
+                CreatePaperRequest.PaperAuthorRequest::role,
+                (user, role) -> PaperAuthor.builder()
                         .paper(newPaper)
                         .user(user)
-                        .role(authorRequest.role())
-                        .build();
-                paperAuthors.add(paperAuthorRepository.save(paperAuthor));
-            }
-        }
+                        .role(role)
+                        .build()
+        );
+        paperAuthors.forEach(paperAuthorRepository::save);
 
         // Handle PaperCorrespondingAuthor linking
         if (dto.correspondingAuthors() != null && !dto.correspondingAuthors().isEmpty()) {
@@ -184,28 +174,17 @@ public class PaperService {
 
         // Update PaperAuthors
         paperAuthorRepository.deleteAllByPaperId(paperId); // Delete existing
-        List<PaperAuthor> paperAuthors = new ArrayList<>();
-        if (dto.paperAuthors() != null && !dto.paperAuthors().isEmpty()) {
-            List<Long> userIds = dto.paperAuthors().stream()
-                    .map(UpdatePaperRequest.PaperAuthorRequest::userId)
-                    .collect(Collectors.toList());
-            List<User> users = userRepository.findAllById(userIds);
-            if (users.size() != userIds.size()) {
-                throw new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND);
-            }
-            java.util.Map<Long, User> userMap = users.stream()
-                    .collect(Collectors.toMap(User::getId, user -> user));
-
-            for (UpdatePaperRequest.PaperAuthorRequest authorRequest : dto.paperAuthors()) {
-                User user = userMap.get(authorRequest.userId());
-                PaperAuthor paperAuthor = PaperAuthor.builder()
+        List<PaperAuthor> paperAuthors = authorSyncService.syncAuthors(
+                dto.paperAuthors(),
+                UpdatePaperRequest.PaperAuthorRequest::userId,
+                UpdatePaperRequest.PaperAuthorRequest::role,
+                (user, role) -> PaperAuthor.builder()
                         .paper(paper)
                         .user(user)
-                        .role(authorRequest.role())
-                        .build();
-                paperAuthors.add(paperAuthorRepository.save(paperAuthor));
-            }
-        }
+                        .role(role)
+                        .build()
+        );
+        paperAuthors.forEach(paperAuthorRepository::save);
 
         return new PaperResponse(paper, paperAuthors, fileSummaries);
     }

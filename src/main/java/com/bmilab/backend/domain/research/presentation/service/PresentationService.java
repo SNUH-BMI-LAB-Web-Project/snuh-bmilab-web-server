@@ -11,9 +11,9 @@ import com.bmilab.backend.domain.research.presentation.entity.AcademicPresentati
 import com.bmilab.backend.domain.research.presentation.entity.AcademicPresentationAuthor;
 import com.bmilab.backend.domain.research.presentation.repository.AcademicPresentationAuthorRepository;
 import com.bmilab.backend.domain.research.presentation.repository.AcademicPresentationRepository;
+import com.bmilab.backend.domain.research.service.AuthorSyncService;
 import com.bmilab.backend.domain.task.entity.Task;
 import com.bmilab.backend.domain.task.repository.TaskRepository;
-import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.exception.GlobalErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -34,7 +33,7 @@ public class PresentationService {
     private final AcademicPresentationAuthorRepository academicPresentationAuthorRepository;
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
-    private final com.bmilab.backend.domain.user.repository.UserRepository userRepository;
+    private final AuthorSyncService authorSyncService;
 
     public AcademicPresentationResponse createAcademicPresentation(CreateAcademicPresentationRequest dto) {
         Project project = projectRepository.findById(dto.projectId())
@@ -59,27 +58,17 @@ public class PresentationService {
         academicPresentationRepository.save(newAcademicPresentation);
 
         // Handle AcademicPresentationAuthor linking
-        if (dto.academicPresentationAuthors() != null && !dto.academicPresentationAuthors().isEmpty()) {
-            List<Long> userIds = dto.academicPresentationAuthors().stream()
-                    .map(CreateAcademicPresentationRequest.AcademicPresentationAuthorRequest::userId)
-                    .collect(Collectors.toList());
-            List<User> users = userRepository.findAllById(userIds);
-            if (users.size() != userIds.size()) {
-                throw new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND);
-            }
-            java.util.Map<Long, User> userMap = users.stream()
-                    .collect(Collectors.toMap(User::getId, user -> user));
-
-            for (CreateAcademicPresentationRequest.AcademicPresentationAuthorRequest authorRequest : dto.academicPresentationAuthors()) {
-                User user = userMap.get(authorRequest.userId());
-                AcademicPresentationAuthor author = AcademicPresentationAuthor.builder()
+        List<AcademicPresentationAuthor> authors = authorSyncService.syncAuthors(
+                dto.academicPresentationAuthors(),
+                CreateAcademicPresentationRequest.AcademicPresentationAuthorRequest::userId,
+                CreateAcademicPresentationRequest.AcademicPresentationAuthorRequest::role,
+                (user, role) -> AcademicPresentationAuthor.builder()
                         .academicPresentation(newAcademicPresentation)
                         .user(user)
-                        .role(authorRequest.role())
-                        .build();
-                academicPresentationAuthorRepository.save(author);
-            }
-        }
+                        .role(role)
+                        .build()
+        );
+        authors.forEach(academicPresentationAuthorRepository::save);
 
         return new AcademicPresentationResponse(newAcademicPresentation);
     }
@@ -112,27 +101,17 @@ public class PresentationService {
 
         // Handle AcademicPresentationAuthor linking
         academicPresentationAuthorRepository.deleteAllByAcademicPresentationId(academicPresentationId);
-        if (dto.academicPresentationAuthors() != null && !dto.academicPresentationAuthors().isEmpty()) {
-            List<Long> userIds = dto.academicPresentationAuthors().stream()
-                    .map(UpdateAcademicPresentationRequest.AcademicPresentationAuthorRequest::userId)
-                    .collect(Collectors.toList());
-            List<User> users = userRepository.findAllById(userIds);
-            if (users.size() != userIds.size()) {
-                throw new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND);
-            }
-            java.util.Map<Long, User> userMap = users.stream()
-                    .collect(Collectors.toMap(User::getId, user -> user));
-
-            for (UpdateAcademicPresentationRequest.AcademicPresentationAuthorRequest authorRequest : dto.academicPresentationAuthors()) {
-                User user = userMap.get(authorRequest.userId());
-                AcademicPresentationAuthor author = AcademicPresentationAuthor.builder()
+        List<AcademicPresentationAuthor> authors = authorSyncService.syncAuthors(
+                dto.academicPresentationAuthors(),
+                UpdateAcademicPresentationRequest.AcademicPresentationAuthorRequest::userId,
+                UpdateAcademicPresentationRequest.AcademicPresentationAuthorRequest::role,
+                (user, role) -> AcademicPresentationAuthor.builder()
                         .academicPresentation(academicPresentation)
                         .user(user)
-                        .role(authorRequest.role())
-                        .build();
-                academicPresentationAuthorRepository.save(author);
-            }
-        }
+                        .role(role)
+                        .build()
+        );
+        authors.forEach(academicPresentationAuthorRepository::save);
 
         return new AcademicPresentationResponse(academicPresentation);
     }

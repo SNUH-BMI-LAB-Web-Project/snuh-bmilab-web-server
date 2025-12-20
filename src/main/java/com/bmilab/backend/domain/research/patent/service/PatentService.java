@@ -14,9 +14,9 @@ import com.bmilab.backend.domain.research.patent.entity.Patent;
 import com.bmilab.backend.domain.research.patent.entity.PatentAuthor;
 import com.bmilab.backend.domain.research.patent.repository.PatentAuthorRepository;
 import com.bmilab.backend.domain.research.patent.repository.PatentRepository;
+import com.bmilab.backend.domain.research.service.AuthorSyncService;
 import com.bmilab.backend.domain.task.entity.Task;
 import com.bmilab.backend.domain.task.repository.TaskRepository;
-import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.exception.GlobalErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -25,9 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -39,7 +37,7 @@ public class PatentService {
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
     private final FileService fileService;
-    private final com.bmilab.backend.domain.user.repository.UserRepository userRepository;
+    private final AuthorSyncService authorSyncService;
 
     public PatentResponse createPatent(CreatePatentRequest dto) {
         Project project = projectRepository.findById(dto.projectId())
@@ -64,28 +62,17 @@ public class PatentService {
                 .map(FileSummary::from)
                 .toList();
 
-        List<PatentAuthor> patentAuthors = new ArrayList<>();
-        if (dto.patentAuthors() != null && !dto.patentAuthors().isEmpty()) {
-            List<Long> userIds = dto.patentAuthors().stream()
-                    .map(CreatePatentRequest.PatentAuthorRequest::userId)
-                    .collect(Collectors.toList());
-            List<User> users = userRepository.findAllById(userIds);
-            if (users.size() != userIds.size()) {
-                throw new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND);
-            }
-            java.util.Map<Long, User> userMap = users.stream()
-                    .collect(Collectors.toMap(User::getId, user -> user));
-
-            for (CreatePatentRequest.PatentAuthorRequest authorRequest : dto.patentAuthors()) {
-                User user = userMap.get(authorRequest.userId());
-                PatentAuthor patentAuthor = PatentAuthor.builder()
+        List<PatentAuthor> patentAuthors = authorSyncService.syncAuthors(
+                dto.patentAuthors(),
+                CreatePatentRequest.PatentAuthorRequest::userId,
+                CreatePatentRequest.PatentAuthorRequest::role,
+                (user, role) -> PatentAuthor.builder()
                         .patent(newPatent)
                         .user(user)
-                        .role(authorRequest.role())
-                        .build();
-                patentAuthors.add(patentAuthorRepository.save(patentAuthor));
-            }
-        }
+                        .role(role)
+                        .build()
+        );
+        patentAuthors.forEach(patentAuthorRepository::save);
 
         return new PatentResponse(newPatent, patentAuthors, fileSummaries);
     }
@@ -129,28 +116,17 @@ public class PatentService {
 
         // Update PatentAuthors
         patentAuthorRepository.deleteAllByPatentId(patentId); // Delete existing
-        List<PatentAuthor> patentAuthors = new ArrayList<>();
-        if (dto.patentAuthors() != null && !dto.patentAuthors().isEmpty()) {
-            List<Long> userIds = dto.patentAuthors().stream()
-                    .map(UpdatePatentRequest.PatentAuthorRequest::userId)
-                    .collect(Collectors.toList());
-            List<User> users = userRepository.findAllById(userIds);
-            if (users.size() != userIds.size()) {
-                throw new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND);
-            }
-            java.util.Map<Long, User> userMap = users.stream()
-                    .collect(Collectors.toMap(User::getId, user -> user));
-
-            for (UpdatePatentRequest.PatentAuthorRequest authorRequest : dto.patentAuthors()) {
-                User user = userMap.get(authorRequest.userId());
-                PatentAuthor patentAuthor = PatentAuthor.builder()
+        List<PatentAuthor> patentAuthors = authorSyncService.syncAuthors(
+                dto.patentAuthors(),
+                UpdatePatentRequest.PatentAuthorRequest::userId,
+                UpdatePatentRequest.PatentAuthorRequest::role,
+                (user, role) -> PatentAuthor.builder()
                         .patent(patent)
                         .user(user)
-                        .role(authorRequest.role())
-                        .build();
-                patentAuthors.add(patentAuthorRepository.save(patentAuthor));
-            }
-        }
+                        .role(role)
+                        .build()
+        );
+        patentAuthors.forEach(patentAuthorRepository::save);
 
         return new PatentResponse(patent, patentAuthors, fileSummaries);
     }
