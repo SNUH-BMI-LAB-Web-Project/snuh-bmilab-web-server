@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface PatentRepository extends JpaRepository<Patent, Long> {
+public interface TaskPatentRepository extends JpaRepository<Patent, Long> {
     Optional<Patent> findByTask(Task task);
 }

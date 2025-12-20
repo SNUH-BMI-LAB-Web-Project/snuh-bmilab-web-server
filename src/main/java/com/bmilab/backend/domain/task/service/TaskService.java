@@ -64,9 +64,9 @@ public class TaskService {
     private final TaskPresentationMakerRepository taskPresentationMakerRepository;
     private final TaskAgreementRepository taskAgreementRepository;
     private final AcknowledgementRepository acknowledgementRepository;
-    private final PublicationRepository publicationRepository;
+    private final TaskPublicationRepository publicationRepository;
     private final ConferenceRepository conferenceRepository;
-    private final PatentRepository patentRepository;
+    private final TaskPatentRepository patentRepository;
     private final ProjectRepository projectRepository;
     private final UserService userService;
     private final FileService fileService;
