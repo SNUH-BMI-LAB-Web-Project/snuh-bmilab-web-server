@@ -8,7 +8,7 @@ import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDate;
 
-@Entity
+@Entity(name = "TaskPublication")
 @Table(name = "publications")
 @Getter
 @Builder
