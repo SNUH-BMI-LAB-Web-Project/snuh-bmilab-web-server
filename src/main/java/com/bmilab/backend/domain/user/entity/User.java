@@ -1,7 +1,9 @@
 package com.bmilab.backend.domain.user.entity;
 
 import com.bmilab.backend.domain.user.enums.UserPosition;
+import com.bmilab.backend.domain.user.enums.UserStatus;
 import com.bmilab.backend.global.entity.BaseTimeEntity;
+import java.time.LocalDateTime;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -52,6 +54,13 @@ public class User extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private UserStatus status = UserStatus.ACTIVE;
+
+    @Column(name = "resigned_at")
+    private LocalDateTime resignedAt;
 
     public void updatePassword(String newPassword) {
         this.password = newPassword;
@@ -75,5 +84,21 @@ public class User extends BaseTimeEntity {
 
     public boolean isAdmin() {
         return Role.ADMIN.equals(role);
+    }
+
+    public boolean isActive() {
+        return UserStatus.ACTIVE.equals(status);
+    }
+
+    public void resign() {
+        this.status = UserStatus.RESIGNED;
+        this.resignedAt = LocalDateTime.now();
+    }
+
+    public void updateStatus(UserStatus status) {
+        this.status = status;
+        if (status == UserStatus.RESIGNED) {
+            this.resignedAt = LocalDateTime.now();
+        }
     }
 }
