@@ -2,6 +2,7 @@ package com.bmilab.backend.domain.user.controller;
 
 import com.bmilab.backend.domain.user.dto.request.RegisterUserRequest;
 import com.bmilab.backend.domain.user.dto.request.AdminUpdateUserRequest;
+import com.bmilab.backend.domain.user.dto.request.UpdateUserStatusRequest;
 import com.bmilab.backend.domain.user.dto.request.UserAccountEmailRequest;
 import com.bmilab.backend.domain.user.dto.response.UserDetail;
 import com.bmilab.backend.domain.user.service.AuthService;
@@ -65,6 +66,23 @@ public class AdminUserController implements AdminUserApi {
     ) {
 
         userService.sendAccountEmail(userId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{userId}/resign")
+    public ResponseEntity<Void> resignUser(@PathVariable Long userId) {
+
+        userService.resignUser(userId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{userId}/status")
+    public ResponseEntity<Void> updateUserStatus(
+            @PathVariable Long userId,
+            @RequestBody @Valid UpdateUserStatusRequest request
+    ) {
+
+        userService.updateUserStatus(userId, request.status());
         return ResponseEntity.ok().build();
     }
 }
