@@ -1,6 +1,7 @@
 package com.bmilab.backend.global.security;
 
 import com.bmilab.backend.domain.user.entity.User;
+import com.bmilab.backend.domain.user.exception.UserErrorCode;
 import com.bmilab.backend.domain.user.repository.UserRepository;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.exception.GlobalErrorCode;
@@ -20,6 +21,10 @@ public class UserAuthInfoService implements UserDetailsService {
         try {
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new ApiException(GlobalErrorCode.SECURITY_USER_NOT_FOUND));
+
+            if (!user.isActive()) {
+                throw new ApiException(UserErrorCode.USER_NOT_ACTIVE);
+            }
 
             return new UserAuthInfo(user, email);
         } catch(UsernameNotFoundException exception) {

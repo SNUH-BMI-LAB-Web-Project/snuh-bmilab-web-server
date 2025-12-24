@@ -15,6 +15,8 @@ public enum UserErrorCode implements ErrorCode {
     SAME_AS_CURRENT_PASSWORD("새 비밀번호가 현재 비밀번호와 같습니다.", HttpStatus.BAD_REQUEST),
     INVALID_PROFILE_IMAGE_FILE_TYPE("프로필 이미지의 파일 형식이 잘못되었습니다.", HttpStatus.BAD_REQUEST),
     DUPLICATE_EMAIL("이미 가입된 이메일입니다.", HttpStatus.CONFLICT),
+    USER_NOT_ACTIVE("비활성화된 계정입니다.", HttpStatus.FORBIDDEN),
+    CANNOT_RESIGN_ADMIN("관리자 계정은 퇴사 처리할 수 없습니다.", HttpStatus.BAD_REQUEST),
     ;
 
     private final String message;
