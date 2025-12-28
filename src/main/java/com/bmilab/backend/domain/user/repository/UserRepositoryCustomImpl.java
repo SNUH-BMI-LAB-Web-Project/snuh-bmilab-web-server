@@ -13,6 +13,7 @@ import com.bmilab.backend.domain.user.entity.QUserProjectCategory;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.entity.UserInfo;
 import com.bmilab.backend.domain.user.enums.UserPosition;
+import com.bmilab.backend.domain.user.enums.UserStatus;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.OrderSpecifier;
@@ -106,6 +107,11 @@ public class UserRepositoryCustomImpl implements UserRepositoryCustom {
                     case "seatnumber" -> conditionBuilder.and(seatNumberContains);
                 }
             }
+        }
+
+        UserStatus statusFilter = condition.getStatus();
+        if (statusFilter != null) {
+            conditionBuilder.and(user.status.eq(statusFilter));
         }
 
         OrderSpecifier<?> orderSpecifier = "desc".equalsIgnoreCase(condition.getDirection())
