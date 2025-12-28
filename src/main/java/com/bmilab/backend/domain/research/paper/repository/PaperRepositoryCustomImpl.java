@@ -1,8 +1,8 @@
 package com.bmilab.backend.domain.research.paper.repository;
 
-import com.bmilab.backend.domain.research.paper.entity.*;
-import com.bmilab.backend.domain.research.paper.dto.response.PaperSummaryResponse;
-import com.querydsl.core.types.Projections;
+import com.bmilab.backend.domain.research.paper.entity.Paper;
+import com.bmilab.backend.domain.research.paper.entity.QJournal;
+import com.bmilab.backend.domain.research.paper.entity.QPaper;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -20,32 +20,27 @@ public class PaperRepositoryCustomImpl implements PaperRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<PaperSummaryResponse> findAllBy(String keyword, Pageable pageable) {
+    public Page<Paper> findAllBy(String keyword, Pageable pageable) {
         QPaper paper = QPaper.paper;
         QJournal journal = QJournal.journal;
 
         BooleanExpression keywordContains = StringUtils.hasText(keyword)
-                ? paper.paperTitle.containsIgnoreCase(keyword).or(journal.journalName.containsIgnoreCase(keyword))
+                ? paper.paperTitle.containsIgnoreCase(keyword)
+                        .or(journal.journalName.containsIgnoreCase(keyword))
+                        .or(paper.allAuthors.containsIgnoreCase(keyword))
                 : null;
 
-        List<PaperSummaryResponse> results = queryFactory.select(Projections.constructor(
-                        PaperSummaryResponse.class,
-                        paper.id,
-                        paper.paperTitle,
-                        journal.journalName,
-                        paper.allAuthors,
-                        paper.acceptDate,
-                        paper.publishDate
-                ))
-                .from(paper)
-                .leftJoin(paper.journal, journal)
+        List<Paper> results = queryFactory
+                .selectFrom(paper)
+                .leftJoin(paper.journal, journal).fetchJoin()
                 .where(keywordContains)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(paper.acceptDate.desc()) // Default sort
+                .orderBy(paper.acceptDate.desc())
                 .fetch();
 
-        Long count = Optional.ofNullable(queryFactory.select(paper.count())
+        Long count = Optional.ofNullable(queryFactory
+                .select(paper.count())
                 .from(paper)
                 .leftJoin(paper.journal, journal)
                 .where(keywordContains)

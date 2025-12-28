@@ -5,6 +5,7 @@ import com.bmilab.backend.domain.project.repository.ProjectRepository;
 import com.bmilab.backend.domain.research.presentation.exception.PresentationErrorCode;
 import com.bmilab.backend.domain.research.presentation.dto.request.CreateAcademicPresentationRequest;
 import com.bmilab.backend.domain.research.presentation.dto.request.UpdateAcademicPresentationRequest;
+import com.bmilab.backend.domain.research.presentation.dto.response.AcademicPresentationFindAllResponse;
 import com.bmilab.backend.domain.research.presentation.dto.response.AcademicPresentationResponse;
 import com.bmilab.backend.domain.research.presentation.dto.response.AcademicPresentationSummaryResponse;
 import com.bmilab.backend.domain.research.presentation.entity.AcademicPresentation;
@@ -70,7 +71,7 @@ public class PresentationService {
         );
         authors.forEach(academicPresentationAuthorRepository::save);
 
-        return new AcademicPresentationResponse(newAcademicPresentation);
+        return new AcademicPresentationResponse(newAcademicPresentation, authors);
     }
 
     public void deleteAcademicPresentation(Long userId, boolean isAdmin, Long academicPresentationId) {
@@ -84,7 +85,8 @@ public class PresentationService {
     public AcademicPresentationResponse getAcademicPresentation(Long academicPresentationId) {
         AcademicPresentation academicPresentation = academicPresentationRepository.findById(academicPresentationId)
                 .orElseThrow(() -> new ApiException(PresentationErrorCode.ACADEMIC_PRESENTATION_NOT_FOUND));
-        return new AcademicPresentationResponse(academicPresentation);
+        List<AcademicPresentationAuthor> authors = academicPresentationAuthorRepository.findAllByAcademicPresentationId(academicPresentationId);
+        return new AcademicPresentationResponse(academicPresentation, authors);
     }
 
     public AcademicPresentationResponse updateAcademicPresentation(Long academicPresentationId, UpdateAcademicPresentationRequest dto) {
@@ -113,11 +115,21 @@ public class PresentationService {
         );
         authors.forEach(academicPresentationAuthorRepository::save);
 
-        return new AcademicPresentationResponse(academicPresentation);
+        return new AcademicPresentationResponse(academicPresentation, authors);
     }
 
     @Transactional(readOnly = true)
-    public Page<AcademicPresentationSummaryResponse> getAcademicPresentations(String keyword, Pageable pageable) {
-        return academicPresentationRepository.findAllBy(keyword, pageable);
+    public AcademicPresentationFindAllResponse getAcademicPresentations(String keyword, Pageable pageable) {
+        Page<AcademicPresentation> presentationPage = academicPresentationRepository.findAllBy(keyword, pageable);
+
+        List<AcademicPresentationSummaryResponse> presentations = presentationPage.getContent().stream()
+                .map(presentation -> {
+                    List<AcademicPresentationAuthor> authors =
+                            academicPresentationAuthorRepository.findAllByAcademicPresentationId(presentation.getId());
+                    return AcademicPresentationSummaryResponse.from(presentation, authors);
+                })
+                .toList();
+
+        return AcademicPresentationFindAllResponse.of(presentations, presentationPage.getTotalPages());
     }
 }

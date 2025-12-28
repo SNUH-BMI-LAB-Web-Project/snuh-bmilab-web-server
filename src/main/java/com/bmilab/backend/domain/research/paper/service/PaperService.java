@@ -8,6 +8,7 @@ import com.bmilab.backend.domain.project.repository.ExternalProfessorRepository;
 import com.bmilab.backend.domain.research.paper.exception.PaperErrorCode;
 import com.bmilab.backend.domain.research.paper.dto.request.CreatePaperRequest;
 import com.bmilab.backend.domain.research.paper.dto.request.UpdatePaperRequest;
+import com.bmilab.backend.domain.research.paper.dto.response.PaperFindAllResponse;
 import com.bmilab.backend.domain.research.paper.dto.response.PaperResponse;
 import com.bmilab.backend.domain.research.paper.dto.response.PaperSummaryResponse;
 import com.bmilab.backend.domain.research.paper.entity.Journal;
@@ -110,7 +111,8 @@ public class PaperService {
             }
         }
 
-        return new PaperResponse(newPaper, paperAuthors, fileSummaries);
+        List<PaperCorrespondingAuthor> correspondingAuthorList = paperCorrespondingAuthorRepository.findAllByPaperId(newPaper.getId());
+        return new PaperResponse(newPaper, correspondingAuthorList, paperAuthors, fileSummaries);
     }
 
     public void deletePaper(Long userId, boolean isAdmin, Long paperId) {
@@ -130,8 +132,9 @@ public class PaperService {
                 .stream()
                 .map(FileSummary::from)
                 .toList();
+        List<PaperCorrespondingAuthor> correspondingAuthors = paperCorrespondingAuthorRepository.findAllByPaperId(paperId);
         List<PaperAuthor> paperAuthors = paperAuthorRepository.findAllByPaperId(paperId);
-        return new PaperResponse(paper, paperAuthors, fileSummaries);
+        return new PaperResponse(paper, correspondingAuthors, paperAuthors, fileSummaries);
     }
 
     public PaperResponse updatePaper(Long paperId, UpdatePaperRequest dto) {
@@ -186,11 +189,29 @@ public class PaperService {
         );
         paperAuthors.forEach(paperAuthorRepository::save);
 
-        return new PaperResponse(paper, paperAuthors, fileSummaries);
+        List<PaperCorrespondingAuthor> correspondingAuthorList = paperCorrespondingAuthorRepository.findAllByPaperId(paperId);
+        return new PaperResponse(paper, correspondingAuthorList, paperAuthors, fileSummaries);
     }
 
     @Transactional(readOnly = true)
-    public Page<PaperSummaryResponse> getPapers(String keyword, Pageable pageable) {
-        return paperRepository.findAllBy(keyword, pageable);
+    public PaperFindAllResponse getPapers(String keyword, Pageable pageable) {
+        Page<Paper> paperPage = paperRepository.findAllBy(keyword, pageable);
+
+        List<PaperSummaryResponse> papers = paperPage.getContent().stream()
+                .map(paper -> {
+                    List<PaperCorrespondingAuthor> correspondingAuthors =
+                            paperCorrespondingAuthorRepository.findAllByPaperId(paper.getId());
+                    List<PaperAuthor> paperAuthors =
+                            paperAuthorRepository.findAllByPaperId(paper.getId());
+                    List<FileSummary> files = fileService.findAllByDomainTypeAndEntityId(
+                                    FileDomainType.PAPER_ATTACHMENT, paper.getId())
+                            .stream()
+                            .map(FileSummary::from)
+                            .toList();
+                    return PaperSummaryResponse.from(paper, correspondingAuthors, paperAuthors, files);
+                })
+                .toList();
+
+        return PaperFindAllResponse.of(papers, paperPage.getTotalPages());
     }
 }

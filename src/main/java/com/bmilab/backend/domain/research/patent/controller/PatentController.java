@@ -2,15 +2,14 @@ package com.bmilab.backend.domain.research.patent.controller;
 
 import com.bmilab.backend.domain.research.patent.dto.request.CreatePatentRequest;
 import com.bmilab.backend.domain.research.patent.dto.request.UpdatePatentRequest;
+import com.bmilab.backend.domain.research.patent.dto.response.PatentFindAllResponse;
 import com.bmilab.backend.domain.research.patent.dto.response.PatentResponse;
-import com.bmilab.backend.domain.research.patent.dto.response.PatentSummaryResponse;
 import com.bmilab.backend.domain.research.patent.service.PatentService;
 import com.bmilab.backend.domain.user.enums.Role;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -54,7 +53,7 @@ public class PatentController implements PatentApi {
     }
 
     @GetMapping
-    public ResponseEntity<Page<PatentSummaryResponse>> getPatents(
+    public ResponseEntity<PatentFindAllResponse> getPatents(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestParam(required = false) String keyword,
             @PageableDefault(size = 10, sort = "applicationDate", direction = Sort.Direction.DESC) @ParameterObject Pageable pageable

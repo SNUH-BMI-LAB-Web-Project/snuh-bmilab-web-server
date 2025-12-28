@@ -4,6 +4,7 @@ import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.project.repository.ProjectRepository;
 import com.bmilab.backend.domain.research.award.dto.request.CreateAwardRequest;
 import com.bmilab.backend.domain.research.award.dto.request.UpdateAwardRequest;
+import com.bmilab.backend.domain.research.award.dto.response.AwardFindAllResponse;
 import com.bmilab.backend.domain.research.award.dto.response.AwardResponse;
 import com.bmilab.backend.domain.research.award.dto.response.AwardSummaryResponse;
 import com.bmilab.backend.domain.research.award.entity.Award;
@@ -66,7 +67,7 @@ public class AwardService {
         );
         recipients.forEach(awardRecipientRepository::save);
 
-        return new AwardResponse(newAward);
+        return new AwardResponse(newAward, recipients);
     }
 
     public void deleteAward(Long userId, boolean isAdmin, Long awardId) {
@@ -80,7 +81,8 @@ public class AwardService {
     public AwardResponse getAward(Long awardId) {
         Award award = awardRepository.findById(awardId)
                 .orElseThrow(() -> new ApiException(AwardErrorCode.AWARD_NOT_FOUND));
-        return new AwardResponse(award);
+        List<AwardRecipient> recipients = awardRecipientRepository.findAllByAwardId(awardId);
+        return new AwardResponse(award, recipients);
     }
 
     public AwardResponse updateAward(Long awardId, UpdateAwardRequest dto) {
@@ -107,11 +109,21 @@ public class AwardService {
         );
         recipients.forEach(awardRecipientRepository::save);
 
-        return new AwardResponse(award);
+        return new AwardResponse(award, recipients);
     }
 
     @Transactional(readOnly = true)
-    public Page<AwardSummaryResponse> getAwards(String keyword, Pageable pageable) {
-        return awardRepository.findAllBy(keyword, pageable);
+    public AwardFindAllResponse getAwards(String keyword, Pageable pageable) {
+        Page<Award> awardPage = awardRepository.findAllBy(keyword, pageable);
+
+        List<AwardSummaryResponse> awards = awardPage.getContent().stream()
+                .map(award -> {
+                    List<AwardRecipient> recipients =
+                            awardRecipientRepository.findAllByAwardId(award.getId());
+                    return AwardSummaryResponse.from(award, recipients);
+                })
+                .toList();
+
+        return AwardFindAllResponse.of(awards, awardPage.getTotalPages());
     }
 }

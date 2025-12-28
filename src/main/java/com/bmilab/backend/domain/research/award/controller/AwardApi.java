@@ -2,8 +2,8 @@ package com.bmilab.backend.domain.research.award.controller;
 
 import com.bmilab.backend.domain.research.award.dto.request.CreateAwardRequest;
 import com.bmilab.backend.domain.research.award.dto.request.UpdateAwardRequest;
+import com.bmilab.backend.domain.research.award.dto.response.AwardFindAllResponse;
 import com.bmilab.backend.domain.research.award.dto.response.AwardResponse;
-import com.bmilab.backend.domain.research.award.dto.response.AwardSummaryResponse;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -61,7 +60,7 @@ public interface AwardApi {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "수상 목록 조회 성공")
     })
-    ResponseEntity<Page<AwardSummaryResponse>> getAwards(
+    ResponseEntity<AwardFindAllResponse> getAwards(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestParam(required = false) String keyword,
             @ParameterObject Pageable pageable

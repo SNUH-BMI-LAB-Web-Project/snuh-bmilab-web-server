@@ -2,6 +2,7 @@ package com.bmilab.backend.domain.research.publication.service;
 
 import com.bmilab.backend.domain.research.publication.dto.request.CreateAuthorRequest;
 import com.bmilab.backend.domain.research.publication.dto.request.UpdateAuthorRequest;
+import com.bmilab.backend.domain.research.publication.dto.response.AuthorFindAllResponse;
 import com.bmilab.backend.domain.research.publication.dto.response.AuthorResponse;
 import com.bmilab.backend.domain.research.publication.dto.response.AuthorSummaryResponse;
 import com.bmilab.backend.domain.research.publication.entity.Author;
@@ -59,7 +60,9 @@ public class PublicationService {
     }
 
     @Transactional(readOnly = true)
-    public Page<AuthorSummaryResponse> getPublications(String keyword, Pageable pageable) {
-        return authorRepository.findAllBy(keyword, pageable);
+    public AuthorFindAllResponse getPublications(String keyword, Pageable pageable) {
+        Page<Author> authorPage = authorRepository.findAllBy(keyword, pageable);
+        Page<AuthorSummaryResponse> responsePage = authorPage.map(AuthorSummaryResponse::from);
+        return AuthorFindAllResponse.from(responsePage);
     }
 }

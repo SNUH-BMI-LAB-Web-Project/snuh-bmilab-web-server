@@ -2,6 +2,7 @@ package com.bmilab.backend.domain.research.paper.service;
 
 import com.bmilab.backend.domain.research.paper.dto.request.CreateJournalRequest;
 import com.bmilab.backend.domain.research.paper.dto.request.UpdateJournalRequest;
+import com.bmilab.backend.domain.research.paper.dto.response.JournalFindAllResponse;
 import com.bmilab.backend.domain.research.paper.dto.response.JournalResponse;
 import com.bmilab.backend.domain.research.paper.dto.response.JournalSummaryResponse;
 import com.bmilab.backend.domain.research.paper.entity.Journal;
@@ -13,6 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Transactional
@@ -69,7 +72,13 @@ public class JournalService {
     }
 
     @Transactional(readOnly = true)
-    public Page<JournalSummaryResponse> getJournals(String keyword, Pageable pageable) {
-        return journalRepository.findAllBy(keyword, pageable);
+    public JournalFindAllResponse getJournals(String keyword, Pageable pageable) {
+        Page<Journal> journalPage = journalRepository.findAllBy(keyword, pageable);
+
+        List<JournalSummaryResponse> journals = journalPage.getContent().stream()
+                .map(JournalSummaryResponse::from)
+                .toList();
+
+        return JournalFindAllResponse.of(journals, journalPage.getTotalPages());
     }
 }

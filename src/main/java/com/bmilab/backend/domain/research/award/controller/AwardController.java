@@ -2,15 +2,14 @@ package com.bmilab.backend.domain.research.award.controller;
 
 import com.bmilab.backend.domain.research.award.dto.request.CreateAwardRequest;
 import com.bmilab.backend.domain.research.award.dto.request.UpdateAwardRequest;
+import com.bmilab.backend.domain.research.award.dto.response.AwardFindAllResponse;
 import com.bmilab.backend.domain.research.award.dto.response.AwardResponse;
-import com.bmilab.backend.domain.research.award.dto.response.AwardSummaryResponse;
 import com.bmilab.backend.domain.research.award.service.AwardService;
 import com.bmilab.backend.domain.user.enums.Role;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -54,7 +53,7 @@ public class AwardController implements AwardApi {
     }
 
     @GetMapping
-    public ResponseEntity<Page<AwardSummaryResponse>> getAwards(
+    public ResponseEntity<AwardFindAllResponse> getAwards(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestParam(required = false) String keyword,
             @PageableDefault(size = 10, sort = "awardDate", direction = Sort.Direction.DESC) @ParameterObject Pageable pageable

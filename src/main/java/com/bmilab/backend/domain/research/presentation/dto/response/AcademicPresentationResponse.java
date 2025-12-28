@@ -1,15 +1,20 @@
 package com.bmilab.backend.domain.research.presentation.dto.response;
 
 import com.bmilab.backend.domain.research.presentation.entity.AcademicPresentation;
+import com.bmilab.backend.domain.research.presentation.entity.AcademicPresentationAuthor;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public record AcademicPresentationResponse(
         @Schema(description = "학회 발표 ID", example = "1")
         Long id,
         @Schema(description = "발표자 목록", example = "김연구, 이개발")
         String authors,
+        @Schema(description = "연구실 내 발표자 목록")
+        List<AcademicPresentationAuthorResponse> academicPresentationAuthors,
         @Schema(description = "학회 시작일", example = "2025-11-10")
         LocalDate conferenceStartDate,
         @Schema(description = "학회 종료일", example = "2025-11-12")
@@ -33,10 +38,11 @@ public record AcademicPresentationResponse(
         @Schema(description = "연계 과제명", example = "AI 기반 의료영상 분석 솔루션 개발")
         String taskName
 ) {
-    public AcademicPresentationResponse(AcademicPresentation academicPresentation) {
+    public AcademicPresentationResponse(AcademicPresentation academicPresentation, List<AcademicPresentationAuthor> authors) {
         this(
                 academicPresentation.getId(),
                 academicPresentation.getAuthors(),
+                authors.stream().map(AcademicPresentationAuthorResponse::new).collect(Collectors.toList()),
                 academicPresentation.getAcademicPresentationStartDate(),
                 academicPresentation.getAcademicPresentationEndDate(),
                 academicPresentation.getAcademicPresentationLocation(),
@@ -49,5 +55,22 @@ public record AcademicPresentationResponse(
                 academicPresentation.getTask() != null ? academicPresentation.getTask().getId() : null,
                 academicPresentation.getTask() != null ? academicPresentation.getTask().getTitle() : null
         );
+    }
+
+    public record AcademicPresentationAuthorResponse(
+            @Schema(description = "사용자 ID")
+            Long userId,
+            @Schema(description = "사용자 이름")
+            String userName,
+            @Schema(description = "역할")
+            String role
+    ) {
+        public AcademicPresentationAuthorResponse(AcademicPresentationAuthor author) {
+            this(
+                    author.getUser().getId(),
+                    author.getUser().getName(),
+                    author.getRole()
+            );
+        }
     }
 }

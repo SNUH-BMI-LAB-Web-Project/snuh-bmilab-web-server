@@ -1,8 +1,7 @@
 package com.bmilab.backend.domain.research.paper.repository;
 
-import com.bmilab.backend.domain.research.paper.entity.*;
-import com.bmilab.backend.domain.research.paper.dto.response.JournalSummaryResponse;
-import com.querydsl.core.types.Projections;
+import com.bmilab.backend.domain.research.paper.entity.Journal;
+import com.bmilab.backend.domain.research.paper.entity.QJournal;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -19,19 +18,11 @@ public class JournalRepositoryCustomImpl implements JournalRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<JournalSummaryResponse> findAllBy(String keyword, Pageable pageable) {
+    public Page<Journal> findAllBy(String keyword, Pageable pageable) {
         QJournal journal = QJournal.journal;
 
-        List<JournalSummaryResponse> content = queryFactory
-                .select(Projections.constructor(JournalSummaryResponse.class,
-                        journal.id,
-                        journal.journalName,
-                        journal.category,
-                        journal.publisher,
-                        journal.issn,
-                        journal.jif
-                ))
-                .from(journal)
+        List<Journal> content = queryFactory
+                .selectFrom(journal)
                 .where(keywordContains(keyword))
                 .orderBy(journal.journalName.asc())
                 .offset(pageable.getOffset())

@@ -2,8 +2,8 @@ package com.bmilab.backend.domain.research.paper.controller;
 
 import com.bmilab.backend.domain.research.paper.dto.request.CreateJournalRequest;
 import com.bmilab.backend.domain.research.paper.dto.request.UpdateJournalRequest;
+import com.bmilab.backend.domain.research.paper.dto.response.JournalFindAllResponse;
 import com.bmilab.backend.domain.research.paper.dto.response.JournalResponse;
-import com.bmilab.backend.domain.research.paper.dto.response.JournalSummaryResponse;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -61,7 +60,7 @@ public interface JournalApi {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "저널 목록 조회 성공")
     })
-    ResponseEntity<Page<JournalSummaryResponse>> getJournals(
+    ResponseEntity<JournalFindAllResponse> getJournals(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestParam(required = false) String keyword,
             @ParameterObject Pageable pageable

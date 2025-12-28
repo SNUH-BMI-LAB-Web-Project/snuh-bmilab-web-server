@@ -1,8 +1,9 @@
 package com.bmilab.backend.domain.research.patent.repository;
 
-import com.bmilab.backend.domain.research.patent.entity.*;
-import com.bmilab.backend.domain.research.patent.dto.response.PatentSummaryResponse;
-import com.querydsl.core.types.Projections;
+import com.bmilab.backend.domain.project.entity.QProject;
+import com.bmilab.backend.domain.research.patent.entity.Patent;
+import com.bmilab.backend.domain.research.patent.entity.QPatent;
+import com.bmilab.backend.domain.task.entity.QTask;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
@@ -20,29 +21,27 @@ public class PatentRepositoryCustomImpl implements PatentRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public Page<PatentSummaryResponse> findAllBy(String keyword, Pageable pageable) {
+    public Page<Patent> findAllBy(String keyword, Pageable pageable) {
         QPatent patent = QPatent.patent;
+        QProject project = QProject.project;
+        QTask task = QTask.task;
 
         BooleanExpression keywordContains = StringUtils.hasText(keyword)
                 ? patent.patentName.containsIgnoreCase(keyword).or(patent.applicationNumber.containsIgnoreCase(keyword))
                 : null;
 
-        List<PatentSummaryResponse> results = queryFactory.select(Projections.constructor(
-                        PatentSummaryResponse.class,
-                        patent.id,
-                        patent.patentName,
-                        patent.applicationNumber,
-                        patent.applicantsAll,
-                        patent.applicationDate
-                ))
-                .from(patent)
+        List<Patent> results = queryFactory
+                .selectFrom(patent)
+                .leftJoin(patent.project, project).fetchJoin()
+                .leftJoin(patent.task, task).fetchJoin()
                 .where(keywordContains)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(patent.applicationDate.desc()) // Default sort
+                .orderBy(patent.applicationDate.desc())
                 .fetch();
 
-        Long count = Optional.ofNullable(queryFactory.select(patent.count())
+        Long count = Optional.ofNullable(queryFactory
+                .select(patent.count())
                 .from(patent)
                 .where(keywordContains)
                 .fetchOne()).orElse(0L);

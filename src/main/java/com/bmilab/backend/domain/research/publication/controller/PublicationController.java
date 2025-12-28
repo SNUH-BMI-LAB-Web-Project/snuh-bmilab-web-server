@@ -2,15 +2,14 @@ package com.bmilab.backend.domain.research.publication.controller;
 
 import com.bmilab.backend.domain.research.publication.dto.request.CreateAuthorRequest;
 import com.bmilab.backend.domain.research.publication.dto.request.UpdateAuthorRequest;
+import com.bmilab.backend.domain.research.publication.dto.response.AuthorFindAllResponse;
 import com.bmilab.backend.domain.research.publication.dto.response.AuthorResponse;
-import com.bmilab.backend.domain.research.publication.dto.response.AuthorSummaryResponse;
 import com.bmilab.backend.domain.research.publication.service.PublicationService;
 import com.bmilab.backend.domain.user.enums.Role;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -54,7 +53,7 @@ public class PublicationController implements PublicationApi {
     }
 
     @GetMapping
-    public ResponseEntity<Page<AuthorSummaryResponse>> getPublications(
+    public ResponseEntity<AuthorFindAllResponse> getPublications(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestParam(required = false) String keyword,
             @PageableDefault(size = 10, sort = "publicationDate", direction = Sort.Direction.DESC) @ParameterObject Pageable pageable

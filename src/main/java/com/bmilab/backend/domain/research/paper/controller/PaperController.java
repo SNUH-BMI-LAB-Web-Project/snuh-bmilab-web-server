@@ -2,15 +2,14 @@ package com.bmilab.backend.domain.research.paper.controller;
 
 import com.bmilab.backend.domain.research.paper.dto.request.CreatePaperRequest;
 import com.bmilab.backend.domain.research.paper.dto.request.UpdatePaperRequest;
+import com.bmilab.backend.domain.research.paper.dto.response.PaperFindAllResponse;
 import com.bmilab.backend.domain.research.paper.dto.response.PaperResponse;
-import com.bmilab.backend.domain.research.paper.dto.response.PaperSummaryResponse;
 import com.bmilab.backend.domain.research.paper.service.PaperService;
 import com.bmilab.backend.domain.user.enums.Role;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -54,7 +53,7 @@ public class PaperController implements PaperApi {
     }
 
     @GetMapping
-    public ResponseEntity<Page<PaperSummaryResponse>> getPapers(
+    public ResponseEntity<PaperFindAllResponse> getPapers(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestParam(required = false) String keyword,
             @PageableDefault(size = 10, sort = "acceptDate", direction = Sort.Direction.DESC) @ParameterObject Pageable pageable

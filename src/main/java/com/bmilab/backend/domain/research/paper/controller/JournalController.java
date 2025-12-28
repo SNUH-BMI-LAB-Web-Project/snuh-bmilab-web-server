@@ -2,14 +2,13 @@ package com.bmilab.backend.domain.research.paper.controller;
 
 import com.bmilab.backend.domain.research.paper.dto.request.CreateJournalRequest;
 import com.bmilab.backend.domain.research.paper.dto.request.UpdateJournalRequest;
+import com.bmilab.backend.domain.research.paper.dto.response.JournalFindAllResponse;
 import com.bmilab.backend.domain.research.paper.dto.response.JournalResponse;
-import com.bmilab.backend.domain.research.paper.dto.response.JournalSummaryResponse;
 import com.bmilab.backend.domain.research.paper.service.JournalService;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -53,7 +52,7 @@ public class JournalController implements JournalApi {
     }
 
     @GetMapping
-    public ResponseEntity<Page<JournalSummaryResponse>> getJournals(
+    public ResponseEntity<JournalFindAllResponse> getJournals(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestParam(required = false) String keyword,
             @PageableDefault(size = 10, sort = "journalName", direction = Sort.Direction.ASC) @ParameterObject Pageable pageable

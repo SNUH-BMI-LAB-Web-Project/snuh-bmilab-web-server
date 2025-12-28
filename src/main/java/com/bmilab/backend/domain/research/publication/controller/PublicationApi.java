@@ -2,8 +2,8 @@ package com.bmilab.backend.domain.research.publication.controller;
 
 import com.bmilab.backend.domain.research.publication.dto.request.CreateAuthorRequest;
 import com.bmilab.backend.domain.research.publication.dto.request.UpdateAuthorRequest;
+import com.bmilab.backend.domain.research.publication.dto.response.AuthorFindAllResponse;
 import com.bmilab.backend.domain.research.publication.dto.response.AuthorResponse;
-import com.bmilab.backend.domain.research.publication.dto.response.AuthorSummaryResponse;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -61,7 +60,7 @@ public interface PublicationApi {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "저서 목록 조회 성공")
     })
-    ResponseEntity<Page<AuthorSummaryResponse>> getPublications(
+    ResponseEntity<AuthorFindAllResponse> getPublications(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestParam(required = false) String keyword,
             @ParameterObject Pageable pageable

@@ -18,6 +18,8 @@ public record PatentResponse(
         String remarks,
         Long projectId,
         String projectName,
+        Long taskId,
+        String taskName,
         List<FileSummary> files
 ) {
     public PatentResponse(Patent patent, List<PatentAuthor> patentAuthors, List<FileSummary> files) {
@@ -31,6 +33,8 @@ public record PatentResponse(
                 patent.getRemarks(),
                 patent.getProject().getId(),
                 patent.getProject().getTitle(),
+                patent.getTask() != null ? patent.getTask().getId() : null,
+                patent.getTask() != null ? patent.getTask().getTitle() : null,
                 files
         );
     }

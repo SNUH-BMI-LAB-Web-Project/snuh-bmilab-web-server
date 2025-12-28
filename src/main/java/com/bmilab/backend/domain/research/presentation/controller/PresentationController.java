@@ -2,15 +2,14 @@ package com.bmilab.backend.domain.research.presentation.controller;
 
 import com.bmilab.backend.domain.research.presentation.dto.request.CreateAcademicPresentationRequest;
 import com.bmilab.backend.domain.research.presentation.dto.request.UpdateAcademicPresentationRequest;
+import com.bmilab.backend.domain.research.presentation.dto.response.AcademicPresentationFindAllResponse;
 import com.bmilab.backend.domain.research.presentation.dto.response.AcademicPresentationResponse;
-import com.bmilab.backend.domain.research.presentation.dto.response.AcademicPresentationSummaryResponse;
 import com.bmilab.backend.domain.research.presentation.service.PresentationService;
 import com.bmilab.backend.domain.user.enums.Role;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -54,7 +53,7 @@ public class PresentationController implements PresentationApi {
     }
 
     @GetMapping
-    public ResponseEntity<Page<AcademicPresentationSummaryResponse>> getAcademicPresentations(
+    public ResponseEntity<AcademicPresentationFindAllResponse> getAcademicPresentations(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestParam(required = false) String keyword,
             @PageableDefault(size = 10, sort = "academicPresentationStartDate", direction = Sort.Direction.DESC) @ParameterObject Pageable pageable

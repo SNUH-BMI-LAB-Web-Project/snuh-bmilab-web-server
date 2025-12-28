@@ -8,6 +8,7 @@ import com.bmilab.backend.domain.project.repository.ProjectRepository;
 import com.bmilab.backend.domain.research.patent.exception.PatentErrorCode;
 import com.bmilab.backend.domain.research.patent.dto.request.CreatePatentRequest;
 import com.bmilab.backend.domain.research.patent.dto.request.UpdatePatentRequest;
+import com.bmilab.backend.domain.research.patent.dto.response.PatentFindAllResponse;
 import com.bmilab.backend.domain.research.patent.dto.response.PatentResponse;
 import com.bmilab.backend.domain.research.patent.dto.response.PatentSummaryResponse;
 import com.bmilab.backend.domain.research.patent.entity.Patent;
@@ -132,7 +133,22 @@ public class PatentService {
     }
 
     @Transactional(readOnly = true)
-    public Page<PatentSummaryResponse> getPatents(String keyword, Pageable pageable) {
-        return patentRepository.findAllBy(keyword, pageable);
+    public PatentFindAllResponse getPatents(String keyword, Pageable pageable) {
+        Page<Patent> patentPage = patentRepository.findAllBy(keyword, pageable);
+
+        List<PatentSummaryResponse> patents = patentPage.getContent().stream()
+                .map(patent -> {
+                    List<PatentAuthor> patentAuthors =
+                            patentAuthorRepository.findAllByPatentId(patent.getId());
+                    List<FileSummary> files = fileService.findAllByDomainTypeAndEntityId(
+                                    FileDomainType.PATENT_ATTACHMENT, patent.getId())
+                            .stream()
+                            .map(FileSummary::from)
+                            .toList();
+                    return PatentSummaryResponse.from(patent, patentAuthors, files);
+                })
+                .toList();
+
+        return PatentFindAllResponse.of(patents, patentPage.getTotalPages());
     }
 }
