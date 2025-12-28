@@ -90,11 +90,6 @@ public class User extends BaseTimeEntity {
         return UserStatus.ACTIVE.equals(status);
     }
 
-    public void resign() {
-        this.status = UserStatus.RESIGNED;
-        this.resignedAt = LocalDateTime.now();
-    }
-
     public void updateStatus(UserStatus status) {
         this.status = status;
         if (status == UserStatus.RESIGNED) {

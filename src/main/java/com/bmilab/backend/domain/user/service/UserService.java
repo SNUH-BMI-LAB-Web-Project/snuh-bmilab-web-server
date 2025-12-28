@@ -289,18 +289,6 @@ public class UserService {
     }
 
     @Transactional
-    public void resignUser(Long userId) {
-
-        User user = findUserById(userId);
-
-        if (user.isAdmin()) {
-            throw new ApiException(UserErrorCode.CANNOT_RESIGN_ADMIN);
-        }
-
-        user.resign();
-    }
-
-    @Transactional
     public void updateUserStatus(Long userId, UserStatus status) {
 
         User user = findUserById(userId);

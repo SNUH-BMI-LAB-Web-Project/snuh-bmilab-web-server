@@ -69,13 +69,6 @@ public class AdminUserController implements AdminUserApi {
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/{userId}/resign")
-    public ResponseEntity<Void> resignUser(@PathVariable Long userId) {
-
-        userService.resignUser(userId);
-        return ResponseEntity.ok().build();
-    }
-
     @PatchMapping("/{userId}/status")
     public ResponseEntity<Void> updateUserStatus(
             @PathVariable Long userId,
