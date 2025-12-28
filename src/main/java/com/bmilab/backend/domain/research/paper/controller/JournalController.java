@@ -5,6 +5,7 @@ import com.bmilab.backend.domain.research.paper.dto.request.UpdateJournalRequest
 import com.bmilab.backend.domain.research.paper.dto.response.JournalFindAllResponse;
 import com.bmilab.backend.domain.research.paper.dto.response.JournalResponse;
 import com.bmilab.backend.domain.research.paper.service.JournalService;
+import com.bmilab.backend.domain.user.enums.Role;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -58,5 +59,15 @@ public class JournalController implements JournalApi {
             @PageableDefault(size = 10, sort = "journalName", direction = Sort.Direction.ASC) @ParameterObject Pageable pageable
     ) {
         return ResponseEntity.ok(journalService.getJournals(keyword, pageable));
+    }
+
+    @DeleteMapping("/{journalId}")
+    public ResponseEntity<Void> deleteJournal(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long journalId
+    ) {
+        boolean isAdmin = userAuthInfo.getUser().getRole() == Role.ADMIN;
+        journalService.deleteJournal(userAuthInfo.getUserId(), isAdmin, journalId);
+        return ResponseEntity.ok().build();
     }
 }

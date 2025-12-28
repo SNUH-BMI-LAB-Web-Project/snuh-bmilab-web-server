@@ -65,4 +65,17 @@ public interface JournalApi {
             @RequestParam(required = false) String keyword,
             @ParameterObject Pageable pageable
     );
+
+    @Operation(summary = "저널 삭제", description = "저널을 삭제하는 DELETE API (관리자 전용)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "저널 삭제 성공"),
+            @ApiResponse(responseCode = "403", description = "권한이 없습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "저널을 찾을 수 없습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    ResponseEntity<Void> deleteJournal(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long journalId
+    );
 }
