@@ -38,6 +38,9 @@ public record UpdateJournalRequest(
 
         @Schema(description = "JCR Rank")
         @NotBlank(message = "JCR Rank는 필수입니다.")
-        String jcrRank
+        String jcrRank,
+
+        @Schema(description = "Issue")
+        String issue
 ) {
 }

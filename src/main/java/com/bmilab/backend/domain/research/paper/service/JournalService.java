@@ -35,6 +35,7 @@ public class JournalService {
                 .eissn(dto.eissn())
                 .jif(dto.jif())
                 .jcrRank(dto.jcrRank())
+                .issue(dto.issue())
                 .build();
         journalRepository.save(newJournal);
         return JournalResponse.from(newJournal);
@@ -66,7 +67,8 @@ public class JournalService {
                 dto.issn(),
                 dto.eissn(),
                 dto.jif(),
-                dto.jcrRank()
+                dto.jcrRank(),
+                dto.issue()
         );
         return JournalResponse.from(journal);
     }

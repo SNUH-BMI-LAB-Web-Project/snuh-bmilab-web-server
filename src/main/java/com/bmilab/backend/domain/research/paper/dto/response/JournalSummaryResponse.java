@@ -33,7 +33,10 @@ public record JournalSummaryResponse(
         String jif,
 
         @Schema(description = "JCR Rank")
-        String jcrRank
+        String jcrRank,
+
+        @Schema(description = "Issue")
+        String issue
 ) {
     public static JournalSummaryResponse from(Journal journal) {
         return new JournalSummaryResponse(
@@ -46,7 +49,8 @@ public record JournalSummaryResponse(
                 journal.getIssn(),
                 journal.getEissn(),
                 journal.getJif(),
-                journal.getJcrRank()
+                journal.getJcrRank(),
+                journal.getIssue()
         );
     }
 }

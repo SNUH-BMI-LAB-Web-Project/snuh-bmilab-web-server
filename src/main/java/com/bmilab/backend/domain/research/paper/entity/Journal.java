@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Table(name = "research_journals")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Journal extends BaseTimeEntity {
@@ -45,10 +46,12 @@ public class Journal extends BaseTimeEntity {
     @Column(nullable = false)
     private String jcrRank;
 
+    private String issue;
+
     @Builder
     public Journal(String journalName, JournalCategory category, String publisher,
                    String publishCountry, String isbn, String issn, String eissn,
-                   String jif, String jcrRank) {
+                   String jif, String jcrRank, String issue) {
         this.journalName = journalName;
         this.category = category;
         this.publisher = publisher;
@@ -58,11 +61,12 @@ public class Journal extends BaseTimeEntity {
         this.eissn = eissn;
         this.jif = jif;
         this.jcrRank = jcrRank;
+        this.issue = issue;
     }
 
     public void update(String journalName, JournalCategory category, String publisher,
                       String publishCountry, String isbn, String issn, String eissn,
-                      String jif, String jcrRank) {
+                      String jif, String jcrRank, String issue) {
         this.journalName = journalName;
         this.category = category;
         this.publisher = publisher;
@@ -72,5 +76,6 @@ public class Journal extends BaseTimeEntity {
         this.eissn = eissn;
         this.jif = jif;
         this.jcrRank = jcrRank;
+        this.issue = issue;
     }
 }
