@@ -11,6 +11,7 @@ import lombok.Setter;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "research_paper_authors")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PaperAuthor extends ResearchAuthorEntity {

@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "research_papers")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Paper extends BaseTimeEntity {

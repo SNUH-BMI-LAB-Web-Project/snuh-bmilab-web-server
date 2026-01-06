@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Table(name = "research_paper_corresponding_authors")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PaperCorrespondingAuthor extends BaseTimeEntity {

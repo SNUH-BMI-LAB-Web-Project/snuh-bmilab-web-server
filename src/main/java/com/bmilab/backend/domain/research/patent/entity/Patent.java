@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name = "research_patents")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Patent extends BaseTimeEntity {

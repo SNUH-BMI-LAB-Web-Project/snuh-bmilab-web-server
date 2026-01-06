@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Table(name = "research_award_recipients")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AwardRecipient extends ResearchAuthorEntity {

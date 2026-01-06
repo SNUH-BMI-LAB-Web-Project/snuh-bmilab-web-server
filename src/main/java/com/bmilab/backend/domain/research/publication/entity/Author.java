@@ -11,6 +11,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
+@Table(name = "research_publications")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Author extends BaseTimeEntity {

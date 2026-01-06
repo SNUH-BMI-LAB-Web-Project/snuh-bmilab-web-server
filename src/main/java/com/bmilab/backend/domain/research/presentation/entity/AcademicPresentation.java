@@ -13,6 +13,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
+@Table(name = "research_academic_presentations")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AcademicPresentation extends BaseTimeEntity {

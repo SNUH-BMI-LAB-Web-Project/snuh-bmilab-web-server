@@ -11,6 +11,7 @@ import lombok.Setter;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "research_patent_authors")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PatentAuthor extends ResearchAuthorEntity {
