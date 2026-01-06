@@ -115,6 +115,7 @@ public class TaskService {
                 .totalYears(request.totalYears())
                 .currentYear(request.currentYear())
                 .status(request.status() != null ? request.status() : TaskStatus.PROPOSAL_WRITING)
+                .isInternal(request.isInternal())
                 .build();
 
         taskRepository.save(task);
@@ -183,7 +184,8 @@ public class TaskService {
                 request.snuhPi(),
                 request.professorRole(),
                 practicalManager,
-                request.participatingInstitutions()
+                request.participatingInstitutions(),
+                request.isInternal()
         );
 
         List<TaskPeriod> existingPeriods = taskPeriodRepository.findByTaskOrderByYearNumberAsc(task);
@@ -337,7 +339,8 @@ public class TaskService {
                     task.getSnuhPi(),
                     task.getProfessorRole(),
                     task.getPracticalManager(),
-                    task.getParticipatingInstitutions()
+                    task.getParticipatingInstitutions(),
+                    task.getIsInternal()
             );
         }
 
