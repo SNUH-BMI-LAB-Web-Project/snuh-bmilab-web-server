@@ -1,7 +1,9 @@
 package com.bmilab.backend.domain.leave.enums;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@Getter
 @AllArgsConstructor
 public enum LeaveType {
     ANNUAL("연차"),
