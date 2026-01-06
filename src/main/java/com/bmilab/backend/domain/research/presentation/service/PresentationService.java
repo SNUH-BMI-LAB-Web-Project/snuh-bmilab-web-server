@@ -78,6 +78,7 @@ public class PresentationService {
         if (!isAdmin) {
             throw new ApiException(PresentationErrorCode.ACADEMIC_PRESENTATION_ACCESS_DENIED);
         }
+        academicPresentationAuthorRepository.deleteAllByAcademicPresentationId(academicPresentationId);
         academicPresentationRepository.deleteById(academicPresentationId);
     }
 

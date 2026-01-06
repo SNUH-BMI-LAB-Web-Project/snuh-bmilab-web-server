@@ -119,7 +119,8 @@ public class PaperService {
         if (!isAdmin) {
             throw new ApiException(PaperErrorCode.PAPER_ACCESS_DENIED);
         }
-        paperAuthorRepository.deleteAllByPaperId(paperId); // Explicitly delete PaperAuthors
+        paperAuthorRepository.deleteAllByPaperId(paperId);
+        paperCorrespondingAuthorRepository.deleteAllByPaperId(paperId);
         fileService.deleteAllFileByDomainTypeAndEntityId(FileDomainType.PAPER_ATTACHMENT, paperId);
         paperRepository.deleteById(paperId);
     }

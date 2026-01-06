@@ -74,6 +74,7 @@ public class AwardService {
         if (!isAdmin) {
             throw new ApiException(AwardErrorCode.AWARD_ACCESS_DENIED);
         }
+        awardRecipientRepository.deleteAllByAwardId(awardId);
         awardRepository.deleteById(awardId);
     }
 
