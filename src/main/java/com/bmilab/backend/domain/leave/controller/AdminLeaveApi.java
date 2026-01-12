@@ -1,5 +1,6 @@
 package com.bmilab.backend.domain.leave.controller;
 
+import com.bmilab.backend.domain.leave.dto.request.AdminUpdateLeaveRequest;
 import com.bmilab.backend.domain.leave.dto.request.RejectLeaveRequest;
 import com.bmilab.backend.domain.leave.dto.response.LeaveFindAllResponse;
 import com.bmilab.backend.domain.leave.enums.LeaveStatus;
@@ -71,5 +72,27 @@ public interface AdminLeaveApi {
     ResponseEntity<LeaveFindAllResponse> getLeaves(
             @RequestParam(required = false) LeaveStatus status,
             @PageableDefault(size = 10, sort = "applicatedAt", direction = Sort.Direction.DESC) @ParameterObject Pageable pageable
+    );
+
+    @Operation(summary = "승인된 휴가 수정", description = "승인된 휴가 정보를 수정하는 PATCH API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "휴가 수정 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "승인된 휴가만 수정할 수 있습니다."
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "휴가 정보를 찾을 수 없습니다."
+                    )
+            }
+    )
+    ResponseEntity<Void> updateLeave(
+            @PathVariable long leaveId,
+            AdminUpdateLeaveRequest request
     );
 }
