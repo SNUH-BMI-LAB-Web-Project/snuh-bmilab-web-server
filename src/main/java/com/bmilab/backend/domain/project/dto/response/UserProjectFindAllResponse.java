@@ -45,7 +45,7 @@ public record UserProjectFindAllResponse(
                                 .builder()
                                 .projectId(project.getId())
                                 .title(project.getTitle())
-                                .status(project.getStatus())
+                                .status(project.getEffectiveStatus())
                                 .category(project.getCategory() == null ? null : ProjectCategorySummary.from(project.getCategory()))
                                 .startDate(project.getStartDate())
                                 .endDate(project.getEndDate())
