@@ -20,6 +20,9 @@ import com.bmilab.backend.domain.research.paper.repository.PaperAuthorRepository
 import com.bmilab.backend.domain.research.paper.repository.PaperCorrespondingAuthorRepository;
 import com.bmilab.backend.domain.research.paper.repository.PaperRepository;
 import com.bmilab.backend.domain.research.service.AuthorSyncService;
+import com.bmilab.backend.domain.task.entity.Task;
+import com.bmilab.backend.domain.task.exception.TaskErrorCode;
+import com.bmilab.backend.domain.task.repository.TaskRepository;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.exception.GlobalErrorCode;
@@ -43,12 +46,16 @@ public class PaperService {
     private final PaperCorrespondingAuthorRepository paperCorrespondingAuthorRepository;
     private final JournalRepository journalRepository;
     private final ExternalProfessorRepository externalProfessorRepository;
+    private final TaskRepository taskRepository;
     private final FileService fileService;
     private final AuthorSyncService authorSyncService;
 
     public PaperResponse createPaper(CreatePaperRequest dto) {
         Journal journal = journalRepository.findById(dto.journalId())
                 .orElseThrow(() -> new ApiException(PaperErrorCode.JOURNAL_NOT_FOUND));
+        Task task = dto.taskId() != null
+                ? taskRepository.findById(dto.taskId()).orElseThrow(() -> new ApiException(TaskErrorCode.TASK_NOT_FOUND))
+                : null;
         int authorCount = (dto.allAuthors() != null) ? dto.allAuthors().split(",").length : 0;
         Paper newPaper = Paper.builder()
                 .acceptDate(dto.acceptDate())
@@ -67,6 +74,7 @@ public class PaperService {
                 .citations(dto.citations())
                 .professorRole(dto.professorRole())
                 .isRepresentative(dto.isRepresentative())
+                .task(task)
                 .build();
         paperRepository.save(newPaper);
 
@@ -143,8 +151,11 @@ public class PaperService {
                 .orElseThrow(() -> new ApiException(PaperErrorCode.PAPER_NOT_FOUND));
         Journal journal = journalRepository.findById(dto.journalId())
                 .orElseThrow(() -> new ApiException(PaperErrorCode.JOURNAL_NOT_FOUND));
+        Task task = dto.taskId() != null
+                ? taskRepository.findById(dto.taskId()).orElseThrow(() -> new ApiException(TaskErrorCode.TASK_NOT_FOUND))
+                : null;
         int authorCount = (dto.allAuthors() != null) ? dto.allAuthors().split(",").length : 0;
-        paper.update(dto.acceptDate(), dto.publishDate(), journal, dto.paperTitle(), dto.allAuthors(), authorCount, dto.firstAuthor(), dto.coAuthors(), dto.vol(), dto.page(), dto.paperLink(), dto.doi(), dto.pmid(), dto.citations(), dto.professorRole(), dto.isRepresentative());
+        paper.update(dto.acceptDate(), dto.publishDate(), journal, dto.paperTitle(), dto.allAuthors(), authorCount, dto.firstAuthor(), dto.coAuthors(), dto.vol(), dto.page(), dto.paperLink(), dto.doi(), dto.pmid(), dto.citations(), dto.professorRole(), dto.isRepresentative(), task);
 
         // Handle PaperCorrespondingAuthor linking
         paperCorrespondingAuthorRepository.deleteAllByPaperId(paperId);
