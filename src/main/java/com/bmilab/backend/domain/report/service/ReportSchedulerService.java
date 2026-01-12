@@ -6,6 +6,9 @@ import com.bmilab.backend.domain.leave.repository.LeaveRepository;
 import com.bmilab.backend.domain.project.repository.ProjectRepository;
 import com.bmilab.backend.domain.report.dto.query.GetAllReportsQueryResult;
 import com.bmilab.backend.domain.report.repository.ReportRepository;
+import com.bmilab.backend.domain.user.entity.User;
+import com.bmilab.backend.domain.user.entity.UserProjectCategory;
+import com.bmilab.backend.domain.user.repository.UserProjectCategoryRepository;
 import com.bmilab.backend.domain.user.repository.UserRepository;
 import com.bmilab.backend.global.email.EmailSender;
 import jakarta.mail.MessagingException;
@@ -25,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -42,6 +46,7 @@ public class ReportSchedulerService {
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final LeaveRepository leaveRepository;
+    private final UserProjectCategoryRepository userProjectCategoryRepository;
 
     private static final DateTimeFormatter DATE_WITH_DAY_FORMATTER =
             DateTimeFormatter.ofPattern("MM/dd E", Locale.KOREAN);
@@ -119,14 +124,14 @@ public class ReportSchedulerService {
         StringBuilder sb = new StringBuilder();
         for (Leave leave : leaves) {
             String name = escMdV2(leave.getUser().getName());
-            String email = leave.getUser().getEmail();
+            String categoryDisplay = getCategoryDisplay(leave.getUser());
             String leaveType = escMdV2(leave.getType().getDescription());
             String period = formatLeavePeriod(leave);
 
             sb.append("\\- ")
               .append(name)
               .append(" \\(")
-              .append("`").append(email).append("`")
+              .append(categoryDisplay)
               .append("\\) \\- ")
               .append(leaveType)
               .append(" \\(")
@@ -135,6 +140,16 @@ public class ReportSchedulerService {
         }
 
         return sb.toString().trim();
+    }
+
+    private String getCategoryDisplay(User user) {
+        List<UserProjectCategory> categories = userProjectCategoryRepository.findAllByUser(user);
+        if (categories.isEmpty()) {
+            return "소속 없음";
+        }
+        return categories.stream()
+                .map(upc -> escMdV2(upc.getCategory().getName()))
+                .collect(Collectors.joining(", "));
     }
 
     private String formatLeavePeriod(Leave leave) {

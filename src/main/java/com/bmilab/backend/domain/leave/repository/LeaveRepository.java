@@ -39,4 +39,13 @@ public interface LeaveRepository extends JpaRepository<Leave, Long> {
     Page<Leave> findAllByStatus(LeaveStatus status, Pageable pageable);
 
     List<Leave> findAllByStatus(LeaveStatus status);
+
+    @Query("SELECT COUNT(l) > 0 FROM Leave l " +
+            "WHERE l.user.id = :userId " +
+            "AND l.status != 'REJECTED' " +
+            "AND ( " +
+            "  (l.endDate IS NULL AND l.startDate BETWEEN :startDate AND :endDate) " +
+            "  OR (l.endDate IS NOT NULL AND l.startDate <= :endDate AND l.endDate >= :startDate) " +
+            ")")
+    boolean existsOverlappingLeave(Long userId, LocalDate startDate, LocalDate endDate);
 }

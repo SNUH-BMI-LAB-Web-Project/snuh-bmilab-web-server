@@ -85,7 +85,7 @@ public record ProjectFindAllResponse(
                             .toList()
                     )
                     .participantCount(queryResult.getParticipantCount().intValue())
-                    .status(queryResult.getStatus())
+                    .status(queryResult.getEffectiveStatus())
                     .isPrivate(queryResult.isPrivate())
                     .isAccessible(queryResult.isAccessible())
                     .isPinned(queryResult.isPinned())

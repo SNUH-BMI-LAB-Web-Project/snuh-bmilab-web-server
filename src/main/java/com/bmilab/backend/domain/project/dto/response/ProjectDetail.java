@@ -112,7 +112,7 @@ public record ProjectDetail(
                 .category(ProjectCategorySummary.from(project.getCategory()))
                 .isPrivate(project.isPrivate())
                 .isAccessible(isAccessible)
-                .status(project.getStatus())
+                .status(project.getEffectiveStatus())
                 .irbId(project.getIrbId())
                 .drbId(project.getDrbId())
                 .piList(

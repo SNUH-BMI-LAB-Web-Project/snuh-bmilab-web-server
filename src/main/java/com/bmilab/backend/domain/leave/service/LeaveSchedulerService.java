@@ -35,10 +35,6 @@ public class LeaveSchedulerService {
     public void updateUserAnnualLeaves() {
         YearMonth lastMonthWithYear = YearMonth.now().minusMonths(1);
 
-        if (lastMonthWithYear.getYear() == 2025) {
-            return;
-        }
-
         int endOfMonth = lastMonthWithYear.lengthOfMonth();
         int holidayCount = countHolidays(lastMonthWithYear);
         int weekendCount = (int) countWeekends(lastMonthWithYear);

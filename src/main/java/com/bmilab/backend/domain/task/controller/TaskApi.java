@@ -1,9 +1,9 @@
 package com.bmilab.backend.domain.task.controller;
 
+import com.bmilab.backend.domain.research.paper.dto.response.PaperSummaryResponse;
+import com.bmilab.backend.domain.research.patent.dto.response.PatentSummaryResponse;
+import com.bmilab.backend.domain.research.presentation.dto.response.AcademicPresentationSummaryResponse;
 import com.bmilab.backend.domain.task.dto.request.AcknowledgementUpdateRequest;
-import com.bmilab.backend.domain.task.dto.request.ConferenceRequest;
-import com.bmilab.backend.domain.task.dto.request.PatentRequest;
-import com.bmilab.backend.domain.task.dto.request.PublicationUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskAgreementUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskBasicInfoUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskPeriodUpdateRequest;
@@ -11,9 +11,6 @@ import com.bmilab.backend.domain.task.dto.request.TaskPresentationUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskProposalUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskRequest;
 import com.bmilab.backend.domain.task.dto.response.AcknowledgementResponse;
-import com.bmilab.backend.domain.task.dto.response.ConferenceResponse;
-import com.bmilab.backend.domain.task.dto.response.PatentResponse;
-import com.bmilab.backend.domain.task.dto.response.PublicationResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskAgreementResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskBasicInfoResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskPeriodResponse;
@@ -449,138 +446,6 @@ public interface TaskApi {
             @PathVariable Long taskId
     );
 
-    @Operation(summary = "논문 정보 조회", description = "과제별 논문 정보를 조회하는 GET API")
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "논문 정보 조회 성공"
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "과제 정보를 찾을 수 없습니다.",
-                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-                    )
-            }
-    )
-    ResponseEntity<PublicationResponse> getPublication(
-            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
-            @PathVariable Long taskId
-    );
-
-    @Operation(summary = "논문 정보 저장", description = "논문 정보를 저장하는 PUT API")
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "논문 정보 저장 성공"
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "과제 정보를 찾을 수 없습니다.",
-                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-                    ),
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = "저장할 수 없는 상태입니다.",
-                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-                    )
-            }
-    )
-    ResponseEntity<Void> savePublication(
-            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
-            @PathVariable Long taskId,
-            @RequestBody PublicationUpdateRequest request
-    );
-
-    @Operation(summary = "학회발표 정보 조회", description = "과제별 학회발표 정보를 조회하는 GET API")
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "학회발표 정보 조회 성공"
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "과제 정보를 찾을 수 없습니다.",
-                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-                    )
-            }
-    )
-    ResponseEntity<ConferenceResponse> getConference(
-            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
-            @PathVariable Long taskId
-    );
-
-    @Operation(summary = "학회발표 정보 저장", description = "학회발표 정보를 저장하는 PUT API")
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "학회발표 정보 저장 성공"
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "과제 정보를 찾을 수 없습니다.",
-                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-                    ),
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = "저장할 수 없는 상태입니다.",
-                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-                    )
-            }
-    )
-    ResponseEntity<Void> saveConference(
-            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
-            @PathVariable Long taskId,
-            @RequestBody ConferenceRequest request
-    );
-
-    @Operation(summary = "특허 정보 조회", description = "과제별 특허 정보를 조회하는 GET API")
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "특허 정보 조회 성공"
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "과제 정보를 찾을 수 없습니다.",
-                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-                    )
-            }
-    )
-    ResponseEntity<PatentResponse> getPatent(
-            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
-            @PathVariable Long taskId
-    );
-
-    @Operation(summary = "특허 정보 저장", description = "특허 정보를 저장하는 PUT API")
-    @ApiResponses(
-            value = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "특허 정보 저장 성공"
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "과제 정보를 찾을 수 없습니다.",
-                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-                    ),
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = "저장할 수 없는 상태입니다.",
-                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
-                    )
-            }
-    )
-    ResponseEntity<Void> savePatent(
-            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
-            @PathVariable Long taskId,
-            @RequestBody PatentRequest request
-    );
-
     @Operation(summary = "과제에 연구프로젝트 추가", description = "과제와 연구프로젝트를 연결하는 POST API")
     @ApiResponses(
             value = {
@@ -619,5 +484,62 @@ public interface TaskApi {
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @PathVariable Long taskId,
             @PathVariable Long projectId
+    );
+
+    @Operation(summary = "과제 관련 논문 목록 조회", description = "과제와 연결된 논문 목록을 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "논문 목록 조회 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<List<PaperSummaryResponse>> getTaskPapers(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    );
+
+    @Operation(summary = "과제 관련 학회발표 목록 조회", description = "과제와 연결된 학회발표 목록을 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "학회발표 목록 조회 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<List<AcademicPresentationSummaryResponse>> getTaskPresentations(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    );
+
+    @Operation(summary = "과제 관련 특허 목록 조회", description = "과제와 연결된 특허 목록을 조회하는 GET API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "특허 목록 조회 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "과제 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<List<PatentSummaryResponse>> getTaskPatents(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
     );
 }

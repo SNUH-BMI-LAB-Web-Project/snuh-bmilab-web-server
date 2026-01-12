@@ -39,4 +39,22 @@ public class GetAllProjectsQueryResult {
     private boolean isAccessible;
 
     private boolean isPinned;
+
+    public ProjectStatus getEffectiveStatus() {
+        if (this.status == ProjectStatus.WAITING) {
+            return ProjectStatus.WAITING;
+        }
+
+        LocalDate today = LocalDate.now();
+
+        if (this.endDate != null && today.isAfter(this.endDate)) {
+            return ProjectStatus.COMPLETED;
+        }
+
+        if (this.startDate != null && !today.isBefore(this.startDate)) {
+            return ProjectStatus.IN_PROGRESS;
+        }
+
+        return ProjectStatus.PENDING;
+    }
 }

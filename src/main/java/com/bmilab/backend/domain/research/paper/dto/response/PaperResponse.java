@@ -49,6 +49,8 @@ public record PaperResponse(
         String professorRole,
         @Schema(description = "대표 실적 여부")
         boolean isRepresentative,
+        @Schema(description = "연계 과제 ID")
+        Long taskId,
         @Schema(description = "첨부 파일 목록")
         List<FileSummary> files
 ) {
@@ -73,6 +75,7 @@ public record PaperResponse(
                 paper.getCitations(),
                 paper.getProfessorRole().getDescription(),
                 paper.getIsRepresentative(),
+                paper.getTask() != null ? paper.getTask().getId() : null,
                 files
         );
     }

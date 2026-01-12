@@ -42,6 +42,8 @@ public record CreatePaperRequest(
         ProfessorRole professorRole,
         @Schema(description = "대표 실적 여부", example = "true")
         boolean isRepresentative,
+        @Schema(description = "연계 과제 ID (선택적)", example = "1")
+        Long taskId,
         @Schema(description = "첨부 파일 ID 목록", example = "[\"a1b2c3d4-e5f6-7890-1234-567890abcdef\"]")
         List<UUID> fileIds
 ) {
