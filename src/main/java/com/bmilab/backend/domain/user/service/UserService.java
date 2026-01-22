@@ -19,6 +19,7 @@ import com.bmilab.backend.domain.user.entity.UserEducation;
 import com.bmilab.backend.domain.user.entity.UserInfo;
 import com.bmilab.backend.domain.user.entity.UserProjectCategory;
 import com.bmilab.backend.domain.user.entity.UserSubAffiliation;
+import com.bmilab.backend.domain.user.enums.UserStatus;
 import com.bmilab.backend.domain.user.event.UserEducationUpdateEvent;
 import com.bmilab.backend.domain.user.exception.UserErrorCode;
 import com.bmilab.backend.domain.user.repository.UserEducationRepository;
@@ -285,6 +286,18 @@ public class UserService {
     public void deleteUserById(Long userId) {
 
         userRepository.deleteById(userId);
+    }
+
+    @Transactional
+    public void updateUserStatus(Long userId, UserStatus status) {
+
+        User user = findUserById(userId);
+
+        if (user.isAdmin() && status == UserStatus.RESIGNED) {
+            throw new ApiException(UserErrorCode.CANNOT_RESIGN_ADMIN);
+        }
+
+        user.updateStatus(status);
     }
 
     public SearchUserResponse searchUsers(String keyword) {

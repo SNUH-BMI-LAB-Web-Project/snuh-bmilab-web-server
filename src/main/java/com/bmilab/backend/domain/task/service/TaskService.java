@@ -6,10 +6,24 @@ import com.bmilab.backend.domain.file.service.FileService;
 import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.project.exception.ProjectErrorCode;
 import com.bmilab.backend.domain.project.repository.ProjectRepository;
+import com.bmilab.backend.domain.research.paper.dto.response.PaperSummaryResponse;
+import com.bmilab.backend.domain.research.paper.entity.Paper;
+import com.bmilab.backend.domain.research.paper.entity.PaperAuthor;
+import com.bmilab.backend.domain.research.paper.entity.PaperCorrespondingAuthor;
+import com.bmilab.backend.domain.research.paper.repository.PaperAuthorRepository;
+import com.bmilab.backend.domain.research.paper.repository.PaperCorrespondingAuthorRepository;
+import com.bmilab.backend.domain.research.paper.repository.PaperRepository;
+import com.bmilab.backend.domain.research.patent.dto.response.PatentSummaryResponse;
+import com.bmilab.backend.domain.research.patent.entity.Patent;
+import com.bmilab.backend.domain.research.patent.entity.PatentAuthor;
+import com.bmilab.backend.domain.research.patent.repository.PatentAuthorRepository;
+import com.bmilab.backend.domain.research.patent.repository.PatentRepository;
+import com.bmilab.backend.domain.research.presentation.dto.response.AcademicPresentationSummaryResponse;
+import com.bmilab.backend.domain.research.presentation.entity.AcademicPresentation;
+import com.bmilab.backend.domain.research.presentation.entity.AcademicPresentationAuthor;
+import com.bmilab.backend.domain.research.presentation.repository.AcademicPresentationAuthorRepository;
+import com.bmilab.backend.domain.research.presentation.repository.AcademicPresentationRepository;
 import com.bmilab.backend.domain.task.dto.request.AcknowledgementUpdateRequest;
-import com.bmilab.backend.domain.task.dto.request.ConferenceRequest;
-import com.bmilab.backend.domain.task.dto.request.PatentRequest;
-import com.bmilab.backend.domain.task.dto.request.PublicationUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskAgreementUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskBasicInfoUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskPeriodRequest;
@@ -18,9 +32,6 @@ import com.bmilab.backend.domain.task.dto.request.TaskPresentationUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskProposalUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskRequest;
 import com.bmilab.backend.domain.task.dto.response.AcknowledgementResponse;
-import com.bmilab.backend.domain.task.dto.response.ConferenceResponse;
-import com.bmilab.backend.domain.task.dto.response.PatentResponse;
-import com.bmilab.backend.domain.task.dto.response.PublicationResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskAgreementResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskBasicInfoResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskMemberSummary;
@@ -64,12 +75,16 @@ public class TaskService {
     private final TaskPresentationMakerRepository taskPresentationMakerRepository;
     private final TaskAgreementRepository taskAgreementRepository;
     private final AcknowledgementRepository acknowledgementRepository;
-    private final PublicationRepository publicationRepository;
-    private final ConferenceRepository conferenceRepository;
-    private final PatentRepository patentRepository;
     private final ProjectRepository projectRepository;
     private final UserService userService;
     private final FileService fileService;
+    private final PaperRepository paperRepository;
+    private final PaperAuthorRepository paperAuthorRepository;
+    private final PaperCorrespondingAuthorRepository paperCorrespondingAuthorRepository;
+    private final AcademicPresentationRepository academicPresentationRepository;
+    private final AcademicPresentationAuthorRepository academicPresentationAuthorRepository;
+    private final PatentRepository patentRepository;
+    private final PatentAuthorRepository patentAuthorRepository;
 
 
     @Transactional
@@ -115,6 +130,7 @@ public class TaskService {
                 .totalYears(request.totalYears())
                 .currentYear(request.currentYear())
                 .status(request.status() != null ? request.status() : TaskStatus.PROPOSAL_WRITING)
+                .isInternal(request.isInternal())
                 .build();
 
         taskRepository.save(task);
@@ -183,7 +199,8 @@ public class TaskService {
                 request.snuhPi(),
                 request.professorRole(),
                 practicalManager,
-                request.participatingInstitutions()
+                request.participatingInstitutions(),
+                request.isInternal()
         );
 
         List<TaskPeriod> existingPeriods = taskPeriodRepository.findByTaskOrderByYearNumberAsc(task);
@@ -337,7 +354,8 @@ public class TaskService {
                     task.getSnuhPi(),
                     task.getProfessorRole(),
                     task.getPracticalManager(),
-                    task.getParticipatingInstitutions()
+                    task.getParticipatingInstitutions(),
+                    task.getIsInternal()
             );
         }
 
@@ -677,96 +695,6 @@ public class TaskService {
         return projects.stream().map(TaskProjectSummary::from).collect(Collectors.toList());
     }
 
-    public PublicationResponse getPublication(Long userId, Long taskId) {
-
-        Task task = getTaskById(taskId);
-        Publication publication = publicationRepository.findByTask(task).orElse(null);
-
-        return PublicationResponse.from(publication);
-    }
-
-    @Transactional
-    public void savePublication(Long userId, boolean isAdmin, Long taskId, PublicationUpdateRequest request) {
-
-        Task task = getTaskById(taskId);
-
-        if (!task.canBeEditedByUser(userId, isAdmin)) {
-            throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
-        }
-
-        Publication publication = publicationRepository.findByTask(task)
-                .orElseGet(() -> Publication.builder().task(task).build());
-
-        publication.update(
-                request.title(),
-                request.authors(),
-                request.journal(),
-                request.publicationDate(),
-                request.doi()
-        );
-
-        publicationRepository.save(publication);
-    }
-
-    public ConferenceResponse getConference(Long userId, Long taskId) {
-
-        Task task = getTaskById(taskId);
-        Conference conference = conferenceRepository.findByTask(task).orElse(null);
-
-        return ConferenceResponse.from(conference);
-    }
-
-    @Transactional
-    public void saveConference(Long userId, boolean isAdmin, Long taskId, ConferenceRequest request) {
-
-        Task task = getTaskById(taskId);
-
-        if (!task.canBeEditedByUser(userId, isAdmin)) {
-            throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
-        }
-
-        Conference conference = conferenceRepository.findByTask(task)
-                .orElseGet(() -> Conference.builder().task(task).build());
-
-        conference.update(
-                request.presentationTitle(),
-                request.conferenceName(),
-                request.presenter(),
-                request.presentationDate()
-        );
-
-        conferenceRepository.save(conference);
-    }
-
-    public PatentResponse getPatent(Long userId, Long taskId) {
-
-        Task task = getTaskById(taskId);
-        Patent patent = patentRepository.findByTask(task).orElse(null);
-
-        return PatentResponse.from(patent);
-    }
-
-    @Transactional
-    public void savePatent(Long userId, boolean isAdmin, Long taskId, PatentRequest request) {
-
-        Task task = getTaskById(taskId);
-
-        if (!task.canBeEditedByUser(userId, isAdmin)) {
-            throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
-        }
-
-        Patent patent = patentRepository.findByTask(task)
-                .orElseGet(() -> Patent.builder().task(task).build());
-
-        patent.update(
-                request.patentTitle(),
-                request.patentNumber(),
-                request.applicationDate()
-        );
-
-        patentRepository.save(patent);
-    }
-
     @Transactional
     public void addProjectToTask(Long userId, Long taskId, Long projectId) {
         Task task = getTaskById(taskId);
@@ -787,6 +715,57 @@ public class TaskService {
         // Project의 task 필드를 null로 설정하여 연결 해제
         project.setTask(null);
         projectRepository.save(project);
+    }
+
+    public List<PaperSummaryResponse> getTaskPapers(Long userId, Long taskId) {
+        Task task = getTaskById(taskId);
+        List<Paper> papers = paperRepository.findAllByTaskId(taskId);
+
+        return papers.stream()
+                .map(paper -> {
+                    List<PaperCorrespondingAuthor> correspondingAuthors =
+                            paperCorrespondingAuthorRepository.findAllByPaperId(paper.getId());
+                    List<PaperAuthor> paperAuthors =
+                            paperAuthorRepository.findAllByPaperId(paper.getId());
+                    List<FileSummary> files = fileService.findAllByDomainTypeAndEntityId(
+                                    FileDomainType.PAPER_ATTACHMENT, paper.getId())
+                            .stream()
+                            .map(FileSummary::from)
+                            .toList();
+                    return PaperSummaryResponse.from(paper, correspondingAuthors, paperAuthors, files);
+                })
+                .toList();
+    }
+
+    public List<AcademicPresentationSummaryResponse> getTaskPresentations(Long userId, Long taskId) {
+        Task task = getTaskById(taskId);
+        List<AcademicPresentation> presentations = academicPresentationRepository.findAllByTaskId(taskId);
+
+        return presentations.stream()
+                .map(presentation -> {
+                    List<AcademicPresentationAuthor> authors =
+                            academicPresentationAuthorRepository.findAllByAcademicPresentationId(presentation.getId());
+                    return AcademicPresentationSummaryResponse.from(presentation, authors);
+                })
+                .toList();
+    }
+
+    public List<PatentSummaryResponse> getTaskPatents(Long userId, Long taskId) {
+        Task task = getTaskById(taskId);
+        List<Patent> patents = patentRepository.findAllByTaskId(taskId);
+
+        return patents.stream()
+                .map(patent -> {
+                    List<PatentAuthor> patentAuthors =
+                            patentAuthorRepository.findAllByPatentId(patent.getId());
+                    List<FileSummary> files = fileService.findAllByDomainTypeAndEntityId(
+                                    FileDomainType.PATENT_ATTACHMENT, patent.getId())
+                            .stream()
+                            .map(FileSummary::from)
+                            .toList();
+                    return PatentSummaryResponse.from(patent, patentAuthors, files);
+                })
+                .toList();
     }
 
     private Task getTaskById(Long taskId) {

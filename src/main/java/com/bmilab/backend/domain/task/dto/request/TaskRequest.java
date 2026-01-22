@@ -79,6 +79,10 @@ public record TaskRequest(
         String participatingInstitutions,
 
         @Schema(description = "진행 상태", example = "PROPOSAL_WRITING(제안서 준비중)")
-        TaskStatus status
+        TaskStatus status,
+
+        @Schema(description = "원내과제 여부", example = "true")
+        @NotNull(message = "원내과제 여부는 필수입니다.")
+        Boolean isInternal
 ) {
 }

@@ -125,6 +125,28 @@ public class Project extends BaseTimeEntity {
         this.status = ProjectStatus.COMPLETED;
     }
 
+    public void updateStatus(ProjectStatus status) {
+        this.status = status;
+    }
+
+    public ProjectStatus getEffectiveStatus() {
+        if (this.status == ProjectStatus.WAITING) {
+            return ProjectStatus.WAITING;
+        }
+
+        LocalDate today = LocalDate.now();
+
+        if (this.endDate != null && today.isAfter(this.endDate)) {
+            return ProjectStatus.COMPLETED;
+        }
+
+        if (this.startDate != null && !today.isBefore(this.startDate)) {
+            return ProjectStatus.IN_PROGRESS;
+        }
+
+        return ProjectStatus.PENDING;
+    }
+
     public List<String> getPIList() {
         return List.of(pi.split(","));
     }

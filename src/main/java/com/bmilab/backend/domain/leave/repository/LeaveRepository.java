@@ -24,6 +24,14 @@ public interface LeaveRepository extends JpaRepository<Leave, Long> {
             "OR (l.endDate IS NOT NULL AND l.startDate <= :end AND l.endDate >= :start) )")
     List<Leave> findAllByBetweenDatesAndStatus(LocalDate start, LocalDate end, LeaveStatus status);
 
+    // 금주 휴가자 알림용 - 오늘 이후 종료되는 휴가만 조회 (user fetch join)
+    @Query("SELECT l FROM Leave l JOIN FETCH l.user " +
+            "WHERE l.status = :status AND " +
+            "( (l.endDate IS NULL AND l.startDate BETWEEN :today AND :endOfWeek) " +
+            "OR (l.endDate IS NOT NULL AND l.startDate <= :endOfWeek AND l.endDate >= :today) ) " +
+            "ORDER BY l.startDate ASC, l.user.name ASC")
+    List<Leave> findWeeklyLeavesEndingAfterToday(LocalDate today, LocalDate endOfWeek, LeaveStatus status);
+
     Page<Leave> findAllByUserId(Long userId, Pageable pageable);
 
     List<Leave> findAllByUserId(Long userId);
@@ -31,4 +39,13 @@ public interface LeaveRepository extends JpaRepository<Leave, Long> {
     Page<Leave> findAllByStatus(LeaveStatus status, Pageable pageable);
 
     List<Leave> findAllByStatus(LeaveStatus status);
+
+    @Query("SELECT COUNT(l) > 0 FROM Leave l " +
+            "WHERE l.user.id = :userId " +
+            "AND l.status != 'REJECTED' " +
+            "AND ( " +
+            "  (l.endDate IS NULL AND l.startDate BETWEEN :startDate AND :endDate) " +
+            "  OR (l.endDate IS NOT NULL AND l.startDate <= :endDate AND l.endDate >= :startDate) " +
+            ")")
+    boolean existsOverlappingLeave(Long userId, LocalDate startDate, LocalDate endDate);
 }

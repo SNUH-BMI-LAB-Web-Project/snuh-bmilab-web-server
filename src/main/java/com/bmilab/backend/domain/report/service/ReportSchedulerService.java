@@ -1,8 +1,14 @@
 package com.bmilab.backend.domain.report.service;
 
+import com.bmilab.backend.domain.leave.entity.Leave;
+import com.bmilab.backend.domain.leave.enums.LeaveStatus;
+import com.bmilab.backend.domain.leave.repository.LeaveRepository;
 import com.bmilab.backend.domain.project.repository.ProjectRepository;
 import com.bmilab.backend.domain.report.dto.query.GetAllReportsQueryResult;
 import com.bmilab.backend.domain.report.repository.ReportRepository;
+import com.bmilab.backend.domain.user.entity.User;
+import com.bmilab.backend.domain.user.entity.UserProjectCategory;
+import com.bmilab.backend.domain.user.repository.UserProjectCategoryRepository;
 import com.bmilab.backend.domain.user.repository.UserRepository;
 import com.bmilab.backend.global.email.EmailSender;
 import jakarta.mail.MessagingException;
@@ -18,7 +24,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -35,11 +45,16 @@ public class ReportSchedulerService {
     private final ReportExportConverter reportExportConverter;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
+    private final LeaveRepository leaveRepository;
+    private final UserProjectCategoryRepository userProjectCategoryRepository;
+
+    private static final DateTimeFormatter DATE_WITH_DAY_FORMATTER =
+            DateTimeFormatter.ofPattern("MM/dd E", Locale.KOREAN);
 
     @Value("${service.professor-mail-address}")
     private String professorMailAddress;
 
-    @Scheduled(cron = "0 0 9 * * MON-FRI", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 5 9 * * MON-FRI", zone = "Asia/Seoul")
     public void sendReportMail() throws IOException, MessagingException {
         //월요일 -> 금요일꺼 나머지는 전날 꺼
         LocalDate today = LocalDate.now();
@@ -64,7 +79,7 @@ public class ReportSchedulerService {
 
     }
 
-    @Scheduled(cron = "0 10 9 * * MON-FRI", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 0 9 * * MON-FRI", zone = "Asia/Seoul")
     public void checkBiWeeklyReportStatus() {
         LocalDate end = LocalDate.now().minusDays(1);
         LocalDate start = end.minusDays(13);
@@ -83,5 +98,82 @@ public class ReportSchedulerService {
         String title = "\\[SNUH BMI Lab\\] 2주 보고 미제출 현황 \\(`" + start + "` \\~ `" + end + "`\\)";
         String body = reportExportConverter.toBiWeeklyMissingReports(projectsMissingReports, userProjectsMissingReports);
         telegramService.sendMessage(title + "\n\n" + body);
+    }
+
+    @Scheduled(cron = "0 10 9 * * MON-FRI", zone = "Asia/Seoul")
+    public void notifyWeeklyLeaves() {
+        LocalDate today = LocalDate.now();
+        LocalDate endOfWeek = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.FRIDAY));
+
+        log.info("[금주 휴가자 알림] 조회 기간: {} ~ {}", today, endOfWeek);
+
+        List<Leave> leaves = leaveRepository.findWeeklyLeavesEndingAfterToday(today, endOfWeek, LeaveStatus.APPROVED);
+        log.info("[금주 휴가자 알림] 휴가자 수: {}", leaves.size());
+
+        String title = "\\[SNUH BMI Lab\\] 금주 휴가자 현황";
+        String body = buildWeeklyLeavesMessage(leaves);
+
+        telegramService.sendMessage(title + "\n\n" + body);
+    }
+
+    private String buildWeeklyLeavesMessage(List<Leave> leaves) {
+        if (leaves.isEmpty()) {
+            return "금주 휴가자가 없습니다\\.";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (Leave leave : leaves) {
+            String name = escMdV2(leave.getUser().getName());
+            String categoryDisplay = getCategoryDisplay(leave.getUser());
+            String leaveType = escMdV2(leave.getType().getDescription());
+            String period = formatLeavePeriod(leave);
+
+            sb.append("\\- ")
+              .append(name)
+              .append(" \\(")
+              .append(categoryDisplay)
+              .append("\\) \\- ")
+              .append(leaveType)
+              .append(" \\(")
+              .append(period)
+              .append("\\)\n");
+        }
+
+        return sb.toString().trim();
+    }
+
+    private String getCategoryDisplay(User user) {
+        List<UserProjectCategory> categories = userProjectCategoryRepository.findAllByUser(user);
+        if (categories.isEmpty()) {
+            return "소속 없음";
+        }
+        return categories.stream()
+                .map(upc -> escMdV2(upc.getCategory().getName()))
+                .collect(Collectors.joining(", "));
+    }
+
+    private String formatLeavePeriod(Leave leave) {
+        String startDateStr = escMdV2(leave.getStartDate().format(DATE_WITH_DAY_FORMATTER));
+
+        if (leave.getEndDate() == null) {
+            // 반차인 경우 당일만 표시
+            return startDateStr;
+        }
+
+        if (leave.getStartDate().equals(leave.getEndDate())) {
+            // 연차지만 하루만인 경우
+            return startDateStr;
+        }
+
+        // 연차 기간 표시
+        String endDateStr = escMdV2(leave.getEndDate().format(DATE_WITH_DAY_FORMATTER));
+        return startDateStr + " \\~ " + endDateStr;
+    }
+
+    // AIDEV-NOTE: MarkdownV2 특수문자 이스케이프 처리
+    private static String escMdV2(String s) {
+        if (s == null) return "";
+        s = s.replace("\\", "\\\\");
+        return s.replaceAll("([_*\\[\\]()~`>#+\\-=|{}.!])", "\\\\$1");
     }
 }

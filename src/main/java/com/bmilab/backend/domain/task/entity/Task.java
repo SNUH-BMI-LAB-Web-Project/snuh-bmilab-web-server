@@ -100,6 +100,9 @@ public class Task extends BaseTimeEntity {
     @Column(name = "participating_institutions", columnDefinition = "TEXT", nullable = false)
     private String participatingInstitutions;
 
+    @Column(name = "is_internal", columnDefinition = "TINYINT(1)", nullable = false)
+    private Boolean isInternal;
+
     public void update(
             String researchTaskNumber,
             String title,
@@ -119,7 +122,8 @@ public class Task extends BaseTimeEntity {
             String snuhPi,
             TaskProfessorRole professorRole,
             User practicalManager,
-            String participatingInstitutions
+            String participatingInstitutions,
+            Boolean isInternal
     ) {
         this.researchTaskNumber = researchTaskNumber;
         this.title = title;
@@ -140,6 +144,7 @@ public class Task extends BaseTimeEntity {
         this.professorRole = professorRole;
         this.practicalManager = practicalManager;
         this.participatingInstitutions = participatingInstitutions;
+        this.isInternal = isInternal;
     }
 
     // 제안서 탈락, 발표 탈락, 과제 종료 상태에서는 실무책임자 또는 어드민만 수정 가능

@@ -1,5 +1,6 @@
 package com.bmilab.backend.domain.leave.controller;
 
+import com.bmilab.backend.domain.leave.dto.request.AdminUpdateLeaveRequest;
 import com.bmilab.backend.domain.leave.dto.request.RejectLeaveRequest;
 import com.bmilab.backend.domain.leave.dto.response.LeaveFindAllResponse;
 import com.bmilab.backend.domain.leave.enums.LeaveStatus;
@@ -15,6 +16,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -56,5 +58,14 @@ public class AdminLeaveController implements AdminLeaveApi {
             @PageableDefault(size = 10, sort = "applicatedAt", direction = Sort.Direction.DESC) @ParameterObject Pageable pageable
     ) {
         return ResponseEntity.ok(leaveService.getLeavesByAdmin(status, pageable));
+    }
+
+    @PatchMapping("/{leaveId}")
+    public ResponseEntity<Void> updateLeave(
+            @PathVariable long leaveId,
+            @RequestBody @Valid AdminUpdateLeaveRequest request
+    ) {
+        leaveService.updateLeaveByAdmin(leaveId, request);
+        return ResponseEntity.ok().build();
     }
 }

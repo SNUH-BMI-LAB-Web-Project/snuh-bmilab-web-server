@@ -71,7 +71,10 @@ public record TaskSummaryResponse(
         String practicalManagerName,
 
         @Schema(description = "참여기관")
-        String participatingInstitutions
+        String participatingInstitutions,
+
+        @Schema(description = "원내과제 여부")
+        Boolean isInternal
 ) {
     public static TaskSummaryResponse from(Task task, List<TaskPeriodSummaryResponse> periods) {
         LocalDate calculatedStartDate = null;
@@ -103,7 +106,8 @@ public record TaskSummaryResponse(
                 task.getSnuhPi(),
                 task.getProfessorRole(),
                 task.getPracticalManager().getName(),
-                task.getParticipatingInstitutions()
+                task.getParticipatingInstitutions(),
+                task.getIsInternal()
         );
     }
 }

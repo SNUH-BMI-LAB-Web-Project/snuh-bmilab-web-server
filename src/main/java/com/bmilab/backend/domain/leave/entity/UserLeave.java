@@ -60,4 +60,11 @@ public class UserLeave extends BaseTimeEntity {
     public void updateAnnualLeaveCount(Double annualLeaveCount) {
         this.annualLeaveCount = annualLeaveCount;
     }
+
+    public void restoreLeave(Double leaveCount, boolean isAnnualLeave) {
+        if (isAnnualLeave) {
+            annualLeaveCount += leaveCount;
+        }
+        usedLeaveCount -= leaveCount;
+    }
 }

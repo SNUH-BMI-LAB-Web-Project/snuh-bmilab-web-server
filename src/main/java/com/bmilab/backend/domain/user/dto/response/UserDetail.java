@@ -10,6 +10,7 @@ import com.bmilab.backend.domain.user.entity.UserInfo;
 import com.bmilab.backend.domain.user.entity.UserSubAffiliation;
 import com.bmilab.backend.domain.user.enums.Role;
 import com.bmilab.backend.domain.user.enums.UserPosition;
+import com.bmilab.backend.domain.user.enums.UserStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDate;
 import java.util.List;
@@ -66,7 +67,10 @@ public record UserDetail(
         String comment,
 
         @Schema(description = "입사일", example = "2023-03-01")
-        LocalDate joinedAt
+        LocalDate joinedAt,
+
+        @Schema(description = "상태", example = "ACTIVE")
+        UserStatus status
 ) {
     public static UserDetail from(
             UserDetailQueryResult queryResult,
@@ -99,6 +103,7 @@ public record UserDetail(
                 .educations(educations.stream().map(UserEducationSummary::from).toList())
                 .comment(userInfo.getComment())
                 .joinedAt(userInfo.getJoinedAt())
+                .status(user.getStatus())
                 .build();
     }
 }

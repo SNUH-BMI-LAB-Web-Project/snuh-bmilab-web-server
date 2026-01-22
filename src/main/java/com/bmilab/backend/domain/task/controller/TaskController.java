@@ -1,9 +1,9 @@
 package com.bmilab.backend.domain.task.controller;
 
+import com.bmilab.backend.domain.research.paper.dto.response.PaperSummaryResponse;
+import com.bmilab.backend.domain.research.patent.dto.response.PatentSummaryResponse;
+import com.bmilab.backend.domain.research.presentation.dto.response.AcademicPresentationSummaryResponse;
 import com.bmilab.backend.domain.task.dto.request.AcknowledgementUpdateRequest;
-import com.bmilab.backend.domain.task.dto.request.ConferenceRequest;
-import com.bmilab.backend.domain.task.dto.request.PatentRequest;
-import com.bmilab.backend.domain.task.dto.request.PublicationUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskAgreementUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskBasicInfoUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskPeriodUpdateRequest;
@@ -11,9 +11,6 @@ import com.bmilab.backend.domain.task.dto.request.TaskPresentationUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskProposalUpdateRequest;
 import com.bmilab.backend.domain.task.dto.request.TaskRequest;
 import com.bmilab.backend.domain.task.dto.response.AcknowledgementResponse;
-import com.bmilab.backend.domain.task.dto.response.ConferenceResponse;
-import com.bmilab.backend.domain.task.dto.response.PatentResponse;
-import com.bmilab.backend.domain.task.dto.response.PublicationResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskAgreementResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskBasicInfoResponse;
 import com.bmilab.backend.domain.task.dto.response.TaskPeriodResponse;
@@ -246,66 +243,6 @@ public class TaskController implements TaskApi {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{taskId}/publication")
-    public ResponseEntity<PublicationResponse> getPublication(
-            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
-            @PathVariable Long taskId
-    ) {
-        PublicationResponse response = taskService.getPublication(userAuthInfo.getUserId(), taskId);
-        return ResponseEntity.ok(response);
-    }
-
-    @PutMapping("/{taskId}/publication")
-    public ResponseEntity<Void> savePublication(
-            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
-            @PathVariable Long taskId,
-            @RequestBody @Valid PublicationUpdateRequest request
-    ) {
-        boolean isAdmin = userAuthInfo.getUser().getRole() == Role.ADMIN;
-        taskService.savePublication(userAuthInfo.getUserId(), isAdmin, taskId, request);
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/{taskId}/conference")
-    public ResponseEntity<ConferenceResponse> getConference(
-            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
-            @PathVariable Long taskId
-    ) {
-        ConferenceResponse response = taskService.getConference(userAuthInfo.getUserId(), taskId);
-        return ResponseEntity.ok(response);
-    }
-
-    @PutMapping("/{taskId}/conference")
-    public ResponseEntity<Void> saveConference(
-            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
-            @PathVariable Long taskId,
-            @RequestBody @Valid ConferenceRequest request
-    ) {
-        boolean isAdmin = userAuthInfo.getUser().getRole() == Role.ADMIN;
-        taskService.saveConference(userAuthInfo.getUserId(), isAdmin, taskId, request);
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/{taskId}/patent")
-    public ResponseEntity<PatentResponse> getPatent(
-            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
-            @PathVariable Long taskId
-    ) {
-        PatentResponse response = taskService.getPatent(userAuthInfo.getUserId(), taskId);
-        return ResponseEntity.ok(response);
-    }
-
-    @PutMapping("/{taskId}/patent")
-    public ResponseEntity<Void> savePatent(
-            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
-            @PathVariable Long taskId,
-            @RequestBody @Valid PatentRequest request
-    ) {
-        boolean isAdmin = userAuthInfo.getUser().getRole() == Role.ADMIN;
-        taskService.savePatent(userAuthInfo.getUserId(), isAdmin, taskId, request);
-        return ResponseEntity.ok().build();
-    }
-
     @PostMapping("/{taskId}/projects/{projectId}")
     public ResponseEntity<Void> addProjectToTask(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
@@ -324,5 +261,32 @@ public class TaskController implements TaskApi {
     ) {
         taskService.removeProjectFromTask(userAuthInfo.getUserId(), taskId, projectId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{taskId}/papers")
+    public ResponseEntity<List<PaperSummaryResponse>> getTaskPapers(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    ) {
+        List<PaperSummaryResponse> response = taskService.getTaskPapers(userAuthInfo.getUserId(), taskId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{taskId}/presentations")
+    public ResponseEntity<List<AcademicPresentationSummaryResponse>> getTaskPresentations(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    ) {
+        List<AcademicPresentationSummaryResponse> response = taskService.getTaskPresentations(userAuthInfo.getUserId(), taskId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{taskId}/patents")
+    public ResponseEntity<List<PatentSummaryResponse>> getTaskPatents(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable Long taskId
+    ) {
+        List<PatentSummaryResponse> response = taskService.getTaskPatents(userAuthInfo.getUserId(), taskId);
+        return ResponseEntity.ok(response);
     }
 }

@@ -2,6 +2,7 @@ package com.bmilab.backend.domain.user.controller;
 
 import com.bmilab.backend.domain.user.dto.request.RegisterUserRequest;
 import com.bmilab.backend.domain.user.dto.request.AdminUpdateUserRequest;
+import com.bmilab.backend.domain.user.dto.request.UpdateUserStatusRequest;
 import com.bmilab.backend.domain.user.dto.request.UserAccountEmailRequest;
 import com.bmilab.backend.domain.user.dto.response.UserDetail;
 import com.bmilab.backend.global.exception.ErrorResponse;
@@ -94,5 +95,29 @@ public interface AdminUserApi {
     ResponseEntity<Void> sendAccountEmail(
             @PathVariable Long userId,
             @RequestBody UserAccountEmailRequest request
+    );
+
+    @Operation(summary = "사용자 상태 변경", description = "사용자의 상태(재직/휴직/퇴사)를 변경하는 PATCH API. 퇴사 처리된 사용자는 로그인할 수 없습니다.")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "상태 변경 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "관리자 계정은 퇴사 처리할 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "사용자 정보를 찾을 수 없습니다.",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
+    ResponseEntity<Void> updateUserStatus(
+            @PathVariable Long userId,
+            @RequestBody UpdateUserStatusRequest request
     );
 }

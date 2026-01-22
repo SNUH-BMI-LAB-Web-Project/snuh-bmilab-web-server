@@ -1,5 +1,6 @@
 package com.bmilab.backend.domain.leave.service;
 
+import com.bmilab.backend.domain.leave.dto.request.AdminUpdateLeaveRequest;
 import com.bmilab.backend.domain.leave.dto.request.ApplyLeaveRequest;
 import com.bmilab.backend.domain.leave.dto.request.RejectLeaveRequest;
 import com.bmilab.backend.domain.leave.dto.response.LeaveFindAllResponse;
@@ -75,9 +76,12 @@ public class LeaveService {
     public void applyLeave(Long userId, ApplyLeaveRequest request) {
         User user = userService.findUserById(userId);
         LeaveType type = request.type();
-        double leaveCount = (request.endDate() == null) ? 1 : calculateLeaveCount(request.startDate(), request.endDate());
+        LocalDate startDate = request.startDate();
+        LocalDate endDate = request.endDate() != null ? request.endDate() : startDate;
+        double leaveCount = (request.endDate() == null) ? 1 : calculateLeaveCount(startDate, endDate);
 
         validateLeaveTypeAccessPermission(user, type);
+        validateNoDuplicateLeave(userId, startDate, endDate);
 
         if (type.isHalf()) {
             leaveCount *= 0.5;
@@ -136,6 +140,45 @@ public class LeaveService {
         leave.reject(request.rejectReason(), processor, LocalDateTime.now());
     }
 
+    @Transactional
+    public void updateLeaveByAdmin(long leaveId, AdminUpdateLeaveRequest request) {
+        Leave leave = leaveRepository.findById(leaveId)
+                .orElseThrow(() -> new ApiException(LeaveErrorCode.LEAVE_NOT_FOUND));
+
+        if (!leave.isApproved()) {
+            throw new ApiException(LeaveErrorCode.LEAVE_NOT_APPROVED);
+        }
+
+        User user = leave.getUser();
+        UserLeave userLeave = userLeaveRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new ApiException(LeaveErrorCode.USER_LEAVE_NOT_FOUND));
+
+        // 기존 휴가 일수 복원
+        userLeave.restoreLeave(leave.getLeaveCount(), leave.isAnnualLeave());
+
+        // 새로운 휴가 일수 계산
+        LocalDate startDate = request.startDate();
+        LocalDate endDate = request.endDate() != null ? request.endDate() : startDate;
+        LeaveType newType = request.type();
+        double newLeaveCount = (request.endDate() == null) ? 1 : calculateLeaveCount(startDate, endDate);
+
+        if (newType.isHalf()) {
+            newLeaveCount *= 0.5;
+        }
+
+        // 새로운 휴가 일수 차감
+        if (newType == LeaveType.ANNUAL && userLeave.getAnnualLeaveCount() < newLeaveCount) {
+            // 복원한 것을 다시 되돌림
+            userLeave.useLeave(leave.getLeaveCount(), leave.isAnnualLeave());
+            throw new ApiException(LeaveErrorCode.LEAVE_COUNT_REQUIRED);
+        }
+
+        userLeave.useLeave(newLeaveCount, newType == LeaveType.ANNUAL);
+
+        // 휴가 정보 업데이트
+        leave.update(startDate, request.endDate(), newType, newLeaveCount, request.reason());
+    }
+
     public int countDatesByUserIdWithMonth(long userId, YearMonth yearMonth) {
         return leaveRepository.findAllByUserId(userId)
                 .stream()
@@ -147,6 +190,12 @@ public class LeaveService {
     private void validateLeaveTypeAccessPermission(User user, LeaveType type) {
         if ((!user.isAdmin()) && type == LeaveType.ALL) {
             throw new ApiException(LeaveErrorCode.ACCESS_DENIED);
+        }
+    }
+
+    private void validateNoDuplicateLeave(Long userId, LocalDate startDate, LocalDate endDate) {
+        if (leaveRepository.existsOverlappingLeave(userId, startDate, endDate)) {
+            throw new ApiException(LeaveErrorCode.LEAVE_DUPLICATE);
         }
     }
 }

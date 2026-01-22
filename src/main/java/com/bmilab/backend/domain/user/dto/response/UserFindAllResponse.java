@@ -6,6 +6,7 @@ import com.bmilab.backend.domain.user.dto.query.UserInfoQueryResult;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.domain.user.entity.UserInfo;
 import com.bmilab.backend.domain.user.enums.UserPosition;
+import com.bmilab.backend.domain.user.enums.UserStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import org.springframework.data.domain.Page;
@@ -77,7 +78,10 @@ public record UserFindAllResponse(
             String education,
 
             @Schema(description = "입사일", example = "2023-03-01")
-            LocalDate joinedAt
+            LocalDate joinedAt,
+
+            @Schema(description = "상태", example = "ACTIVE")
+            UserStatus status
     ) {
         public static UserItem from(UserInfoQueryResult queryResult) {
             User user = queryResult.getUser();
@@ -101,6 +105,7 @@ public record UserFindAllResponse(
                     .phoneNumber(userInfo != null ? userInfo.getPhoneNumber() : null)
                     .education(userInfo != null ? userInfo.getEducation() : null)
                     .joinedAt(userInfo != null ? userInfo.getJoinedAt() : null)
+                    .status(user.getStatus())
                     .build();
         }
     }

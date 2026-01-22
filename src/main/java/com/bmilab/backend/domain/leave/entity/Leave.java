@@ -103,6 +103,14 @@ public class Leave extends BaseTimeEntity {
         return type == LeaveType.ANNUAL;
     }
 
+    public void update(LocalDate startDate, LocalDate endDate, LeaveType type, Double leaveCount, String reason) {
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.type = type;
+        this.leaveCount = leaveCount;
+        this.reason = reason;
+    }
+
     public int countDaysInYearMonth(YearMonth yearMonth) {
         if (endDate == null) {
             return YearMonth.from(startDate).equals(yearMonth) ? 1 : 0;
