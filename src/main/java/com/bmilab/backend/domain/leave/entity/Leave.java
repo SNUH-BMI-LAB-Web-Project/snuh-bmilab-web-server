@@ -91,6 +91,10 @@ public class Leave extends BaseTimeEntity {
         processedAt = now;
     }
 
+    public boolean isPending() {
+        return status == LeaveStatus.PENDING;
+    }
+
     public boolean isNotPending() {
         return status != LeaveStatus.PENDING;
     }
