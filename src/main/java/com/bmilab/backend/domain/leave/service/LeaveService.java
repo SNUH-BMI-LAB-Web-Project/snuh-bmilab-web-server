@@ -207,6 +207,23 @@ public class LeaveService {
                 .sum();
     }
 
+    @Transactional
+    public void deleteLeaveByAdmin(long leaveId) {
+        Leave leave = leaveRepository.findById(leaveId)
+                .orElseThrow(() -> new ApiException(LeaveErrorCode.LEAVE_NOT_FOUND));
+
+        // 승인된 휴가인 경우 휴가 일수 복원
+        if (leave.isApproved()) {
+            User user = leave.getUser();
+            UserLeave userLeave = userLeaveRepository.findByUserId(user.getId())
+                    .orElseThrow(() -> new ApiException(LeaveErrorCode.USER_LEAVE_NOT_FOUND));
+
+            userLeave.restoreLeave(leave.getLeaveCount(), leave.isAnnualLeave());
+        }
+
+        leaveRepository.delete(leave);
+    }
+
     private void validateLeaveTypeAccessPermission(User user, LeaveType type) {
         if ((!user.isAdmin()) && type == LeaveType.ALL) {
             throw new ApiException(LeaveErrorCode.ACCESS_DENIED);

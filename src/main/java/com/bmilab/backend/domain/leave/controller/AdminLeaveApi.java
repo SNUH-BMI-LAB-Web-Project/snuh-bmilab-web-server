@@ -95,4 +95,19 @@ public interface AdminLeaveApi {
             @PathVariable long leaveId,
             AdminUpdateLeaveRequest request
     );
+
+    @Operation(summary = "휴가 삭제", description = "휴가를 삭제하는 DELETE API (승인된 휴가 삭제 시 휴가 일수 복원)")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "휴가 삭제 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "휴가 정보를 찾을 수 없습니다."
+                    )
+            }
+    )
+    ResponseEntity<Void> deleteLeave(@PathVariable long leaveId);
 }
