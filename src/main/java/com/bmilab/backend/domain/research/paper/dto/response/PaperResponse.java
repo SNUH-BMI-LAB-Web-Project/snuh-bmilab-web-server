@@ -51,6 +51,12 @@ public record PaperResponse(
         boolean isRepresentative,
         @Schema(description = "연계 과제 ID")
         Long taskId,
+        @Schema(description = "연계 과제명")
+        String taskName,
+        @Schema(description = "연계 프로젝트 ID")
+        Long projectId,
+        @Schema(description = "연계 프로젝트명")
+        String projectName,
         @Schema(description = "첨부 파일 목록")
         List<FileSummary> files
 ) {
@@ -76,6 +82,9 @@ public record PaperResponse(
                 paper.getProfessorRole().getDescription(),
                 paper.getIsRepresentative(),
                 paper.getTask() != null ? paper.getTask().getId() : null,
+                paper.getTask() != null ? paper.getTask().getTitle() : null,
+                paper.getProject() != null ? paper.getProject().getId() : null,
+                paper.getProject() != null ? paper.getProject().getTitle() : null,
                 files
         );
     }
