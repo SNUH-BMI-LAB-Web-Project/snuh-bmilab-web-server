@@ -74,7 +74,7 @@ public interface AdminLeaveApi {
             @PageableDefault(size = 10, sort = "applicatedAt", direction = Sort.Direction.DESC) @ParameterObject Pageable pageable
     );
 
-    @Operation(summary = "승인된 휴가 수정", description = "승인된 휴가 정보를 수정하는 PATCH API")
+    @Operation(summary = "승인된 휴가 수정", description = "승인된 휴가 정보를 수정하는 PATCH API (시작일이 지나지 않은 휴가만 수정 가능)")
     @ApiResponses(
             value = {
                     @ApiResponse(
@@ -83,7 +83,7 @@ public interface AdminLeaveApi {
                     ),
                     @ApiResponse(
                             responseCode = "400",
-                            description = "승인된 휴가만 수정할 수 있습니다."
+                            description = "승인된 휴가만 수정할 수 있습니다. / 이미 지난 휴가는 수정할 수 없습니다."
                     ),
                     @ApiResponse(
                             responseCode = "404",
@@ -95,4 +95,19 @@ public interface AdminLeaveApi {
             @PathVariable long leaveId,
             AdminUpdateLeaveRequest request
     );
+
+    @Operation(summary = "휴가 삭제", description = "휴가를 삭제하는 DELETE API (승인된 휴가 삭제 시 휴가 일수 복원)")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "휴가 삭제 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "휴가 정보를 찾을 수 없습니다."
+                    )
+            }
+    )
+    ResponseEntity<Void> deleteLeave(@PathVariable long leaveId);
 }

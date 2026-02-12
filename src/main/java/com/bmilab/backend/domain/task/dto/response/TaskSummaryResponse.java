@@ -67,6 +67,9 @@ public record TaskSummaryResponse(
         @Schema(description = "김광수교수님 역할")
         TaskProfessorRole professorRole,
 
+        @Schema(description = "실무 책임자 ID")
+        Long practicalManagerId,
+
         @Schema(description = "실무 책임자 이름")
         String practicalManagerName,
 
@@ -105,6 +108,7 @@ public record TaskSummaryResponse(
                 task.getLeadProfessor(),
                 task.getSnuhPi(),
                 task.getProfessorRole(),
+                task.getPracticalManager().getId(),
                 task.getPracticalManager().getName(),
                 task.getParticipatingInstitutions(),
                 task.getIsInternal()

@@ -149,6 +149,10 @@ public class LeaveService {
             throw new ApiException(LeaveErrorCode.LEAVE_NOT_APPROVED);
         }
 
+        if (leave.getStartDate().isBefore(LocalDate.now())) {
+            throw new ApiException(LeaveErrorCode.LEAVE_ALREADY_PASSED);
+        }
+
         User user = leave.getUser();
         UserLeave userLeave = userLeaveRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new ApiException(LeaveErrorCode.USER_LEAVE_NOT_FOUND));
@@ -179,12 +183,45 @@ public class LeaveService {
         leave.update(startDate, request.endDate(), newType, newLeaveCount, request.reason());
     }
 
+    @Transactional
+    public void cancelLeaveByUser(Long userId, long leaveId) {
+        Leave leave = leaveRepository.findById(leaveId)
+                .orElseThrow(() -> new ApiException(LeaveErrorCode.LEAVE_NOT_FOUND));
+
+        if (!leave.getUser().getId().equals(userId)) {
+            throw new ApiException(LeaveErrorCode.ACCESS_DENIED);
+        }
+
+        if (!leave.isPending()) {
+            throw new ApiException(LeaveErrorCode.LEAVE_CANNOT_CANCEL_NOT_PENDING);
+        }
+
+        leaveRepository.delete(leave);
+    }
+
     public int countDatesByUserIdWithMonth(long userId, YearMonth yearMonth) {
         return leaveRepository.findAllByUserId(userId)
                 .stream()
                 .filter(Leave::isApproved)
                 .mapToInt((leave) -> leave.countDaysInYearMonth(yearMonth))
                 .sum();
+    }
+
+    @Transactional
+    public void deleteLeaveByAdmin(long leaveId) {
+        Leave leave = leaveRepository.findById(leaveId)
+                .orElseThrow(() -> new ApiException(LeaveErrorCode.LEAVE_NOT_FOUND));
+
+        // 승인된 휴가인 경우 휴가 일수 복원
+        if (leave.isApproved()) {
+            User user = leave.getUser();
+            UserLeave userLeave = userLeaveRepository.findByUserId(user.getId())
+                    .orElseThrow(() -> new ApiException(LeaveErrorCode.USER_LEAVE_NOT_FOUND));
+
+            userLeave.restoreLeave(leave.getLeaveCount(), leave.isAnnualLeave());
+        }
+
+        leaveRepository.delete(leave);
     }
 
     private void validateLeaveTypeAccessPermission(User user, LeaveType type) {

@@ -15,6 +15,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -66,6 +67,13 @@ public class AdminLeaveController implements AdminLeaveApi {
             @RequestBody @Valid AdminUpdateLeaveRequest request
     ) {
         leaveService.updateLeaveByAdmin(leaveId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @DeleteMapping("/{leaveId}")
+    public ResponseEntity<Void> deleteLeave(@PathVariable long leaveId) {
+        leaveService.deleteLeaveByAdmin(leaveId);
         return ResponseEntity.ok().build();
     }
 }

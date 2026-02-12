@@ -1,5 +1,6 @@
 package com.bmilab.backend.domain.research.paper.entity;
 
+import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.research.paper.enums.ProfessorRole;
 import com.bmilab.backend.domain.task.entity.Task;
 import com.bmilab.backend.global.entity.BaseTimeEntity;
@@ -73,8 +74,12 @@ public class Paper extends BaseTimeEntity {
     @JoinColumn(name = "task_id")
     private Task task;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id")
+    private Project project;
+
     @Builder
-    public Paper(LocalDate acceptDate, LocalDate publishDate, Journal journal, String paperTitle, String allAuthors, int authorCount, String firstAuthor, String coAuthors, String vol, String page, String paperLink, String doi, String pmid, Integer citations, ProfessorRole professorRole, Boolean isRepresentative, Task task) {
+    public Paper(LocalDate acceptDate, LocalDate publishDate, Journal journal, String paperTitle, String allAuthors, int authorCount, String firstAuthor, String coAuthors, String vol, String page, String paperLink, String doi, String pmid, Integer citations, ProfessorRole professorRole, Boolean isRepresentative, Task task, Project project) {
         this.acceptDate = acceptDate;
         this.publishDate = publishDate;
         this.journal = journal;
@@ -92,9 +97,10 @@ public class Paper extends BaseTimeEntity {
         this.professorRole = professorRole;
         this.isRepresentative = isRepresentative;
         this.task = task;
+        this.project = project;
     }
 
-    public void update(LocalDate acceptDate, LocalDate publishDate, Journal journal, String paperTitle, String allAuthors, int authorCount, String firstAuthor, String coAuthors, String vol, String page, String paperLink, String doi, String pmid, Integer citations, ProfessorRole professorRole, Boolean isRepresentative, Task task) {
+    public void update(LocalDate acceptDate, LocalDate publishDate, Journal journal, String paperTitle, String allAuthors, int authorCount, String firstAuthor, String coAuthors, String vol, String page, String paperLink, String doi, String pmid, Integer citations, ProfessorRole professorRole, Boolean isRepresentative, Task task, Project project) {
         this.acceptDate = acceptDate;
         this.publishDate = publishDate;
         this.journal = journal;
@@ -112,6 +118,7 @@ public class Paper extends BaseTimeEntity {
         this.professorRole = professorRole;
         this.isRepresentative = isRepresentative;
         this.task = task;
+        this.project = project;
     }
 
 }

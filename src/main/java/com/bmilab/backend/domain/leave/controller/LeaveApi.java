@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "Leave", description = "휴가 API")
@@ -61,5 +62,27 @@ public interface LeaveApi {
     ResponseEntity<Void> applyLeave(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             ApplyLeaveRequest request
+    );
+
+    @Operation(summary = "휴가 취소", description = "대기 상태인 휴가를 취소하는 DELETE API")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "취소 성공"
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "대기 상태인 휴가만 취소할 수 있습니다."
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "휴가 정보를 찾을 수 없습니다."
+                    )
+            }
+    )
+    ResponseEntity<Void> cancelLeave(
+            @AuthenticationPrincipal UserAuthInfo userAuthInfo,
+            @PathVariable long leaveId
     );
 }
