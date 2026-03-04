@@ -11,6 +11,7 @@ public enum PatentErrorCode implements ErrorCode {
 
     PATENT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 특허 정보를 찾을 수 없습니다."),
     PATENT_ACCESS_DENIED(HttpStatus.FORBIDDEN, "해당 특허 정보에 접근할 권한이 없습니다."),
+    INVALID_AUTHOR_REQUEST(HttpStatus.BAD_REQUEST, "발명자는 내부 사용자 또는 외부 인사 중 하나만 지정해야 합니다."),
     ;
 
     private final HttpStatus httpStatus;

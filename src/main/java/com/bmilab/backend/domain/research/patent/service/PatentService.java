@@ -3,7 +3,9 @@ package com.bmilab.backend.domain.research.patent.service;
 import com.bmilab.backend.domain.file.dto.response.FileSummary;
 import com.bmilab.backend.domain.file.enums.FileDomainType;
 import com.bmilab.backend.domain.file.service.FileService;
+import com.bmilab.backend.domain.project.entity.ExternalProfessor;
 import com.bmilab.backend.domain.project.entity.Project;
+import com.bmilab.backend.domain.project.repository.ExternalProfessorRepository;
 import com.bmilab.backend.domain.project.repository.ProjectRepository;
 import com.bmilab.backend.domain.research.patent.exception.PatentErrorCode;
 import com.bmilab.backend.domain.research.patent.dto.request.CreatePatentRequest;
@@ -15,9 +17,10 @@ import com.bmilab.backend.domain.research.patent.entity.Patent;
 import com.bmilab.backend.domain.research.patent.entity.PatentAuthor;
 import com.bmilab.backend.domain.research.patent.repository.PatentAuthorRepository;
 import com.bmilab.backend.domain.research.patent.repository.PatentRepository;
-import com.bmilab.backend.domain.research.service.AuthorSyncService;
 import com.bmilab.backend.domain.task.entity.Task;
 import com.bmilab.backend.domain.task.repository.TaskRepository;
+import com.bmilab.backend.domain.user.entity.User;
+import com.bmilab.backend.domain.user.repository.UserRepository;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.exception.GlobalErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +29,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -37,12 +43,14 @@ public class PatentService {
     private final PatentAuthorRepository patentAuthorRepository;
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
+    private final UserRepository userRepository;
+    private final ExternalProfessorRepository externalProfessorRepository;
     private final FileService fileService;
-    private final AuthorSyncService authorSyncService;
 
     public PatentResponse createPatent(CreatePatentRequest dto) {
-        Project project = projectRepository.findById(dto.projectId())
-                .orElseThrow(() -> new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND));
+        Project project = dto.projectId() != null
+                ? projectRepository.findById(dto.projectId()).orElseThrow(() -> new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND))
+                : null;
         Task task = dto.taskId() != null
                 ? taskRepository.findById(dto.taskId()).orElseThrow(() -> new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND))
                 : null;
@@ -63,17 +71,13 @@ public class PatentService {
                 .map(FileSummary::from)
                 .toList();
 
-        List<PatentAuthor> patentAuthors = authorSyncService.syncAuthors(
+        List<PatentAuthor> patentAuthors = syncPatentAuthors(
+                newPatent,
                 dto.patentAuthors(),
                 CreatePatentRequest.PatentAuthorRequest::userId,
-                CreatePatentRequest.PatentAuthorRequest::role,
-                (user, role) -> PatentAuthor.builder()
-                        .patent(newPatent)
-                        .user(user)
-                        .role(role)
-                        .build()
+                CreatePatentRequest.PatentAuthorRequest::externalProfessorId,
+                CreatePatentRequest.PatentAuthorRequest::role
         );
-        patentAuthors.forEach(patentAuthorRepository::save);
 
         return new PatentResponse(newPatent, patentAuthors, fileSummaries);
     }
@@ -102,8 +106,9 @@ public class PatentService {
     public PatentResponse updatePatent(Long patentId, UpdatePatentRequest dto) {
         Patent patent = patentRepository.findById(patentId)
                 .orElseThrow(() -> new ApiException(PatentErrorCode.PATENT_NOT_FOUND));
-        Project project = projectRepository.findById(dto.projectId())
-                .orElseThrow(() -> new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND));
+        Project project = dto.projectId() != null
+                ? projectRepository.findById(dto.projectId()).orElseThrow(() -> new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND))
+                : null;
         Task task = dto.taskId() != null
                 ? taskRepository.findById(dto.taskId()).orElseThrow(() -> new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND))
                 : null;
@@ -116,18 +121,14 @@ public class PatentService {
                 .toList();
 
         // Update PatentAuthors
-        patentAuthorRepository.deleteAllByPatentId(patentId); // Delete existing
-        List<PatentAuthor> patentAuthors = authorSyncService.syncAuthors(
+        patentAuthorRepository.deleteAllByPatentId(patentId);
+        List<PatentAuthor> patentAuthors = syncPatentAuthors(
+                patent,
                 dto.patentAuthors(),
                 UpdatePatentRequest.PatentAuthorRequest::userId,
-                UpdatePatentRequest.PatentAuthorRequest::role,
-                (user, role) -> PatentAuthor.builder()
-                        .patent(patent)
-                        .user(user)
-                        .role(role)
-                        .build()
+                UpdatePatentRequest.PatentAuthorRequest::externalProfessorId,
+                UpdatePatentRequest.PatentAuthorRequest::role
         );
-        patentAuthors.forEach(patentAuthorRepository::save);
 
         return new PatentResponse(patent, patentAuthors, fileSummaries);
     }
@@ -151,4 +152,68 @@ public class PatentService {
 
         return PatentFindAllResponse.of(patents, patentPage.getTotalPages());
     }
+
+    private <T> List<PatentAuthor> syncPatentAuthors(
+            Patent patent,
+            List<T> authorRequests,
+            java.util.function.Function<T, Long> userIdExtractor,
+            java.util.function.Function<T, Long> externalProfessorIdExtractor,
+            java.util.function.Function<T, String> roleExtractor
+    ) {
+        if (authorRequests == null || authorRequests.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 내부 사용자 ID 추출
+        List<Long> userIds = authorRequests.stream()
+                .map(userIdExtractor)
+                .filter(id -> id != null)
+                .collect(Collectors.toList());
+
+        // 외부 인사 ID 추출
+        List<Long> externalProfessorIds = authorRequests.stream()
+                .map(externalProfessorIdExtractor)
+                .filter(id -> id != null)
+                .collect(Collectors.toList());
+
+        // User 조회
+        Map<Long, User> userMap = userIds.isEmpty() ? Map.of() :
+                userRepository.findAllById(userIds).stream()
+                        .collect(Collectors.toMap(User::getId, user -> user));
+
+        // ExternalProfessor 조회
+        Map<Long, ExternalProfessor> externalProfessorMap = externalProfessorIds.isEmpty() ? Map.of() :
+                externalProfessorRepository.findAllById(externalProfessorIds).stream()
+                        .collect(Collectors.toMap(ExternalProfessor::getId, ep -> ep));
+
+        // 검증: 요청한 ID가 모두 존재하는지
+        if (userMap.size() != userIds.size() || externalProfessorMap.size() != externalProfessorIds.size()) {
+            throw new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND);
+        }
+
+        // PatentAuthor 생성
+        List<PatentAuthor> patentAuthors = new ArrayList<>();
+        for (T request : authorRequests) {
+            Long userId = userIdExtractor.apply(request);
+            Long externalProfessorId = externalProfessorIdExtractor.apply(request);
+            String role = roleExtractor.apply(request);
+
+            // userId와 externalProfessorId 중 하나만 있어야 함
+            if ((userId == null && externalProfessorId == null) || (userId != null && externalProfessorId != null)) {
+                throw new ApiException(PatentErrorCode.INVALID_AUTHOR_REQUEST);
+            }
+
+            PatentAuthor author = PatentAuthor.builder()
+                    .patent(patent)
+                    .user(userId != null ? userMap.get(userId) : null)
+                    .externalProfessor(externalProfessorId != null ? externalProfessorMap.get(externalProfessorId) : null)
+                    .role(role)
+                    .build();
+            patentAuthorRepository.save(author);
+            patentAuthors.add(author);
+        }
+
+        return patentAuthors;
+    }
+
 }

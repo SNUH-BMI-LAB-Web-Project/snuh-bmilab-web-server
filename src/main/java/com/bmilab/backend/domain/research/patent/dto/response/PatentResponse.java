@@ -29,10 +29,10 @@ public record PatentResponse(
                 patent.getApplicationNumber(),
                 patent.getPatentName(),
                 patent.getApplicantsAll(),
-                patentAuthors.stream().map(PatentAuthorResponse::new).collect(Collectors.toList()),
+                patentAuthors.stream().map(PatentAuthorResponse::from).collect(Collectors.toList()),
                 patent.getRemarks(),
-                patent.getProject().getId(),
-                patent.getProject().getTitle(),
+                patent.getProject() != null ? patent.getProject().getId() : null,
+                patent.getProject() != null ? patent.getProject().getTitle() : null,
                 patent.getTask() != null ? patent.getTask().getId() : null,
                 patent.getTask() != null ? patent.getTask().getTitle() : null,
                 files
@@ -42,13 +42,19 @@ public record PatentResponse(
     public record PatentAuthorResponse(
             Long userId,
             String userName,
-            String role
+            Long externalProfessorId,
+            String externalProfessorName,
+            String role,
+            boolean isInternal
     ) {
-        public PatentAuthorResponse(PatentAuthor patentAuthor) {
-            this(
-                    patentAuthor.getUser().getId(),
-                    patentAuthor.getUser().getName(),
-                    patentAuthor.getRole()
+        public static PatentAuthorResponse from(PatentAuthor patentAuthor) {
+            return new PatentAuthorResponse(
+                    patentAuthor.getUser() != null ? patentAuthor.getUser().getId() : null,
+                    patentAuthor.getUser() != null ? patentAuthor.getUser().getName() : null,
+                    patentAuthor.getExternalProfessor() != null ? patentAuthor.getExternalProfessor().getId() : null,
+                    patentAuthor.getExternalProfessor() != null ? patentAuthor.getExternalProfessor().getName() : null,
+                    patentAuthor.getRole(),
+                    patentAuthor.isInternal()
             );
         }
     }

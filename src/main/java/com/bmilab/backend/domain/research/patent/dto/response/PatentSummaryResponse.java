@@ -42,10 +42,10 @@ public record PatentSummaryResponse(
                 patent.getApplicationNumber(),
                 patent.getPatentName(),
                 patent.getApplicantsAll(),
-                patentAuthors.stream().map(PatentResponse.PatentAuthorResponse::new).collect(Collectors.toList()),
+                patentAuthors.stream().map(PatentResponse.PatentAuthorResponse::from).collect(Collectors.toList()),
                 patent.getRemarks(),
-                patent.getProject().getId(),
-                patent.getProject().getTitle(),
+                patent.getProject() != null ? patent.getProject().getId() : null,
+                patent.getProject() != null ? patent.getProject().getTitle() : null,
                 patent.getTask() != null ? patent.getTask().getId() : null,
                 patent.getTask() != null ? patent.getTask().getTitle() : null,
                 files
