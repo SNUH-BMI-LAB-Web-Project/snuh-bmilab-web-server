@@ -2,6 +2,7 @@ package com.bmilab.backend.domain.task.dto.response;
 
 import com.bmilab.backend.domain.file.dto.response.FileSummary;
 import com.bmilab.backend.domain.task.entity.TaskBasicInfo;
+import com.bmilab.backend.domain.task.enums.ThreeFiveRuleType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
@@ -39,7 +40,7 @@ public record TaskBasicInfoResponse(
         String announcementLink,
 
         @Schema(description = "3책5공")
-        Boolean threeFiveRule,
+        ThreeFiveRuleType threeFiveRule,
 
         @Schema(description = "과제제안요구서(RFP) 파일")
         List<FileSummary> rfpFiles,
@@ -50,7 +51,7 @@ public record TaskBasicInfoResponse(
         @Schema(description = "연차별 목록")
         List<TaskPeriodResponse> periods
 ) {
-    public static TaskBasicInfoResponse from(TaskBasicInfo basicInfo, LocalDate announcementStartDate, LocalDate announcementEndDate, Boolean threeFiveRule, List<FileSummary> rfpFiles, List<FileSummary> announcementFiles, List<TaskPeriodResponse> periods) {
+    public static TaskBasicInfoResponse from(TaskBasicInfo basicInfo, LocalDate announcementStartDate, LocalDate announcementEndDate, ThreeFiveRuleType threeFiveRule, List<FileSummary> rfpFiles, List<FileSummary> announcementFiles, List<TaskPeriodResponse> periods) {
         return new TaskBasicInfoResponse(
                 basicInfo != null ? basicInfo.getMinistry() : null,
                 basicInfo != null ? basicInfo.getSpecializedAgency() : null,

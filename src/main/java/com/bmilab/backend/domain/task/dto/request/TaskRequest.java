@@ -3,6 +3,7 @@ package com.bmilab.backend.domain.task.dto.request;
 import com.bmilab.backend.domain.task.enums.TaskProfessorRole;
 import com.bmilab.backend.domain.task.enums.TaskStatus;
 import com.bmilab.backend.domain.task.enums.TaskSupportType;
+import com.bmilab.backend.domain.task.enums.ThreeFiveRuleType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -39,9 +40,9 @@ public record TaskRequest(
         @NotNull(message = "연구과제지원은 필수입니다.")
         TaskSupportType supportType,
 
-        @Schema(description = "3책5공 포함 여부", example = "true")
-        @NotNull(message = "3책5공 포함 여부는 필수입니다.")
-        Boolean threeFiveRule,
+        @Schema(description = "3책5공", example = "RESPONSIBLE")
+        @NotNull(message = "3책5공은 필수입니다.")
+        ThreeFiveRuleType threeFiveRule,
 
         @Schema(description = "총 연차", example = "3")
         @NotNull(message = "총 연차는 필수입니다.")

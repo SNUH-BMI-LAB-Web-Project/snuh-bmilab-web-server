@@ -4,6 +4,7 @@ import com.bmilab.backend.domain.task.entity.Task;
 import com.bmilab.backend.domain.task.enums.TaskProfessorRole;
 import com.bmilab.backend.domain.task.enums.TaskStatus;
 import com.bmilab.backend.domain.task.enums.TaskSupportType;
+import com.bmilab.backend.domain.task.enums.ThreeFiveRuleType;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDate;
@@ -37,8 +38,8 @@ public record TaskSummaryResponse(
         @Schema(description = "연구과제지원")
         TaskSupportType supportType,
 
-        @Schema(description = "삼책오공")
-        Boolean threeFiveRule,
+        @Schema(description = "3책5공")
+        ThreeFiveRuleType threeFiveRule,
 
         @Schema(description = "총 연차")
         Integer totalYears,
