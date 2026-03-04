@@ -1,4 +1,4 @@
-1package com.bmilab.backend.domain.project.controller;
+package com.bmilab.backend.domain.project.controller;
 
 import com.bmilab.backend.domain.project.dto.request.ProjectCompleteRequest;
 import com.bmilab.backend.domain.project.dto.request.ProjectRequest;
