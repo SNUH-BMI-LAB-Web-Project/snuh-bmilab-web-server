@@ -109,6 +109,12 @@ public class PaperService {
             List<Long> externalProfessorIds = dto.correspondingAuthors().stream()
                     .map(CreatePaperRequest.PaperCorrespondingAuthorRequest::externalProfessorId)
                     .collect(Collectors.toList());
+
+            // 교신저자 중복 체크
+            if (externalProfessorIds.size() != externalProfessorIds.stream().distinct().count()) {
+                throw new ApiException(PaperErrorCode.DUPLICATE_CORRESPONDING_AUTHOR);
+            }
+
             List<ExternalProfessor> externalProfessors = externalProfessorRepository.findAllById(externalProfessorIds);
             if (externalProfessors.size() != externalProfessorIds.size()) {
                 throw new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND);
@@ -174,6 +180,12 @@ public class PaperService {
             List<Long> externalProfessorIds = dto.correspondingAuthors().stream()
                     .map(UpdatePaperRequest.PaperCorrespondingAuthorRequest::externalProfessorId)
                     .collect(Collectors.toList());
+
+            // 교신저자 중복 체크
+            if (externalProfessorIds.size() != externalProfessorIds.stream().distinct().count()) {
+                throw new ApiException(PaperErrorCode.DUPLICATE_CORRESPONDING_AUTHOR);
+            }
+
             List<ExternalProfessor> externalProfessors = externalProfessorRepository.findAllById(externalProfessorIds);
             if (externalProfessors.size() != externalProfessorIds.size()) {
                 throw new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND);
