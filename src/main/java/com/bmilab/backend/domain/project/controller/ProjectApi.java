@@ -1,4 +1,4 @@
-package com.bmilab.backend.domain.project.controller;
+1package com.bmilab.backend.domain.project.controller;
 
 import com.bmilab.backend.domain.project.dto.request.ProjectCompleteRequest;
 import com.bmilab.backend.domain.project.dto.request.ProjectRequest;
@@ -234,17 +234,17 @@ public interface ProjectApi {
             @RequestParam(required = false) String keyword
     );
 
-    @Operation(summary = "외부교수 목록 조회", description = "사용자가 연구 생성/수정할 때 외부교수 목록을 조회하는 GET API")
+    @Operation(summary = "외부교수 목록 조회", description = "사용자가 연구 생성/수정할 때 외부교수 목록을 조회하는 GET API. 이름, 기관, 부서로 통합 검색 가능")
     @ApiResponses(
             value = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "내 연구 조회 성공"
+                            description = "외부교수 조회 성공"
                     )
             }
     )
     ResponseEntity<ExternalProfessorFindAllResponse> getExternalProfessors(
-            @RequestParam(required = false) String name
+            @RequestParam(required = false) String keyword
     );
 
     @Operation(summary = "사용자 연구 조회", description = "사용자 ID로 사용자가 참여하는 연구 목록을 조회하는 GET API")

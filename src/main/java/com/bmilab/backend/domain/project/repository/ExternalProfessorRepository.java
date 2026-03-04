@@ -10,10 +10,12 @@ public interface ExternalProfessorRepository extends JpaRepository<ExternalProfe
 
     List<ExternalProfessor> findAllByOrderByNameAsc();
 
-    @Query("select ex from ExternalProfessor ex where :name is null "
-            + "or :name = '' "
-            + "or ex.name like concat('%', :name, '%')")
-    List<ExternalProfessor> findAllByNameContaining(String name);
+    @Query("select ex from ExternalProfessor ex where :keyword is null "
+            + "or :keyword = '' "
+            + "or ex.name like concat('%', :keyword, '%') "
+            + "or ex.organization like concat('%', :keyword, '%') "
+            + "or ex.department like concat('%', :keyword, '%')")
+    List<ExternalProfessor> findAllByKeyword(String keyword);
 
     boolean existsByNameAndOrganizationAndDepartmentAndPosition(String name, String organization, String department, String position);
 }

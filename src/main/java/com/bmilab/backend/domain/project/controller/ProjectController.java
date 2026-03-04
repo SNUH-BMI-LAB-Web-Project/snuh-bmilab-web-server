@@ -168,10 +168,9 @@ public class ProjectController implements ProjectApi {
 
     @GetMapping("/external-professors")
     public ResponseEntity<ExternalProfessorFindAllResponse> getExternalProfessors(
-            @RequestParam(required = false) String name
+            @RequestParam(required = false) String keyword
     ) {
-
-        return ResponseEntity.ok(projectService.getExternalProfessorsByName(name));
+        return ResponseEntity.ok(projectService.getExternalProfessorsByKeyword(keyword));
     }
 
 
