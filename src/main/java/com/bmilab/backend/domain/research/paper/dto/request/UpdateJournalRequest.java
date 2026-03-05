@@ -10,6 +10,10 @@ public record UpdateJournalRequest(
         @NotBlank(message = "저널명은 필수입니다.")
         String journalName,
 
+        @Schema(description = "년도", example = "2025")
+        @NotNull(message = "년도는 필수입니다.")
+        Integer year,
+
         @Schema(description = "저널 분류", example = "SCI")
         @NotNull(message = "저널 분류는 필수입니다.")
         JournalCategory category,

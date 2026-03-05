@@ -24,13 +24,12 @@ public class Paper extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
     private LocalDate acceptDate;
 
     private LocalDate publishDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "journal_id", nullable = false)
+    @JoinColumn(name = "journal_id")
     private Journal journal;
 
     @Column(nullable = false)

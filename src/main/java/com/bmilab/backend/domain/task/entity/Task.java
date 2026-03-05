@@ -3,6 +3,7 @@ package com.bmilab.backend.domain.task.entity;
 import com.bmilab.backend.domain.task.enums.TaskProfessorRole;
 import com.bmilab.backend.domain.task.enums.TaskStatus;
 import com.bmilab.backend.domain.task.enums.TaskSupportType;
+import com.bmilab.backend.domain.task.enums.ThreeFiveRuleType;
 import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.global.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
@@ -64,8 +65,9 @@ public class Task extends BaseTimeEntity {
     @Column(name = "support_type", nullable = false)
     private TaskSupportType supportType;
 
-    @Column(name = "three_five_rule", columnDefinition = "TINYINT(1)", nullable = false)
-    private Boolean threeFiveRule;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "three_five_rule", nullable = false)
+    private ThreeFiveRuleType threeFiveRule;
 
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
@@ -112,7 +114,7 @@ public class Task extends BaseTimeEntity {
             String businessName,
             String issuingAgency,
             TaskSupportType supportType,
-            Boolean threeFiveRule,
+            ThreeFiveRuleType threeFiveRule,
             LocalDate startDate,
             LocalDate endDate,
             Integer totalYears,

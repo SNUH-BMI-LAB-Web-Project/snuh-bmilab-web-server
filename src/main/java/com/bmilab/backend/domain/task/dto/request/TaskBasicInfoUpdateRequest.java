@@ -1,5 +1,6 @@
 package com.bmilab.backend.domain.task.dto.request;
 
+import com.bmilab.backend.domain.task.enums.ThreeFiveRuleType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -18,8 +19,8 @@ public record TaskBasicInfoUpdateRequest(
         @Schema(description = "공고번호", example = "RFP-2025-001")
         String announcementNumber,
 
-        @Schema(description = "3책5공", example = "true")
-        Boolean threeFiveRule,
+        @Schema(description = "3책5공", example = "RESPONSIBLE")
+        ThreeFiveRuleType threeFiveRule,
 
         @Schema(description = "공고 시작일", example = "2025-02-01")
         @DateTimeFormat(pattern = "yyyy-MM-dd")

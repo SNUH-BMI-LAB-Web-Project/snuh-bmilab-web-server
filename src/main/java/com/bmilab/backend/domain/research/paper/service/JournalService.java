@@ -27,6 +27,7 @@ public class JournalService {
     public JournalResponse createJournal(CreateJournalRequest dto) {
         Journal newJournal = Journal.builder()
                 .journalName(dto.journalName())
+                .year(dto.year())
                 .category(dto.category())
                 .publisher(dto.publisher())
                 .publishCountry(dto.publishCountry())
@@ -60,6 +61,7 @@ public class JournalService {
                 .orElseThrow(() -> new ApiException(PaperErrorCode.JOURNAL_NOT_FOUND));
         journal.update(
                 dto.journalName(),
+                dto.year(),
                 dto.category(),
                 dto.publisher(),
                 dto.publishCountry(),

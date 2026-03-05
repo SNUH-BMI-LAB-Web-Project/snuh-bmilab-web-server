@@ -55,8 +55,9 @@ public class PaperService {
     private final AuthorSyncService authorSyncService;
 
     public PaperResponse createPaper(CreatePaperRequest dto) {
-        Journal journal = journalRepository.findById(dto.journalId())
-                .orElseThrow(() -> new ApiException(PaperErrorCode.JOURNAL_NOT_FOUND));
+        Journal journal = dto.journalId() != null
+                ? journalRepository.findById(dto.journalId()).orElseThrow(() -> new ApiException(PaperErrorCode.JOURNAL_NOT_FOUND))
+                : null;
         Task task = dto.taskId() != null
                 ? taskRepository.findById(dto.taskId()).orElseThrow(() -> new ApiException(TaskErrorCode.TASK_NOT_FOUND))
                 : null;
@@ -109,6 +110,12 @@ public class PaperService {
             List<Long> externalProfessorIds = dto.correspondingAuthors().stream()
                     .map(CreatePaperRequest.PaperCorrespondingAuthorRequest::externalProfessorId)
                     .collect(Collectors.toList());
+
+            // 교신저자 중복 체크
+            if (externalProfessorIds.size() != externalProfessorIds.stream().distinct().count()) {
+                throw new ApiException(PaperErrorCode.DUPLICATE_CORRESPONDING_AUTHOR);
+            }
+
             List<ExternalProfessor> externalProfessors = externalProfessorRepository.findAllById(externalProfessorIds);
             if (externalProfessors.size() != externalProfessorIds.size()) {
                 throw new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND);
@@ -157,8 +164,9 @@ public class PaperService {
     public PaperResponse updatePaper(Long paperId, UpdatePaperRequest dto) {
         Paper paper = paperRepository.findById(paperId)
                 .orElseThrow(() -> new ApiException(PaperErrorCode.PAPER_NOT_FOUND));
-        Journal journal = journalRepository.findById(dto.journalId())
-                .orElseThrow(() -> new ApiException(PaperErrorCode.JOURNAL_NOT_FOUND));
+        Journal journal = dto.journalId() != null
+                ? journalRepository.findById(dto.journalId()).orElseThrow(() -> new ApiException(PaperErrorCode.JOURNAL_NOT_FOUND))
+                : null;
         Task task = dto.taskId() != null
                 ? taskRepository.findById(dto.taskId()).orElseThrow(() -> new ApiException(TaskErrorCode.TASK_NOT_FOUND))
                 : null;
@@ -174,6 +182,12 @@ public class PaperService {
             List<Long> externalProfessorIds = dto.correspondingAuthors().stream()
                     .map(UpdatePaperRequest.PaperCorrespondingAuthorRequest::externalProfessorId)
                     .collect(Collectors.toList());
+
+            // 교신저자 중복 체크
+            if (externalProfessorIds.size() != externalProfessorIds.stream().distinct().count()) {
+                throw new ApiException(PaperErrorCode.DUPLICATE_CORRESPONDING_AUTHOR);
+            }
+
             List<ExternalProfessor> externalProfessors = externalProfessorRepository.findAllById(externalProfessorIds);
             if (externalProfessors.size() != externalProfessorIds.size()) {
                 throw new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND);

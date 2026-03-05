@@ -528,8 +528,8 @@ public class ProjectService {
         externalProfessorRepository.delete(externalProfessor);
     }
 
-    public ExternalProfessorFindAllResponse getExternalProfessorsByName(String name) {
-        List<ExternalProfessor> externalProfessors = externalProfessorRepository.findAllByNameContaining(name);
+    public ExternalProfessorFindAllResponse getExternalProfessorsByKeyword(String keyword) {
+        List<ExternalProfessor> externalProfessors = externalProfessorRepository.findAllByKeyword(keyword);
 
         return ExternalProfessorFindAllResponse.of(externalProfessors);
     }

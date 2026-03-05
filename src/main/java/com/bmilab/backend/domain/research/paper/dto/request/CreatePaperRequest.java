@@ -2,6 +2,7 @@ package com.bmilab.backend.domain.research.paper.dto.request;
 
 import com.bmilab.backend.domain.research.paper.enums.ProfessorRole;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -11,6 +12,7 @@ public record CreatePaperRequest(
         @Schema(description = "Accept 날짜", example = "2025-10-20")
         LocalDate acceptDate,
         @Schema(description = "Publish 날짜", example = "2025-12-05")
+        @NotNull(message = "Publish 날짜는 필수입니다.")
         LocalDate publishDate,
         @Schema(description = "저널 ID", example = "1")
         Long journalId,

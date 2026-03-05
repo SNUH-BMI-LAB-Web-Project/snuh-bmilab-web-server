@@ -11,6 +11,9 @@ public record JournalSummaryResponse(
         @Schema(description = "저널명")
         String journalName,
 
+        @Schema(description = "년도")
+        Integer year,
+
         @Schema(description = "저널 분류")
         JournalCategory category,
 
@@ -42,6 +45,7 @@ public record JournalSummaryResponse(
         return new JournalSummaryResponse(
                 journal.getId(),
                 journal.getJournalName(),
+                journal.getYear(),
                 journal.getCategory(),
                 journal.getPublisher(),
                 journal.getPublishCountry(),
