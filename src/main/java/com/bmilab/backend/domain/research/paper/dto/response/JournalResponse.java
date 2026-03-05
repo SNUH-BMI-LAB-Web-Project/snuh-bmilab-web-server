@@ -42,6 +42,9 @@ public record JournalResponse(
         String issue
 ) {
     public static JournalResponse from(Journal journal) {
+        if (journal == null) {
+            return null;
+        }
         return new JournalResponse(
                 journal.getId(),
                 journal.getJournalName(),
