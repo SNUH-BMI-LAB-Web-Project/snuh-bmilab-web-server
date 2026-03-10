@@ -30,7 +30,7 @@ public class PresentationController implements PresentationApi {
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestBody @Valid CreateAcademicPresentationRequest request
     ) {
-        AcademicPresentationResponse response = presentationService.createAcademicPresentation(request);
+        AcademicPresentationResponse response = presentationService.createAcademicPresentation(userAuthInfo.getUserId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -40,7 +40,8 @@ public class PresentationController implements PresentationApi {
             @PathVariable Long academicPresentationId,
             @RequestBody @Valid UpdateAcademicPresentationRequest request
     ) {
-        AcademicPresentationResponse response = presentationService.updateAcademicPresentation(academicPresentationId, request);
+        boolean isAdmin = userAuthInfo.getUser().getRole() == Role.ADMIN;
+        AcademicPresentationResponse response = presentationService.updateAcademicPresentation(userAuthInfo.getUserId(), isAdmin, academicPresentationId, request);
         return ResponseEntity.ok(response);
     }
 

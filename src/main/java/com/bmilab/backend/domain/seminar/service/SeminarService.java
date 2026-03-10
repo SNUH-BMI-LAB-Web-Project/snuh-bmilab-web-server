@@ -64,9 +64,8 @@ public class SeminarService {
     }
 
     @Transactional
-    public void updateSeminar(Long userId, Long seminarId, UpdateSeminarRequest request) {
+    public void updateSeminar(Long seminarId, UpdateSeminarRequest request) {
         Seminar seminar = getSeminar(seminarId);
-        validateOwnerOrAdmin(userId, seminar);
 
         seminar.update(
                 request.label(),
@@ -78,9 +77,8 @@ public class SeminarService {
     }
 
     @Transactional
-    public void deleteSeminar(Long userId, Long seminarId) {
+    public void deleteSeminar(Long seminarId) {
         Seminar seminar = getSeminar(seminarId);
-        validateOwnerOrAdmin(userId, seminar);
 
         seminarRepository.delete(seminar);
     }
@@ -88,12 +86,5 @@ public class SeminarService {
     private Seminar getSeminar(Long seminarId) {
         return seminarRepository.findById(seminarId)
                 .orElseThrow(() -> new ApiException(SeminarErrorCode.SEMINAR_NOT_FOUND));
-    }
-
-    private void validateOwnerOrAdmin(Long userId, Seminar seminar) {
-        User user = userService.findUserById(userId);
-        if (!seminar.getUser().getId().equals(userId) && !user.isAdmin()) {
-            throw new ApiException(SeminarErrorCode.ACCESS_DENIED);
-        }
     }
 }

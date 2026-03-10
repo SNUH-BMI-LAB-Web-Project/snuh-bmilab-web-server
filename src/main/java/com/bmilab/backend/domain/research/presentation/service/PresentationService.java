@@ -15,6 +15,8 @@ import com.bmilab.backend.domain.research.presentation.repository.AcademicPresen
 import com.bmilab.backend.domain.research.service.AuthorSyncService;
 import com.bmilab.backend.domain.task.entity.Task;
 import com.bmilab.backend.domain.task.repository.TaskRepository;
+import com.bmilab.backend.domain.user.entity.User;
+import com.bmilab.backend.domain.user.repository.UserRepository;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.exception.GlobalErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -35,8 +37,11 @@ public class PresentationService {
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
     private final AuthorSyncService authorSyncService;
+    private final UserRepository userRepository;
 
-    public AcademicPresentationResponse createAcademicPresentation(CreateAcademicPresentationRequest dto) {
+    public AcademicPresentationResponse createAcademicPresentation(Long userId, CreateAcademicPresentationRequest dto) {
+        User creator = userRepository.findById(userId)
+                .orElseThrow(() -> new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND));
         Project project = projectRepository.findById(dto.projectId())
                 .orElseThrow(() -> new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND));
         Task task = null;
@@ -55,6 +60,7 @@ public class PresentationService {
                 .presentationTitle(dto.presentationTitle())
                 .project(project)
                 .task(task)
+                .createdBy(creator)
                 .build();
         academicPresentationRepository.save(newAcademicPresentation);
 
@@ -75,9 +81,9 @@ public class PresentationService {
     }
 
     public void deleteAcademicPresentation(Long userId, boolean isAdmin, Long academicPresentationId) {
-        if (!isAdmin) {
-            throw new ApiException(PresentationErrorCode.ACADEMIC_PRESENTATION_ACCESS_DENIED);
-        }
+        AcademicPresentation presentation = academicPresentationRepository.findById(academicPresentationId)
+                .orElseThrow(() -> new ApiException(PresentationErrorCode.ACADEMIC_PRESENTATION_NOT_FOUND));
+        validateAdminOrCreator(userId, isAdmin, presentation.getCreatedBy());
         academicPresentationAuthorRepository.deleteAllByAcademicPresentationId(academicPresentationId);
         academicPresentationRepository.deleteById(academicPresentationId);
     }
@@ -90,9 +96,10 @@ public class PresentationService {
         return new AcademicPresentationResponse(academicPresentation, authors);
     }
 
-    public AcademicPresentationResponse updateAcademicPresentation(Long academicPresentationId, UpdateAcademicPresentationRequest dto) {
+    public AcademicPresentationResponse updateAcademicPresentation(Long userId, boolean isAdmin, Long academicPresentationId, UpdateAcademicPresentationRequest dto) {
         AcademicPresentation academicPresentation = academicPresentationRepository.findById(academicPresentationId)
                 .orElseThrow(() -> new ApiException(PresentationErrorCode.ACADEMIC_PRESENTATION_NOT_FOUND));
+        validateAdminOrCreator(userId, isAdmin, academicPresentation.getCreatedBy());
         Project project = projectRepository.findById(dto.projectId())
                 .orElseThrow(() -> new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND));
         Task task = null;
@@ -132,5 +139,11 @@ public class PresentationService {
                 .toList();
 
         return AcademicPresentationFindAllResponse.of(presentations, presentationPage.getTotalPages());
+    }
+
+    private void validateAdminOrCreator(Long userId, boolean isAdmin, User createdBy) {
+        if (!isAdmin && (createdBy == null || !createdBy.getId().equals(userId))) {
+            throw new ApiException(PresentationErrorCode.ACADEMIC_PRESENTATION_ACCESS_DENIED);
+        }
     }
 }

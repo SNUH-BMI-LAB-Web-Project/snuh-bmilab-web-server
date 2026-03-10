@@ -30,7 +30,7 @@ public class PaperController implements PaperApi {
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestBody @Valid CreatePaperRequest request
     ) {
-        PaperResponse response = paperService.createPaper(request);
+        PaperResponse response = paperService.createPaper(userAuthInfo.getUserId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -40,7 +40,8 @@ public class PaperController implements PaperApi {
             @PathVariable Long paperId,
             @RequestBody @Valid UpdatePaperRequest request
     ) {
-        PaperResponse response = paperService.updatePaper(paperId, request);
+        boolean isAdmin = userAuthInfo.getUser().getRole() == Role.ADMIN;
+        PaperResponse response = paperService.updatePaper(userAuthInfo.getUserId(), isAdmin, paperId, request);
         return ResponseEntity.ok(response);
     }
 

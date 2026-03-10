@@ -76,7 +76,7 @@ public class SeminarController implements SeminarApi {
             @PathVariable Long seminarId,
             @RequestBody @Valid UpdateSeminarRequest request
     ) {
-        seminarService.updateSeminar(userAuthInfo.getUserId(), seminarId, request);
+        seminarService.updateSeminar(seminarId, request);
         return ResponseEntity.ok().build();
     }
 
@@ -86,7 +86,7 @@ public class SeminarController implements SeminarApi {
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @PathVariable Long seminarId
     ) {
-        seminarService.deleteSeminar(userAuthInfo.getUserId(), seminarId);
+        seminarService.deleteSeminar(seminarId);
         return ResponseEntity.ok().build();
     }
 }

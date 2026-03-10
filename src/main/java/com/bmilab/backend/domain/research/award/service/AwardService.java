@@ -15,6 +15,8 @@ import com.bmilab.backend.domain.research.award.exception.AwardErrorCode;
 import com.bmilab.backend.domain.research.service.AuthorSyncService;
 import com.bmilab.backend.domain.task.entity.Task;
 import com.bmilab.backend.domain.task.repository.TaskRepository;
+import com.bmilab.backend.domain.user.entity.User;
+import com.bmilab.backend.domain.user.repository.UserRepository;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.exception.GlobalErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -35,8 +37,11 @@ public class AwardService {
     private final ProjectRepository projectRepository;
     private final TaskRepository taskRepository;
     private final AuthorSyncService authorSyncService;
+    private final UserRepository userRepository;
 
-    public AwardResponse createAward(CreateAwardRequest dto) {
+    public AwardResponse createAward(Long userId, CreateAwardRequest dto) {
+        User creator = userRepository.findById(userId)
+                .orElseThrow(() -> new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND));
         Project project = projectRepository.findById(dto.projectId())
                 .orElseThrow(() -> new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND));
         Task task = dto.taskId() != null
@@ -51,6 +56,7 @@ public class AwardService {
                 .presentationTitle(dto.presentationTitle())
                 .project(project)
                 .task(task)
+                .createdBy(creator)
                 .build();
         awardRepository.save(newAward);
 
@@ -71,9 +77,9 @@ public class AwardService {
     }
 
     public void deleteAward(Long userId, boolean isAdmin, Long awardId) {
-        if (!isAdmin) {
-            throw new ApiException(AwardErrorCode.AWARD_ACCESS_DENIED);
-        }
+        Award award = awardRepository.findById(awardId)
+                .orElseThrow(() -> new ApiException(AwardErrorCode.AWARD_NOT_FOUND));
+        validateAdminOrCreator(userId, isAdmin, award.getCreatedBy());
         awardRecipientRepository.deleteAllByAwardId(awardId);
         awardRepository.deleteById(awardId);
     }
@@ -86,9 +92,10 @@ public class AwardService {
         return new AwardResponse(award, recipients);
     }
 
-    public AwardResponse updateAward(Long awardId, UpdateAwardRequest dto) {
+    public AwardResponse updateAward(Long userId, boolean isAdmin, Long awardId, UpdateAwardRequest dto) {
         Award award = awardRepository.findById(awardId)
                 .orElseThrow(() -> new ApiException(AwardErrorCode.AWARD_NOT_FOUND));
+        validateAdminOrCreator(userId, isAdmin, award.getCreatedBy());
         Project project = projectRepository.findById(dto.projectId())
                 .orElseThrow(() -> new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND));
         Task task = dto.taskId() != null
@@ -126,5 +133,11 @@ public class AwardService {
                 .toList();
 
         return AwardFindAllResponse.of(awards, awardPage.getTotalPages());
+    }
+
+    private void validateAdminOrCreator(Long userId, boolean isAdmin, User createdBy) {
+        if (!isAdmin && (createdBy == null || !createdBy.getId().equals(userId))) {
+            throw new ApiException(AwardErrorCode.AWARD_ACCESS_DENIED);
+        }
     }
 }

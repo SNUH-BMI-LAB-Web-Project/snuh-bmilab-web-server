@@ -1,6 +1,7 @@
 package com.bmilab.backend.domain.research.publication.entity;
 
 import com.bmilab.backend.domain.research.publication.enums.AuthorType;
+import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.global.entity.BaseTimeEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -45,8 +46,12 @@ public class Author extends BaseTimeEntity {
     @Column(nullable = false)
     private String isbn;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private User createdBy;
+
     @Builder
-    public Author(String authors, AuthorType authorType, LocalDate publicationDate, String publicationHouse, String publisher, String publicationName, String title, String isbn) {
+    public Author(String authors, AuthorType authorType, LocalDate publicationDate, String publicationHouse, String publisher, String publicationName, String title, String isbn, User createdBy) {
         this.authors = authors;
         this.authorType = authorType;
         this.publicationDate = publicationDate;
@@ -55,6 +60,7 @@ public class Author extends BaseTimeEntity {
         this.publicationName = publicationName;
         this.title = title;
         this.isbn = isbn;
+        this.createdBy = createdBy;
     }
 
     public void update(String authors, AuthorType authorType, LocalDate publicationDate, String publicationHouse, String publisher, String publicationName, String title, String isbn) {

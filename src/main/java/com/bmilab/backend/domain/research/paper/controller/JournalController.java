@@ -30,7 +30,8 @@ public class JournalController implements JournalApi {
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestBody @Valid CreateJournalRequest request
     ) {
-        JournalResponse response = journalService.createJournal(request);
+        boolean isAdmin = userAuthInfo.getUser().getRole() == Role.ADMIN;
+        JournalResponse response = journalService.createJournal(isAdmin, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -40,7 +41,8 @@ public class JournalController implements JournalApi {
             @PathVariable Long journalId,
             @RequestBody @Valid UpdateJournalRequest request
     ) {
-        JournalResponse response = journalService.updateJournal(journalId, request);
+        boolean isAdmin = userAuthInfo.getUser().getRole() == Role.ADMIN;
+        JournalResponse response = journalService.updateJournal(isAdmin, journalId, request);
         return ResponseEntity.ok(response);
     }
 

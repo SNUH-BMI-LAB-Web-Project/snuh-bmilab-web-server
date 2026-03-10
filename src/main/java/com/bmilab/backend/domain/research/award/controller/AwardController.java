@@ -30,7 +30,7 @@ public class AwardController implements AwardApi {
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestBody @Valid CreateAwardRequest request
     ) {
-        AwardResponse response = awardService.createAward(request);
+        AwardResponse response = awardService.createAward(userAuthInfo.getUserId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -40,7 +40,8 @@ public class AwardController implements AwardApi {
             @PathVariable Long awardId,
             @RequestBody @Valid UpdateAwardRequest request
     ) {
-        AwardResponse response = awardService.updateAward(awardId, request);
+        boolean isAdmin = userAuthInfo.getUser().getRole() == Role.ADMIN;
+        AwardResponse response = awardService.updateAward(userAuthInfo.getUserId(), isAdmin, awardId, request);
         return ResponseEntity.ok(response);
     }
 

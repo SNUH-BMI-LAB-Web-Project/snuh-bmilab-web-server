@@ -63,7 +63,6 @@ public interface SeminarApi {
     @Operation(summary = "세미나/학회 일정 수정", description = "세미나/학회 일정을 수정하는 PUT API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "수정 성공"),
-            @ApiResponse(responseCode = "403", description = "수정/삭제 권한이 없습니다."),
             @ApiResponse(responseCode = "404", description = "세미나/학회 일정을 찾을 수 없습니다.")
     })
     ResponseEntity<Void> updateSeminar(
@@ -75,7 +74,6 @@ public interface SeminarApi {
     @Operation(summary = "세미나/학회 일정 삭제", description = "세미나/학회 일정을 삭제하는 DELETE API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "삭제 성공"),
-            @ApiResponse(responseCode = "403", description = "수정/삭제 권한이 없습니다."),
             @ApiResponse(responseCode = "404", description = "세미나/학회 일정을 찾을 수 없습니다.")
     })
     ResponseEntity<Void> deleteSeminar(

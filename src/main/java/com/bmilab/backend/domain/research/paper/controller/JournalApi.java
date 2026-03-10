@@ -22,9 +22,11 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Research", description = "연구 실적 관리 API")
 public interface JournalApi {
 
-    @Operation(summary = "저널 생성", description = "새로운 저널을 생성하는 POST API")
+    @Operation(summary = "저널 생성", description = "새로운 저널을 생성하는 POST API (관리자 전용)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "저널 생성 성공"),
+            @ApiResponse(responseCode = "403", description = "권한이 없습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "400", description = "잘못된 요청입니다.",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
@@ -33,9 +35,11 @@ public interface JournalApi {
             @RequestBody @Valid CreateJournalRequest request
     );
 
-    @Operation(summary = "저널 수정", description = "저널을 수정하는 PUT API")
+    @Operation(summary = "저널 수정", description = "저널을 수정하는 PUT API (관리자 전용)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "저널 수정 성공"),
+            @ApiResponse(responseCode = "403", description = "권한이 없습니다.",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "저널을 찾을 수 없습니다.",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })

@@ -3,6 +3,7 @@ package com.bmilab.backend.domain.research.presentation.entity;
 import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.research.presentation.enums.AcademicPresentationType;
 import com.bmilab.backend.domain.task.entity.Task;
+import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.global.entity.BaseTimeEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -55,8 +56,12 @@ public class AcademicPresentation extends BaseTimeEntity {
     @JoinColumn(name = "task_id")
     private Task task;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private User createdBy;
+
     @Builder
-    public AcademicPresentation(String authors, LocalDate academicPresentationStartDate, LocalDate academicPresentationEndDate, String academicPresentationLocation, String academicPresentationHost, String academicPresentationName, AcademicPresentationType presentationType, String presentationTitle, Project project, Task task) {
+    public AcademicPresentation(String authors, LocalDate academicPresentationStartDate, LocalDate academicPresentationEndDate, String academicPresentationLocation, String academicPresentationHost, String academicPresentationName, AcademicPresentationType presentationType, String presentationTitle, Project project, Task task, User createdBy) {
         this.authors = authors;
         this.academicPresentationStartDate = academicPresentationStartDate;
         this.academicPresentationEndDate = academicPresentationEndDate;
@@ -67,6 +72,7 @@ public class AcademicPresentation extends BaseTimeEntity {
         this.presentationTitle = presentationTitle;
         this.project = project;
         this.task = task;
+        this.createdBy = createdBy;
     }
 
     public void update(String authors, LocalDate academicPresentationStartDate, LocalDate academicPresentationEndDate, String academicPresentationLocation, String academicPresentationHost, String academicPresentationName, AcademicPresentationType presentationType, String presentationTitle, Project project, Task task) {
