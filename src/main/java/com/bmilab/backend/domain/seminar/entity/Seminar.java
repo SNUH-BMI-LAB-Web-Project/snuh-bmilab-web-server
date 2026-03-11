@@ -55,6 +55,13 @@ public class Seminar extends BaseTimeEntity {
     @Column(name = "note", length = 1000)
     private String note;
 
+    @Column(name = "google_event_id")
+    private String googleEventId;
+
+    public void updateGoogleEventId(String googleEventId) {
+        this.googleEventId = googleEventId;
+    }
+
     public void update(SeminarLabel label, String title, LocalDate startDate, LocalDate endDate, String note) {
         this.label = label;
         this.title = title;
