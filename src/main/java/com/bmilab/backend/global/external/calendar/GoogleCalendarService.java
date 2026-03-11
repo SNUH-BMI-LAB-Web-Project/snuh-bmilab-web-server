@@ -6,20 +6,28 @@ import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-@ConditionalOnBean(Calendar.class)
 public class GoogleCalendarService {
 
     private final Calendar googleCalendar;
 
+    @Autowired
+    public GoogleCalendarService(@Autowired(required = false) Calendar googleCalendar) {
+        this.googleCalendar = googleCalendar;
+    }
+
+    public boolean isEnabled() {
+        return googleCalendar != null;
+    }
+
     public String createEvent(String calendarId, String title, LocalDate startDate, LocalDate endDate) {
+        if (!isEnabled()) return null;
         try {
             Event event = buildAllDayEvent(title, startDate, endDate);
             Event created = googleCalendar.events().insert(calendarId, event).execute();
@@ -32,6 +40,7 @@ public class GoogleCalendarService {
     }
 
     public String updateEvent(String calendarId, String eventId, String title, LocalDate startDate, LocalDate endDate) {
+        if (!isEnabled()) return null;
         try {
             Event event = buildAllDayEvent(title, startDate, endDate);
             Event updated = googleCalendar.events().update(calendarId, eventId, event).execute();
@@ -44,6 +53,7 @@ public class GoogleCalendarService {
     }
 
     public void deleteEvent(String calendarId, String eventId) {
+        if (!isEnabled()) return;
         try {
             googleCalendar.events().delete(calendarId, eventId).execute();
             log.info("Google Calendar 이벤트 삭제 완료: calendarId={}, eventId={}", calendarId, eventId);

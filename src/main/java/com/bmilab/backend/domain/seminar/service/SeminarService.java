@@ -16,7 +16,6 @@ import com.bmilab.backend.global.external.calendar.GoogleCalendarService;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,12 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class SeminarService {
     private final SeminarRepository seminarRepository;
     private final UserService userService;
-
-    @Autowired(required = false)
-    private GoogleCalendarService googleCalendarService;
-
-    @Autowired(required = false)
-    private GoogleCalendarConfig googleCalendarConfig;
+    private final GoogleCalendarService googleCalendarService;
+    private final GoogleCalendarConfig googleCalendarConfig;
 
     public SeminarFindAllResponse getSeminarsByDateRange(LocalDate startDate, LocalDate endDate) {
         List<Seminar> seminars = seminarRepository.findAllByDateRange(startDate, endDate);
@@ -71,7 +66,7 @@ public class SeminarService {
 
         seminarRepository.save(seminar);
 
-        if (googleCalendarService != null) {
+        if (googleCalendarService.isEnabled()) {
             String eventTitle = buildSeminarEventTitle(request.label(), request.title());
             String eventId = googleCalendarService.createEvent(
                     googleCalendarConfig.getSeminarCalendarId(),
@@ -97,7 +92,7 @@ public class SeminarService {
                 request.note()
         );
 
-        if (googleCalendarService != null) {
+        if (googleCalendarService.isEnabled()) {
             String eventTitle = buildSeminarEventTitle(request.label(), request.title());
             if (seminar.getGoogleEventId() != null) {
                 googleCalendarService.updateEvent(
@@ -123,7 +118,7 @@ public class SeminarService {
     public void deleteSeminar(Long seminarId) {
         Seminar seminar = getSeminar(seminarId);
 
-        if (googleCalendarService != null && seminar.getGoogleEventId() != null) {
+        if (googleCalendarService.isEnabled() && seminar.getGoogleEventId() != null) {
             googleCalendarService.deleteEvent(
                     googleCalendarConfig.getSeminarCalendarId(),
                     seminar.getGoogleEventId()

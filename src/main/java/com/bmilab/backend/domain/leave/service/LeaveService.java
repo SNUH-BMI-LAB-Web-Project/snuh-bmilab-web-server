@@ -24,7 +24,6 @@ import java.time.YearMonth;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -37,12 +36,8 @@ public class LeaveService {
     private final LeaveRepository leaveRepository;
     private final UserLeaveRepository userLeaveRepository;
     private final UserService userService;
-
-    @Autowired(required = false)
-    private GoogleCalendarService googleCalendarService;
-
-    @Autowired(required = false)
-    private GoogleCalendarConfig googleCalendarConfig;
+    private final GoogleCalendarService googleCalendarService;
+    private final GoogleCalendarConfig googleCalendarConfig;
 
     public LeaveFindAllResponse getLeaves(LocalDate startDate, LocalDate endDate) {
         List<Leave> leaves =
@@ -131,7 +126,7 @@ public class LeaveService {
 
         leave.approve(processor, LocalDateTime.now());
 
-        if (googleCalendarService != null) {
+        if (googleCalendarService.isEnabled()) {
             String eventTitle = buildLeaveEventTitle(user.getName(), leave.getType());
             String eventId = googleCalendarService.createEvent(
                     googleCalendarConfig.getLeaveCalendarId(),
@@ -199,7 +194,7 @@ public class LeaveService {
         // 휴가 정보 업데이트
         leave.update(startDate, request.endDate(), newType, newLeaveCount, request.reason());
 
-        if (googleCalendarService != null) {
+        if (googleCalendarService.isEnabled()) {
             String eventTitle = buildLeaveEventTitle(user.getName(), newType);
             if (leave.getGoogleEventId() != null) {
                 googleCalendarService.updateEvent(
@@ -258,7 +253,7 @@ public class LeaveService {
 
             userLeave.restoreLeave(leave.getLeaveCount(), leave.isAnnualLeave());
 
-            if (googleCalendarService != null && leave.getGoogleEventId() != null) {
+            if (googleCalendarService.isEnabled() && leave.getGoogleEventId() != null) {
                 googleCalendarService.deleteEvent(
                         googleCalendarConfig.getLeaveCalendarId(),
                         leave.getGoogleEventId()
