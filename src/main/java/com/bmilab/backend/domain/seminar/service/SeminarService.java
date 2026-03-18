@@ -61,6 +61,8 @@ public class SeminarService {
                 .title(request.title())
                 .startDate(request.startDate())
                 .endDate(request.endDate())
+                .startTime(request.startTime())
+                .endTime(request.endTime())
                 .note(request.note())
                 .build();
 
@@ -72,7 +74,9 @@ public class SeminarService {
                     googleCalendarConfig.getSeminarCalendarId(),
                     eventTitle,
                     request.startDate(),
-                    request.endDate()
+                    request.endDate(),
+                    request.startTime(),
+                    request.endTime()
             );
             seminar.updateGoogleEventId(eventId);
         }
@@ -89,6 +93,8 @@ public class SeminarService {
                 request.title(),
                 request.startDate(),
                 request.endDate(),
+                request.startTime(),
+                request.endTime(),
                 request.note()
         );
 
@@ -100,14 +106,18 @@ public class SeminarService {
                         seminar.getGoogleEventId(),
                         eventTitle,
                         request.startDate(),
-                        request.endDate()
+                        request.endDate(),
+                        request.startTime(),
+                        request.endTime()
                 );
             } else {
                 String eventId = googleCalendarService.createEvent(
                         googleCalendarConfig.getSeminarCalendarId(),
                         eventTitle,
                         request.startDate(),
-                        request.endDate()
+                        request.endDate(),
+                        request.startTime(),
+                        request.endTime()
                 );
                 seminar.updateGoogleEventId(eventId);
             }

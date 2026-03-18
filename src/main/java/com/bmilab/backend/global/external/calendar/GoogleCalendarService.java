@@ -4,16 +4,20 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.EventDateTime;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @Slf4j
 @Service
 public class GoogleCalendarService {
+
+    private static final String TIMEZONE = "Asia/Seoul";
 
     private final Calendar googleCalendar;
 
@@ -27,9 +31,14 @@ public class GoogleCalendarService {
     }
 
     public String createEvent(String calendarId, String title, LocalDate startDate, LocalDate endDate) {
+        return createEvent(calendarId, title, startDate, endDate, null, null);
+    }
+
+    public String createEvent(String calendarId, String title, LocalDate startDate, LocalDate endDate,
+                               LocalTime startTime, LocalTime endTime) {
         if (!isEnabled()) return null;
         try {
-            Event event = buildAllDayEvent(title, startDate, endDate);
+            Event event = buildEvent(title, startDate, endDate, startTime, endTime);
             Event created = googleCalendar.events().insert(calendarId, event).execute();
             log.info("Google Calendar 이벤트 생성 완료: calendarId={}, eventId={}", calendarId, created.getId());
             return created.getId();
@@ -40,9 +49,14 @@ public class GoogleCalendarService {
     }
 
     public String updateEvent(String calendarId, String eventId, String title, LocalDate startDate, LocalDate endDate) {
+        return updateEvent(calendarId, eventId, title, startDate, endDate, null, null);
+    }
+
+    public String updateEvent(String calendarId, String eventId, String title, LocalDate startDate, LocalDate endDate,
+                               LocalTime startTime, LocalTime endTime) {
         if (!isEnabled()) return null;
         try {
-            Event event = buildAllDayEvent(title, startDate, endDate);
+            Event event = buildEvent(title, startDate, endDate, startTime, endTime);
             Event updated = googleCalendar.events().update(calendarId, eventId, event).execute();
             log.info("Google Calendar 이벤트 수정 완료: calendarId={}, eventId={}", calendarId, updated.getId());
             return updated.getId();
@@ -62,18 +76,32 @@ public class GoogleCalendarService {
         }
     }
 
-    // AIDEV-NOTE: Google Calendar all-day 이벤트의 endDate는 exclusive이므로 +1일 처리
-    private Event buildAllDayEvent(String title, LocalDate startDate, LocalDate endDate) {
+    // AIDEV-NOTE: startTime이 있으면 시간 지정 이벤트, 없으면 종일 이벤트로 생성
+    private Event buildEvent(String title, LocalDate startDate, LocalDate endDate,
+                              LocalTime startTime, LocalTime endTime) {
         Event event = new Event().setSummary(title);
 
-        EventDateTime start = new EventDateTime()
-                .setDate(new DateTime(startDate.toString()));
-        event.setStart(start);
+        if (startTime != null) {
+            ZonedDateTime startZdt = startDate.atTime(startTime).atZone(ZoneId.of(TIMEZONE));
+            event.setStart(new EventDateTime()
+                    .setDateTime(new DateTime(startZdt.toInstant().toEpochMilli()))
+                    .setTimeZone(TIMEZONE));
 
-        LocalDate effectiveEnd = (endDate != null ? endDate : startDate).plusDays(1);
-        EventDateTime end = new EventDateTime()
-                .setDate(new DateTime(effectiveEnd.toString()));
-        event.setEnd(end);
+            LocalTime effectiveEndTime = endTime != null ? endTime : startTime.plusHours(1);
+            LocalDate effectiveEndDate = endDate != null ? endDate : startDate;
+            ZonedDateTime endZdt = effectiveEndDate.atTime(effectiveEndTime).atZone(ZoneId.of(TIMEZONE));
+            event.setEnd(new EventDateTime()
+                    .setDateTime(new DateTime(endZdt.toInstant().toEpochMilli()))
+                    .setTimeZone(TIMEZONE));
+        } else {
+            // AIDEV-NOTE: Google Calendar all-day 이벤트의 endDate는 exclusive이므로 +1일 처리
+            event.setStart(new EventDateTime()
+                    .setDate(new DateTime(startDate.toString())));
+
+            LocalDate effectiveEnd = (endDate != null ? endDate : startDate).plusDays(1);
+            event.setEnd(new EventDateTime()
+                    .setDate(new DateTime(effectiveEnd.toString())));
+        }
 
         return event;
     }
