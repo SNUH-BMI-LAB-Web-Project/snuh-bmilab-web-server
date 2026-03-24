@@ -5,6 +5,7 @@ import com.bmilab.backend.domain.seminar.dto.request.UpdateSeminarRequest;
 import com.bmilab.backend.domain.seminar.dto.response.SeminarFindAllResponse;
 import com.bmilab.backend.domain.seminar.dto.response.SeminarResponse;
 import com.bmilab.backend.domain.seminar.entity.Seminar;
+import com.bmilab.backend.domain.seminar.enums.RepeatType;
 import com.bmilab.backend.domain.seminar.enums.SeminarLabel;
 import com.bmilab.backend.domain.seminar.exception.SeminarErrorCode;
 import com.bmilab.backend.domain.seminar.repository.SeminarRepository;
@@ -14,6 +15,8 @@ import com.bmilab.backend.global.config.GoogleCalendarConfig;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.external.calendar.GoogleCalendarService;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -52,36 +55,56 @@ public class SeminarService {
     }
 
     @Transactional
-    public Long createSeminar(Long userId, CreateSeminarRequest request) {
+    public List<Long> createSeminar(Long userId, CreateSeminarRequest request) {
         User user = userService.findUserById(userId);
+        validateRepeatOptions(request);
 
-        Seminar seminar = Seminar.builder()
-                .user(user)
-                .label(request.label())
-                .title(request.title())
-                .startDate(request.startDate())
-                .endDate(request.endDate())
-                .startTime(request.startTime())
-                .endTime(request.endTime())
-                .note(request.note())
-                .build();
+        List<LocalDate> occurrenceDates = calculateOccurrenceDates(
+                request.startDate(), request.repeatType(), request.repeatEndDate()
+        );
 
-        seminarRepository.save(seminar);
+        // AIDEV-NOTE: endDate가 있으면 startDate와의 차이를 유지하여 각 반복 일정에 동일한 기간 적용
+        Long daysBetween = (request.endDate() != null)
+                ? ChronoUnit.DAYS.between(request.startDate(), request.endDate())
+                : null;
 
-        if (googleCalendarService.isEnabled()) {
-            String eventTitle = buildSeminarEventTitle(request.label(), request.title());
-            String eventId = googleCalendarService.createEvent(
-                    googleCalendarConfig.getSeminarCalendarId(),
-                    eventTitle,
-                    request.startDate(),
-                    request.endDate(),
-                    request.startTime(),
-                    request.endTime()
-            );
-            seminar.updateGoogleEventId(eventId);
+        List<Long> seminarIds = new ArrayList<>();
+
+        for (LocalDate occurrenceDate : occurrenceDates) {
+            LocalDate occurrenceEndDate = (daysBetween != null)
+                    ? occurrenceDate.plusDays(daysBetween)
+                    : null;
+
+            Seminar seminar = Seminar.builder()
+                    .user(user)
+                    .label(request.label())
+                    .title(request.title())
+                    .startDate(occurrenceDate)
+                    .endDate(occurrenceEndDate)
+                    .startTime(request.startTime())
+                    .endTime(request.endTime())
+                    .note(request.note())
+                    .build();
+
+            seminarRepository.save(seminar);
+
+            if (googleCalendarService.isEnabled()) {
+                String eventTitle = buildSeminarEventTitle(request.label(), request.title());
+                String eventId = googleCalendarService.createEvent(
+                        googleCalendarConfig.getSeminarCalendarId(),
+                        eventTitle,
+                        occurrenceDate,
+                        occurrenceEndDate,
+                        request.startTime(),
+                        request.endTime()
+                );
+                seminar.updateGoogleEventId(eventId);
+            }
+
+            seminarIds.add(seminar.getId());
         }
 
-        return seminar.getId();
+        return seminarIds;
     }
 
     @Transactional
@@ -145,5 +168,36 @@ public class SeminarService {
 
     private String buildSeminarEventTitle(SeminarLabel label, String title) {
         return "[" + label.getDescription() + "] " + title;
+    }
+
+    private void validateRepeatOptions(CreateSeminarRequest request) {
+        if (request.repeatType() != null && request.repeatEndDate() == null) {
+            throw new ApiException(SeminarErrorCode.INVALID_REPEAT_OPTIONS);
+        }
+        if (request.repeatType() == null && request.repeatEndDate() != null) {
+            throw new ApiException(SeminarErrorCode.INVALID_REPEAT_OPTIONS);
+        }
+        if (request.repeatType() != null && !request.repeatEndDate().isAfter(request.startDate())) {
+            throw new ApiException(SeminarErrorCode.INVALID_REPEAT_OPTIONS);
+        }
+    }
+
+    private List<LocalDate> calculateOccurrenceDates(LocalDate startDate, RepeatType repeatType, LocalDate repeatEndDate) {
+        if (repeatType == null) {
+            return List.of(startDate);
+        }
+
+        List<LocalDate> dates = new ArrayList<>();
+        LocalDate current = startDate;
+
+        while (!current.isAfter(repeatEndDate)) {
+            dates.add(current);
+            current = switch (repeatType) {
+                case WEEKLY -> current.plusWeeks(1);
+                case MONTHLY -> current.plusMonths(1);
+            };
+        }
+
+        return dates;
     }
 }

@@ -1,5 +1,6 @@
 package com.bmilab.backend.domain.seminar.dto.request;
 
+import com.bmilab.backend.domain.seminar.enums.RepeatType;
 import com.bmilab.backend.domain.seminar.enums.SeminarLabel;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -30,5 +31,11 @@ public record CreateSeminarRequest(
     LocalTime endTime,
 
     @Schema(description = "발표/준비/참석 메모 (선택)", example = "발표 예정")
-    String note
+    String note,
+
+    @Schema(description = "반복 유형 (WEEKLY: 매주, MONTHLY: 매월, null이면 단건 생성)", example = "WEEKLY")
+    RepeatType repeatType,
+
+    @Schema(description = "반복 종료일 (repeatType이 있을 때 필수)", example = "2025-06-30")
+    LocalDate repeatEndDate
 ) {}
