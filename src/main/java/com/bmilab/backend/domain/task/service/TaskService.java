@@ -643,8 +643,8 @@ public class TaskService {
 
         Task task = getTaskById(taskId);
 
-        if (!task.canBeEditedByUser(userId, isAdmin)) {
-            throw new ApiException(TaskErrorCode.TASK_CANNOT_EDIT);
+        if (!task.canBeDeletedByUser(isAdmin)) {
+            throw new ApiException(TaskErrorCode.TASK_CANNOT_DELETE);
         }
 
         taskRepository.delete(task);

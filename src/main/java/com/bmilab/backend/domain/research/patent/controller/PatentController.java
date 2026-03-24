@@ -30,7 +30,7 @@ public class PatentController implements PatentApi {
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestBody @Valid CreatePatentRequest request
     ) {
-        PatentResponse response = patentService.createPatent(request);
+        PatentResponse response = patentService.createPatent(userAuthInfo.getUserId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -40,7 +40,8 @@ public class PatentController implements PatentApi {
             @PathVariable Long patentId,
             @RequestBody @Valid UpdatePatentRequest request
     ) {
-        PatentResponse response = patentService.updatePatent(patentId, request);
+        boolean isAdmin = userAuthInfo.getUser().getRole() == Role.ADMIN;
+        PatentResponse response = patentService.updatePatent(userAuthInfo.getUserId(), isAdmin, patentId, request);
         return ResponseEntity.ok(response);
     }
 

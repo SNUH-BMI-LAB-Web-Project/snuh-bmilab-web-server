@@ -2,6 +2,7 @@ package com.bmilab.backend.domain.research.patent.entity;
 
 import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.task.entity.Task;
+import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.global.entity.BaseTimeEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -48,8 +49,12 @@ public class Patent extends BaseTimeEntity {
     @JoinColumn(name = "task_id")
     private Task task;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private User createdBy;
+
     @Builder
-    public Patent(LocalDate applicationDate, String applicationNumber, String patentName, String applicantsAll, String remarks, Project project, Task task) {
+    public Patent(LocalDate applicationDate, String applicationNumber, String patentName, String applicantsAll, String remarks, Project project, Task task, User createdBy) {
         this.applicationDate = applicationDate;
         this.applicationNumber = applicationNumber;
         this.patentName = patentName;
@@ -57,6 +62,7 @@ public class Patent extends BaseTimeEntity {
         this.remarks = remarks;
         this.project = project;
         this.task = task;
+        this.createdBy = createdBy;
     }
 
     public void update(LocalDate applicationDate, String applicationNumber, String patentName, String applicantsAll, String remarks, Project project, Task task) {

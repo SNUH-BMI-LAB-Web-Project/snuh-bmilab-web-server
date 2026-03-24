@@ -2,6 +2,7 @@ package com.bmilab.backend.domain.seminar.controller;
 
 import com.bmilab.backend.domain.seminar.dto.request.CreateSeminarRequest;
 import com.bmilab.backend.domain.seminar.dto.request.UpdateSeminarRequest;
+import com.bmilab.backend.domain.seminar.dto.response.CreateSeminarResponse;
 import com.bmilab.backend.domain.seminar.dto.response.SeminarFindAllResponse;
 import com.bmilab.backend.domain.seminar.dto.response.SeminarResponse;
 import com.bmilab.backend.domain.seminar.enums.SeminarLabel;
@@ -9,6 +10,7 @@ import com.bmilab.backend.domain.seminar.service.SeminarService;
 import com.bmilab.backend.global.security.UserAuthInfo;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
@@ -61,12 +63,12 @@ public class SeminarController implements SeminarApi {
 
     @Override
     @PostMapping
-    public ResponseEntity<Void> createSeminar(
+    public ResponseEntity<CreateSeminarResponse> createSeminar(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestBody @Valid CreateSeminarRequest request
     ) {
-        seminarService.createSeminar(userAuthInfo.getUserId(), request);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        List<Long> seminarIds = seminarService.createSeminar(userAuthInfo.getUserId(), request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(CreateSeminarResponse.from(seminarIds));
     }
 
     @Override
@@ -76,7 +78,7 @@ public class SeminarController implements SeminarApi {
             @PathVariable Long seminarId,
             @RequestBody @Valid UpdateSeminarRequest request
     ) {
-        seminarService.updateSeminar(userAuthInfo.getUserId(), seminarId, request);
+        seminarService.updateSeminar(seminarId, request);
         return ResponseEntity.ok().build();
     }
 
@@ -86,7 +88,7 @@ public class SeminarController implements SeminarApi {
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @PathVariable Long seminarId
     ) {
-        seminarService.deleteSeminar(userAuthInfo.getUserId(), seminarId);
+        seminarService.deleteSeminar(seminarId);
         return ResponseEntity.ok().build();
     }
 }

@@ -14,6 +14,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -52,14 +53,30 @@ public class Seminar extends BaseTimeEntity {
     @Column(name = "end_date")
     private LocalDate endDate;
 
+    @Column(name = "start_time")
+    private LocalTime startTime;
+
+    @Column(name = "end_time")
+    private LocalTime endTime;
+
     @Column(name = "note", length = 1000)
     private String note;
 
-    public void update(SeminarLabel label, String title, LocalDate startDate, LocalDate endDate, String note) {
+    @Column(name = "google_event_id")
+    private String googleEventId;
+
+    public void updateGoogleEventId(String googleEventId) {
+        this.googleEventId = googleEventId;
+    }
+
+    public void update(SeminarLabel label, String title, LocalDate startDate, LocalDate endDate,
+                       LocalTime startTime, LocalTime endTime, String note) {
         this.label = label;
         this.title = title;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.startTime = startTime;
+        this.endTime = endTime;
         this.note = note;
     }
 }

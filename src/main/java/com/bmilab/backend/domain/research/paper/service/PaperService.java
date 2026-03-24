@@ -27,6 +27,7 @@ import com.bmilab.backend.domain.task.entity.Task;
 import com.bmilab.backend.domain.task.exception.TaskErrorCode;
 import com.bmilab.backend.domain.task.repository.TaskRepository;
 import com.bmilab.backend.domain.user.entity.User;
+import com.bmilab.backend.domain.user.repository.UserRepository;
 import com.bmilab.backend.global.exception.ApiException;
 import com.bmilab.backend.global.exception.GlobalErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -53,8 +54,11 @@ public class PaperService {
     private final ProjectRepository projectRepository;
     private final FileService fileService;
     private final AuthorSyncService authorSyncService;
+    private final UserRepository userRepository;
 
-    public PaperResponse createPaper(CreatePaperRequest dto) {
+    public PaperResponse createPaper(Long userId, CreatePaperRequest dto) {
+        User creator = userRepository.findById(userId)
+                .orElseThrow(() -> new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND));
         Journal journal = dto.journalId() != null
                 ? journalRepository.findById(dto.journalId()).orElseThrow(() -> new ApiException(PaperErrorCode.JOURNAL_NOT_FOUND))
                 : null;
@@ -84,6 +88,7 @@ public class PaperService {
                 .isRepresentative(dto.isRepresentative())
                 .task(task)
                 .project(project)
+                .createdBy(creator)
                 .build();
         paperRepository.save(newPaper);
 
@@ -139,9 +144,9 @@ public class PaperService {
     }
 
     public void deletePaper(Long userId, boolean isAdmin, Long paperId) {
-        if (!isAdmin) {
-            throw new ApiException(PaperErrorCode.PAPER_ACCESS_DENIED);
-        }
+        Paper paper = paperRepository.findById(paperId)
+                .orElseThrow(() -> new ApiException(PaperErrorCode.PAPER_NOT_FOUND));
+        validateAdminOrCreator(userId, isAdmin, paper.getCreatedBy());
         paperAuthorRepository.deleteAllByPaperId(paperId);
         paperCorrespondingAuthorRepository.deleteAllByPaperId(paperId);
         fileService.deleteAllFileByDomainTypeAndEntityId(FileDomainType.PAPER_ATTACHMENT, paperId);
@@ -161,9 +166,10 @@ public class PaperService {
         return new PaperResponse(paper, correspondingAuthors, paperAuthors, fileSummaries);
     }
 
-    public PaperResponse updatePaper(Long paperId, UpdatePaperRequest dto) {
+    public PaperResponse updatePaper(Long userId, boolean isAdmin, Long paperId, UpdatePaperRequest dto) {
         Paper paper = paperRepository.findById(paperId)
                 .orElseThrow(() -> new ApiException(PaperErrorCode.PAPER_NOT_FOUND));
+        validateAdminOrCreator(userId, isAdmin, paper.getCreatedBy());
         Journal journal = dto.journalId() != null
                 ? journalRepository.findById(dto.journalId()).orElseThrow(() -> new ApiException(PaperErrorCode.JOURNAL_NOT_FOUND))
                 : null;
@@ -250,5 +256,11 @@ public class PaperService {
                 .toList();
 
         return PaperFindAllResponse.of(papers, paperPage.getTotalPages());
+    }
+
+    private void validateAdminOrCreator(Long userId, boolean isAdmin, User createdBy) {
+        if (!isAdmin && (createdBy == null || !createdBy.getId().equals(userId))) {
+            throw new ApiException(PaperErrorCode.PAPER_ACCESS_DENIED);
+        }
     }
 }

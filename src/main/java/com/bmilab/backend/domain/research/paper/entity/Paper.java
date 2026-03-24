@@ -3,6 +3,7 @@ package com.bmilab.backend.domain.research.paper.entity;
 import com.bmilab.backend.domain.project.entity.Project;
 import com.bmilab.backend.domain.research.paper.enums.ProfessorRole;
 import com.bmilab.backend.domain.task.entity.Task;
+import com.bmilab.backend.domain.user.entity.User;
 import com.bmilab.backend.global.entity.BaseTimeEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -77,8 +78,12 @@ public class Paper extends BaseTimeEntity {
     @JoinColumn(name = "project_id")
     private Project project;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private User createdBy;
+
     @Builder
-    public Paper(LocalDate acceptDate, LocalDate publishDate, Journal journal, String paperTitle, String allAuthors, int authorCount, String firstAuthor, String coAuthors, String vol, String page, String paperLink, String doi, String pmid, Integer citations, ProfessorRole professorRole, Boolean isRepresentative, Task task, Project project) {
+    public Paper(LocalDate acceptDate, LocalDate publishDate, Journal journal, String paperTitle, String allAuthors, int authorCount, String firstAuthor, String coAuthors, String vol, String page, String paperLink, String doi, String pmid, Integer citations, ProfessorRole professorRole, Boolean isRepresentative, Task task, Project project, User createdBy) {
         this.acceptDate = acceptDate;
         this.publishDate = publishDate;
         this.journal = journal;
@@ -97,6 +102,7 @@ public class Paper extends BaseTimeEntity {
         this.isRepresentative = isRepresentative;
         this.task = task;
         this.project = project;
+        this.createdBy = createdBy;
     }
 
     public void update(LocalDate acceptDate, LocalDate publishDate, Journal journal, String paperTitle, String allAuthors, int authorCount, String firstAuthor, String coAuthors, String vol, String page, String paperLink, String doi, String pmid, Integer citations, ProfessorRole professorRole, Boolean isRepresentative, Task task, Project project) {

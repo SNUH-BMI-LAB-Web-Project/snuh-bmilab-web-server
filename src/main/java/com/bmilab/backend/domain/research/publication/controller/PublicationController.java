@@ -30,7 +30,7 @@ public class PublicationController implements PublicationApi {
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestBody @Valid CreateAuthorRequest request
     ) {
-        AuthorResponse response = publicationService.createPublication(request);
+        AuthorResponse response = publicationService.createPublication(userAuthInfo.getUserId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -40,7 +40,8 @@ public class PublicationController implements PublicationApi {
             @PathVariable Long authorId,
             @RequestBody @Valid UpdateAuthorRequest request
     ) {
-        AuthorResponse response = publicationService.updatePublication(authorId, request);
+        boolean isAdmin = userAuthInfo.getUser().getRole() == Role.ADMIN;
+        AuthorResponse response = publicationService.updatePublication(userAuthInfo.getUserId(), isAdmin, authorId, request);
         return ResponseEntity.ok(response);
     }
 

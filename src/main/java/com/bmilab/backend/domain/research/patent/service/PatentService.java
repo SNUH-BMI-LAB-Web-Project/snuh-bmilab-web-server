@@ -47,7 +47,9 @@ public class PatentService {
     private final ExternalProfessorRepository externalProfessorRepository;
     private final FileService fileService;
 
-    public PatentResponse createPatent(CreatePatentRequest dto) {
+    public PatentResponse createPatent(Long userId, CreatePatentRequest dto) {
+        User creator = userRepository.findById(userId)
+                .orElseThrow(() -> new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND));
         Project project = dto.projectId() != null
                 ? projectRepository.findById(dto.projectId()).orElseThrow(() -> new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND))
                 : null;
@@ -62,6 +64,7 @@ public class PatentService {
                 .remarks(dto.remarks())
                 .project(project)
                 .task(task)
+                .createdBy(creator)
                 .build();
         patentRepository.save(newPatent);
 
@@ -83,9 +86,9 @@ public class PatentService {
     }
 
     public void deletePatent(Long userId, boolean isAdmin, Long patentId) {
-        if (!isAdmin) {
-            throw new ApiException(PatentErrorCode.PATENT_ACCESS_DENIED);
-        }
+        Patent patent = patentRepository.findById(patentId)
+                .orElseThrow(() -> new ApiException(PatentErrorCode.PATENT_NOT_FOUND));
+        validateAdminOrCreator(userId, isAdmin, patent.getCreatedBy());
         patentAuthorRepository.deleteAllByPatentId(patentId); // Explicitly delete PatentAuthors
         fileService.deleteAllFileByDomainTypeAndEntityId(FileDomainType.PATENT_ATTACHMENT, patentId);
         patentRepository.deleteById(patentId);
@@ -103,9 +106,10 @@ public class PatentService {
         return new PatentResponse(patent, patentAuthors, fileSummaries);
     }
 
-    public PatentResponse updatePatent(Long patentId, UpdatePatentRequest dto) {
+    public PatentResponse updatePatent(Long userId, boolean isAdmin, Long patentId, UpdatePatentRequest dto) {
         Patent patent = patentRepository.findById(patentId)
                 .orElseThrow(() -> new ApiException(PatentErrorCode.PATENT_NOT_FOUND));
+        validateAdminOrCreator(userId, isAdmin, patent.getCreatedBy());
         Project project = dto.projectId() != null
                 ? projectRepository.findById(dto.projectId()).orElseThrow(() -> new ApiException(GlobalErrorCode.GLOBAL_NOT_FOUND))
                 : null;
@@ -216,4 +220,9 @@ public class PatentService {
         return patentAuthors;
     }
 
+    private void validateAdminOrCreator(Long userId, boolean isAdmin, User createdBy) {
+        if (!isAdmin && (createdBy == null || !createdBy.getId().equals(userId))) {
+            throw new ApiException(PatentErrorCode.PATENT_ACCESS_DENIED);
+        }
+    }
 }

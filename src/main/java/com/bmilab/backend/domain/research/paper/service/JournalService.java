@@ -24,7 +24,11 @@ public class JournalService {
 
     private final JournalRepository journalRepository;
 
-    public JournalResponse createJournal(CreateJournalRequest dto) {
+    public JournalResponse createJournal(boolean isAdmin, CreateJournalRequest dto) {
+        if (!isAdmin) {
+            throw new ApiException(PaperErrorCode.PAPER_ACCESS_DENIED);
+        }
+
         Journal newJournal = Journal.builder()
                 .journalName(dto.journalName())
                 .year(dto.year())
@@ -56,7 +60,11 @@ public class JournalService {
         return JournalResponse.from(journal);
     }
 
-    public JournalResponse updateJournal(Long journalId, UpdateJournalRequest dto) {
+    public JournalResponse updateJournal(boolean isAdmin, Long journalId, UpdateJournalRequest dto) {
+        if (!isAdmin) {
+            throw new ApiException(PaperErrorCode.PAPER_ACCESS_DENIED);
+        }
+
         Journal journal = journalRepository.findById(journalId)
                 .orElseThrow(() -> new ApiException(PaperErrorCode.JOURNAL_NOT_FOUND));
         journal.update(

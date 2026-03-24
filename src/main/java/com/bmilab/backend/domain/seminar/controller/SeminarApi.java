@@ -2,6 +2,7 @@ package com.bmilab.backend.domain.seminar.controller;
 
 import com.bmilab.backend.domain.seminar.dto.request.CreateSeminarRequest;
 import com.bmilab.backend.domain.seminar.dto.request.UpdateSeminarRequest;
+import com.bmilab.backend.domain.seminar.dto.response.CreateSeminarResponse;
 import com.bmilab.backend.domain.seminar.dto.response.SeminarFindAllResponse;
 import com.bmilab.backend.domain.seminar.dto.response.SeminarResponse;
 import com.bmilab.backend.domain.seminar.enums.SeminarLabel;
@@ -51,11 +52,12 @@ public interface SeminarApi {
     })
     ResponseEntity<SeminarResponse> getSeminarById(@PathVariable Long seminarId);
 
-    @Operation(summary = "세미나/학회 일정 생성", description = "새로운 세미나/학회 일정을 생성하는 POST API")
+    @Operation(summary = "세미나/학회 일정 생성", description = "새로운 세미나/학회 일정을 생성하는 POST API. repeatType 지정 시 반복 일정을 일괄 생성합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "생성 성공")
+            @ApiResponse(responseCode = "201", description = "생성 성공"),
+            @ApiResponse(responseCode = "400", description = "반복 옵션이 올바르지 않습니다.")
     })
-    ResponseEntity<Void> createSeminar(
+    ResponseEntity<CreateSeminarResponse> createSeminar(
             @AuthenticationPrincipal UserAuthInfo userAuthInfo,
             @RequestBody CreateSeminarRequest request
     );
@@ -63,7 +65,6 @@ public interface SeminarApi {
     @Operation(summary = "세미나/학회 일정 수정", description = "세미나/학회 일정을 수정하는 PUT API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "수정 성공"),
-            @ApiResponse(responseCode = "403", description = "수정/삭제 권한이 없습니다."),
             @ApiResponse(responseCode = "404", description = "세미나/학회 일정을 찾을 수 없습니다.")
     })
     ResponseEntity<Void> updateSeminar(
@@ -75,7 +76,6 @@ public interface SeminarApi {
     @Operation(summary = "세미나/학회 일정 삭제", description = "세미나/학회 일정을 삭제하는 DELETE API")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "삭제 성공"),
-            @ApiResponse(responseCode = "403", description = "수정/삭제 권한이 없습니다."),
             @ApiResponse(responseCode = "404", description = "세미나/학회 일정을 찾을 수 없습니다.")
     })
     ResponseEntity<Void> deleteSeminar(

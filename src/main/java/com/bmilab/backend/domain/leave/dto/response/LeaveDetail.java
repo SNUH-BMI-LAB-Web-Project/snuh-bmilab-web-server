@@ -6,8 +6,11 @@ import com.bmilab.backend.domain.leave.enums.LeaveType;
 import com.bmilab.backend.domain.user.dto.response.UserSummary;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import lombok.Builder;
 
 @Builder
@@ -43,9 +46,13 @@ public record LeaveDetail(
         LocalDateTime processedAt,
 
         @Schema(description = "신청 일시", example = "2025-04-23T15:30:00")
-        LocalDateTime applicatedAt
+        LocalDateTime applicatedAt,
+
+        @Schema(description = "Google 캘린더 추가 링크")
+        String googleCalendarLink
 ) {
     public static LeaveDetail from(Leave leave) {
+        String eventTitle = leave.getUser().getName() + " " + leave.getType().getDescription();
         return LeaveDetail
                 .builder()
                 .leaveId(leave.getId())
@@ -59,6 +66,20 @@ public record LeaveDetail(
                 .processor(leave.getProcessor() == null ? null : UserSummary.from(leave.getProcessor()))
                 .processedAt(leave.getProcessedAt())
                 .applicatedAt(leave.getApplicatedAt())
+                .googleCalendarLink(buildGoogleCalendarLink(eventTitle, leave.getStartDate(), leave.getEndDate()))
                 .build();
+    }
+
+    private static String buildGoogleCalendarLink(String title, LocalDate startDate, LocalDate endDate) {
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyyMMdd");
+        String encodedTitle = URLEncoder.encode(title, StandardCharsets.UTF_8);
+        String start = startDate.format(df);
+        // AIDEV-NOTE: 종일 이벤트 — endDate는 exclusive이므로 +1일
+        LocalDate effectiveEnd = (endDate != null ? endDate : startDate).plusDays(1);
+        String end = effectiveEnd.format(df);
+
+        return "https://calendar.google.com/calendar/render?action=TEMPLATE"
+                + "&text=" + encodedTitle
+                + "&dates=" + start + "/" + end;
     }
 }

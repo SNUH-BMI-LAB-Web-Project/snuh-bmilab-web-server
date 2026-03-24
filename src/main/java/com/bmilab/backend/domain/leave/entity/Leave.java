@@ -78,6 +78,9 @@ public class Leave extends BaseTimeEntity {
     @Column(name = "applicated_at", nullable = false)
     private LocalDateTime applicatedAt;
 
+    @Column(name = "google_event_id")
+    private String googleEventId;
+
     public void approve(User processor, LocalDateTime now) {
         status = LeaveStatus.APPROVED;
         this.processor = processor;
@@ -105,6 +108,10 @@ public class Leave extends BaseTimeEntity {
 
     public boolean isAnnualLeave() {
         return type == LeaveType.ANNUAL;
+    }
+
+    public void updateGoogleEventId(String googleEventId) {
+        this.googleEventId = googleEventId;
     }
 
     public void update(LocalDate startDate, LocalDate endDate, LeaveType type, Double leaveCount, String reason) {

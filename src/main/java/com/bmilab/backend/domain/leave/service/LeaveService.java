@@ -13,10 +13,10 @@ import com.bmilab.backend.domain.leave.exception.LeaveErrorCode;
 import com.bmilab.backend.domain.leave.repository.LeaveRepository;
 import com.bmilab.backend.domain.leave.repository.UserLeaveRepository;
 import com.bmilab.backend.domain.user.entity.User;
-import com.bmilab.backend.domain.user.exception.UserErrorCode;
-import com.bmilab.backend.domain.user.repository.UserRepository;
 import com.bmilab.backend.domain.user.service.UserService;
+import com.bmilab.backend.global.config.GoogleCalendarConfig;
 import com.bmilab.backend.global.exception.ApiException;
+import com.bmilab.backend.global.external.calendar.GoogleCalendarService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,7 +25,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +36,8 @@ public class LeaveService {
     private final LeaveRepository leaveRepository;
     private final UserLeaveRepository userLeaveRepository;
     private final UserService userService;
+    private final GoogleCalendarService googleCalendarService;
+    private final GoogleCalendarConfig googleCalendarConfig;
 
     public LeaveFindAllResponse getLeaves(LocalDate startDate, LocalDate endDate) {
         List<Leave> leaves =
@@ -124,6 +125,17 @@ public class LeaveService {
         userLeave.useLeave(leave.getLeaveCount(), leave.isAnnualLeave());
 
         leave.approve(processor, LocalDateTime.now());
+
+        if (googleCalendarService.isEnabled()) {
+            String eventTitle = buildLeaveEventTitle(user.getName(), leave.getType());
+            String eventId = googleCalendarService.createEvent(
+                    googleCalendarConfig.getLeaveCalendarId(),
+                    eventTitle,
+                    leave.getStartDate(),
+                    leave.getEndDate()
+            );
+            leave.updateGoogleEventId(eventId);
+        }
     }
 
     @Transactional
@@ -181,6 +193,27 @@ public class LeaveService {
 
         // 휴가 정보 업데이트
         leave.update(startDate, request.endDate(), newType, newLeaveCount, request.reason());
+
+        if (googleCalendarService.isEnabled()) {
+            String eventTitle = buildLeaveEventTitle(user.getName(), newType);
+            if (leave.getGoogleEventId() != null) {
+                googleCalendarService.updateEvent(
+                        googleCalendarConfig.getLeaveCalendarId(),
+                        leave.getGoogleEventId(),
+                        eventTitle,
+                        startDate,
+                        request.endDate()
+                );
+            } else {
+                String eventId = googleCalendarService.createEvent(
+                        googleCalendarConfig.getLeaveCalendarId(),
+                        eventTitle,
+                        startDate,
+                        request.endDate()
+                );
+                leave.updateGoogleEventId(eventId);
+            }
+        }
     }
 
     @Transactional
@@ -212,13 +245,20 @@ public class LeaveService {
         Leave leave = leaveRepository.findById(leaveId)
                 .orElseThrow(() -> new ApiException(LeaveErrorCode.LEAVE_NOT_FOUND));
 
-        // 승인된 휴가인 경우 휴가 일수 복원
+        // 승인된 휴가인 경우 휴가 일수 복원 및 구글 캘린더 이벤트 삭제
         if (leave.isApproved()) {
             User user = leave.getUser();
             UserLeave userLeave = userLeaveRepository.findByUserId(user.getId())
                     .orElseThrow(() -> new ApiException(LeaveErrorCode.USER_LEAVE_NOT_FOUND));
 
             userLeave.restoreLeave(leave.getLeaveCount(), leave.isAnnualLeave());
+
+            if (googleCalendarService.isEnabled() && leave.getGoogleEventId() != null) {
+                googleCalendarService.deleteEvent(
+                        googleCalendarConfig.getLeaveCalendarId(),
+                        leave.getGoogleEventId()
+                );
+            }
         }
 
         leaveRepository.delete(leave);
@@ -234,5 +274,9 @@ public class LeaveService {
         if (leaveRepository.existsOverlappingLeave(userId, startDate, endDate)) {
             throw new ApiException(LeaveErrorCode.LEAVE_DUPLICATE);
         }
+    }
+
+    private String buildLeaveEventTitle(String userName, LeaveType type) {
+        return userName + " " + type.getDescription();
     }
 }
