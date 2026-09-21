@@ -52,11 +52,16 @@ jobs:
       - name: docker pull
         run: sudo docker pull ${{ secrets.DOCKER_USERNAME }}/bmi-lab:latest
 
-      - name: docker stop container
-        run: sudo docker stop springboot || true
+      # --restart 사용으로 컨테이너가 stop 후에도 남아있으므로 rm -f로 제거
+      - name: docker remove container
+        run: sudo docker rm -f springboot || true
 
+      # --rm 제거 + --restart unless-stopped 추가 (서버 재부팅 시 자동 복구)
       - name: docker run new container
-        run: sudo docker run --env-file /home/ubuntu/bmilab.env --name springboot --rm -d -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/bmi-lab:latest
+        run: |
+          sudo docker run -d --name springboot --restart unless-stopped \
+            --env-file /home/ubuntu/bmilab.env \
+            -p 8080:8080 ${{ secrets.DOCKER_USERNAME }}/bmi-lab:latest
 
       - name: delete old docker image
         run: sudo docker image prune -f
